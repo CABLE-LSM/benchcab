@@ -8,10 +8,10 @@ from benchcab import bench_config
 from benchcab import get_cable
 
 
-def checkout_branch(branch_type:str, opt:dict,tb:benchtree.BenchTree):
+def checkout_branch(branch_id:str, opt:dict,tb:benchtree.BenchTree):
 
-    # Check if the branch_type exists in file?
-    locbranch = opt[branch_type]
+    # Check if the branch_id exists in file?
+    locbranch = opt[branch_id]
     tr = get_cable.GetCable(src_dir=tb.src_dir, user=opt["user"])
     tr.main(**locbranch)
 
@@ -54,12 +54,22 @@ def test_checkout_trunk(create_testconfig):
 
     checkout_branch("trunk", opt, tb)
 
-# def test_checkout_user(create_testconfig, checkout_branch):
+def test_checkout_user(create_testconfig):
 
-#     checkout_branch("user_branch", create_testconfig)
+    td = create_testconfig[0]
+    os.chdir(td)
+    # Setup the benchmarking
+    opt, _, tb = create_testconfig[1:]
+
+    checkout_branch("user_branch", opt, tb)
  
-# def test_checkout_share(create_testconfig, checkout_branch):
+def test_checkout_share(create_testconfig):
 
-#     checkout_branch("share", create_testconfig)
+    td = create_testconfig[0]
+    os.chdir(td)
+    # Setup the benchmarking
+    opt, _, tb = create_testconfig[1:]
+
+    checkout_branch("share", opt, tb)
 
 

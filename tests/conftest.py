@@ -13,16 +13,19 @@ def testconfig():
         "use_branches":["user_branch","trunk"],
         "user_branch":{
             "name": "v3.0-YP-changes",
+            "revision": -1,
             "trunk": False,
             "share_branch": False,
             },
         "trunk":{
             "name": "trunk",
+            "revision": 9000,
             "trunk": True,
             "share_branch": False,
             },
         "share":{
             "name": "integration",
+            "revision": -1,
             "trunk": False,
             "share_branch": True,
             },
