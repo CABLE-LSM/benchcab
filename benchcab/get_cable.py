@@ -59,48 +59,7 @@ class GetCable(object):
         if trunk:
 
             if need_pass:
-                # Check if we have a local copy of the trunk, if we do we won't
-                # write over this, otherwise we will check one out
-                cmd = "svn info %s/branches/Users/%s/%s --password %s" % (
-                    self.root,
-                    self.user,
-                    repo_name,
-                    pswd,
-                )
-
-                with tempfile.NamedTemporaryFile(mode="w+t") as f:
-                    f.write(cmd)
-                    f.flush()
-
-                    p = subprocess.Popen(
-                            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-                        )
-
-                    output, error = p.communicate()
-                    if error == 1:
-                        raise ("Error checking if repo exists")
-
-                    # error = subprocess.call(['/bin/bash', f.name])
-                    # if error == 1:
-                    #    raise("Error checking if repo exists")
-                    # f.close()
-
-                if "non-existent" in str(output) or "problem" in str(output):
-                    cmd = (
-                        "svn copy %s/trunk %s/branches/Users/%s/%s --password %s -m %s"
-                        % (self.root, self.root, self.user, repo_name, pswd, self.msg)
-                    )
-
-                    with tempfile.NamedTemporaryFile(mode="w+t") as f:
-                        f.write(cmd)
-                        f.flush()
-
-                        error = subprocess.call(["/bin/bash", f.name])
-                        if error == 1:
-                            raise ("Error checking out repo")
-                        f.close()
-
-                cmd = "svn checkout %s/branches/Users/%s/%s --password %s" % (
+                cmd = "svn checkout %s/trunk --password %s" % (
                     self.root,
                     self.user,
                     repo_name,
@@ -115,41 +74,14 @@ class GetCable(object):
                         raise ("Error downloading repo")
                     f.close()
             else:
-
-                # Check if we have a local copy of the trunk, if we do we won't
-                # write over this, otherwise we will check one out
-                cmd = "svn info %s/branches/Users/%s/%s" % (
-                    self.root,
-                    self.user,
-                    repo_name,
-                )
-                p = subprocess.Popen(
-                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-                )
-                output, error = p.communicate()
-                if error == 1:
-                    raise ("Error checking if repo exists")
-
-                if "non-existent" in str(output) or "problem" in str(output):
-                    cmd = "svn copy %s/trunk %s/branches/Users/%s/%s -m %s" % (
-                        self.root,
-                        self.root,
-                        self.user,
-                        repo_name,
-                        self.msg,
-                    )
-                    error = subprocess.call(cmd, shell=True)
-                    if error == 1:
-                        raise ("Error checking out repo")
-
-                cmd = "svn checkout %s/branches/Users/%s/%s" % (
+                cmd = "svn checkout %s/trunk" % (
                     self.root,
                     self.user,
                     repo_name,
                 )
                 error = subprocess.call(cmd, shell=True)
                 if error == 1:
-                    raise ("Error downloading repo")
+                   raise ("Error downloading repo")
 
         # Checkout named branch ...
         else:
