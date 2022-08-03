@@ -12,6 +12,7 @@ __email__ = "mdekauwe@gmail.com"
 
 import os
 import subprocess
+import shlex
 import datetime
 import getpass
 import tempfile
@@ -47,9 +48,9 @@ class GetCable(object):
         os.chdir(self.src_dir)
 
         # Check if a specified version is required. Negative value means take the latest
-        rev_opt=""
+        rev_opt = ""
         if revision > 0:
-            rev_opt=f"-r {revision}"
+            rev_opt = f"-r {revision}"
 
         try:
             where = os.listdir("%s/.subversion/auth/svn.simple/" % (self.home_dir))
@@ -75,11 +76,11 @@ class GetCable(object):
                         raise ("Error downloading repo")
                     f.close()
             else:
-                cmd = f"svn checkout {rev_opt} {self.root}/trunk" 
+                cmd = f"svn checkout {rev_opt} {self.root}/trunk"
 
                 error = subprocess.call(cmd, shell=True)
                 if error == 1:
-                   raise ("Error downloading repo")
+                    raise ("Error downloading repo")
 
         # Checkout named branch ...
         else:
@@ -101,7 +102,9 @@ class GetCable(object):
                     f.close()
             else:
                 if share_branch:
-                    cmd = f"svn checkout {rev_opt} {self.root}/branches/Share/{repo_name}"
+                    cmd = (
+                        f"svn checkout {rev_opt} {self.root}/branches/Share/{repo_name}"
+                    )
                 else:
                     cmd = f"svn checkout {rev_opt} {self.root}/branches/Users/{self.user}/{repo_name}"
 
@@ -113,12 +116,7 @@ class GetCable(object):
         if need_pass:
 
             if not os.path.exists(self.aux_dir):
-                cmd = "svn checkout %s/branches/Share/%s %s --password %s" % (
-                    self.root,
-                    self.aux_dir,
-                    self.aux_dir,
-                    pswd,
-                )
+                cmd = f"svn checkout {self.root}/branches/Share/{self.aux_dir} {self.aux_dir} --password {pswd}"
                 with tempfile.NamedTemporaryFile(mode="w+t") as f:
                     f.write(cmd)
                     f.flush()
@@ -129,15 +127,18 @@ class GetCable(object):
                     f.close()
         else:
             if not os.path.exists(self.aux_dir):
-                cmd = "svn checkout %s/branches/Share/%s %s" % (
-                    self.root,
-                    self.aux_dir,
-                    self.aux_dir,
-                )
+                cmd = f"svn checkout {self.root}/branches/Share/{self.aux_dir} {self.aux_dir}"
+
                 error = subprocess.call(cmd, shell=True)
                 if error == 1:
                     raise ("Error checking out CABLE-AUX")
 
+        # Write last change revision number to rev_number.log file
+        cmd = shlex.split(f"svn info --show-item last-changed-revision {repo_name}")
+        out = subprocess.run(cmd, capture_output=True, text=True)
+        rev_number = out.stdout
+        with open(f"{cwd}/rev_number.log", "a") as fout:
+            fout.write(f"{repo_name} last change revision: {rev_number}")
         os.chdir(cwd)
 
 

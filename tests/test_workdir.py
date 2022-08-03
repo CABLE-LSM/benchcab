@@ -72,4 +72,13 @@ def test_checkout_share(create_testconfig):
 
     checkout_branch("share", opt, tb)
 
+def test_checkout_2branches(create_testconfig):
+
+    td = create_testconfig[0]
+    os.chdir(td)
+    # Setup the benchmarking
+    opt, _, tb = create_testconfig[1:]
+
+    checkout_branch("share", opt, tb)
+    checkout_branch("user_branch", opt, tb)
 
