@@ -1,7 +1,17 @@
 CHANGES
 =======
 
+* Log last change revision number for each branch
+* Add rev. number in svn checkout and config.yaml
+* Remove code to create user copy of trunk
+* new version
+* Change source of namelist files Fixes #13
+* Need the soil namelist in the run dir
 * Changelog
+
+v0.1.4
+------
+
 * Update version
 * Get the pft\_params.nml file in run directory
 * Clarify instructions for run directory
