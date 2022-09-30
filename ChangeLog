@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+v0.1.5
+------
+
+* Update version
 * Log last change revision number for each branch
 * Add rev. number in svn checkout and config.yaml
 * Remove code to create user copy of trunk
