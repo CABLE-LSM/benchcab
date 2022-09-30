@@ -16,6 +16,7 @@ class BenchSetup(object):
         """Run some checks on the config file to ensure the data is coherent.
         check1: make sure the names in use_branches are keys in the dictionary.
         check2: make sure all required entries are listed
+        check3: add revision pointing to HEAD of branch if missing for one branch
         """
 
         assert all([x in opt for x in opt["use_branches"][0:2]]), "At least one of the first 2 aliases " \
@@ -36,6 +37,9 @@ class BenchSetup(object):
             print("Only the first 2 branches will be used.")
             print("------------------------------------------------------")
             
+        # Add "revision" to each branch description if not provided with default value -1, i.e. HEAD of branch   
+        for req_branch in opt["use_branches"][:2]:
+            opt[req_branch].setdefault("revision",-1)
 
     def read_config(self):
         """Read config file for the CABLE benchmarking"""

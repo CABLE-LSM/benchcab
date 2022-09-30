@@ -19,6 +19,40 @@ class BenchTree(object):
             "namelist_dir": self.runroot_dir/"site/namelists",
         }
 
+        self.clean_previous()
+
+    def clean_previous(self):
+        """Clean previous benchmarking runs as needed. 
+        Archives previous rev_number.log"""
+
+        revision_file=Path("rev_number.log")
+        if revision_file.exists():
+            revision_file.replace(self.next_path("rev_number-*.log"))
+
+        return
+
+    @staticmethod
+    def next_path(path_pattern, sep="-"):
+        """
+        Finds the next free path in a sequentially named list of files with the following pattern:
+            path_pattern = 'file{sep}*.suf':
+
+        file-1.txt
+        file-2.txt
+        file-3.txt
+        """
+
+        loc_pattern=Path(path_pattern)
+        new_file_index = 1
+        common_filename, _ = loc_pattern.stem.split(sep)
+
+        pattern_files_sorted = sorted(Path('.').glob(path_pattern))
+        if len(pattern_files_sorted):
+            common_filename, last_file_index = pattern_files_sorted[-1].stem.split(sep)
+            new_file_index = int(last_file_index) + 1
+
+        return f"{common_filename}{sep}{new_file_index}{loc_pattern.suffix}"
+
     def create_minbenchtree(self):
         """Create the minimum directory tree needed to run the CABLE benchmarking.
         At least, we need:
