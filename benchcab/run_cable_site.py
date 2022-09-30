@@ -56,7 +56,7 @@ class RunCableSite(object):
         num_cores=None,
         multiprocess=False,
         verbose=False,
-    ):        
+    ):
 
         self.met_dir = met_dir
         self.log_dir = log_dir
@@ -178,7 +178,7 @@ class RunCableSite(object):
             adjust_nml_file(nml_fname, replace_dict)
 
             self.run_me(nml_fname)
-            
+
             add_attributes_to_output_file(nml_fname, out_fname, sci_config, url, rev)
             shutil.move(nml_fname, os.path.join(self.namelist_dir, nml_fname))
 
@@ -198,10 +198,10 @@ class RunCableSite(object):
         # - cable executable
         # - veg. parameters namelist
         # - soil parameters namelist
-        copies={
-            self.cable_exe:"cable",
-            self.veg_nml:Path(self.veg_nml).name,
-            self.soil_nml:Path(self.soil_nml).name,
+        copies = {
+            self.cable_exe: "cable",
+            self.veg_nml: Path(self.veg_nml).name,
+            self.soil_nml: Path(self.soil_nml).name,
         }
         self.copy_files(copies)
         self.cable_exe = copies[self.cable_exe]
@@ -270,12 +270,12 @@ class RunCableSite(object):
         email_address = f"{user}@nci.org.au"
 
         # Add the local directory to the storage flag for PBS
-        curdir=Path.cwd().parts
-        if ("scratch" in curdir):
-            curdir_root="scratch"
+        curdir = Path.cwd().parts
+        if "scratch" in curdir:
+            curdir_root = "scratch"
             curdir_proj = curdir[2]
-        elif ("g" in curdir and "data" in curdir):
-            curdir_root="gdata"
+        elif "g" in curdir and "data" in curdir:
+            curdir_root = "gdata"
             curdir_proj = curdir[3]
         else:
             print("Current directory structure unknown on Gadi")
@@ -293,7 +293,9 @@ class RunCableSite(object):
         f.write("#PBS -P %s\n" % (project))
         f.write("#PBS -j oe\n")
         f.write("#PBS -M %s\n" % (email_address))
-        f.write(f"#PBS -l storage=gdata/ks32+gdata/wd9+gdata/hh5+gdata/{project}+{curdir_root}/{curdir_proj}\n")
+        f.write(
+            f"#PBS -l storage=gdata/ks32+gdata/wd9+gdata/hh5+gdata/{project}+{curdir_root}/{curdir_proj}\n"
+        )
         f.write("\n")
         f.write("\n")
         f.write("\n")
@@ -307,7 +309,7 @@ class RunCableSite(object):
 
         f.close()
 
-        os.chmod(qsub_fname, 0o755)        
+        os.chmod(qsub_fname, 0o755)
 
 
 def merge_two_dicts(x, y):

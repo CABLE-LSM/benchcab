@@ -13,14 +13,30 @@ from benchcab.bench_config import BenchSetup
 # Define names of default config files globally
 default_config = "config.yaml"
 default_science = "site_configs.yaml"
+
+
 def myparse(arglist):
     """
     Parse arguments given as list (arglist)
     """
-    parser = argparse.ArgumentParser(description="Run CABLE simulations at single sites for benchmarking")
-    parser.add_argument("-q","--qsub", help="Creates a qsub job script if running at NCI", action="store_true")
-    parser.add_argument("-c","--config", help="Config filename", default=default_config)
-    parser.add_argument("-s", "--science_config", help="Config file to define the various configurations to run", default=default_science)
+    parser = argparse.ArgumentParser(
+        description="Run CABLE simulations at single sites for benchmarking"
+    )
+    parser.add_argument(
+        "-q",
+        "--qsub",
+        help="Creates a qsub job script if running at NCI",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-c", "--config", help="Config filename", default=default_config
+    )
+    parser.add_argument(
+        "-s",
+        "--science_config",
+        help="Config file to define the various configurations to run",
+        default=default_science,
+    )
 
     args = parser.parse_args(arglist)
 
@@ -31,26 +47,29 @@ def myparse(arglist):
         raise
 
     if not "nci" in nodename and not args.met_dir:
-        raise("You need to specify the path to the meteorological data if you are not running at NCI.")
+        raise (
+            "You need to specify the path to the meteorological data if you are not running at NCI."
+        )
 
     return args
+
 
 def read_sci_configs(sci_configfile):
     """Read the science config file"""
 
     with open(sci_configfile, "r") as fin:
-        sci_configs=yaml.safe_load(fin)
+        sci_configs = yaml.safe_load(fin)
 
     return sci_configs
 
 
-def main(qsub=False, config=default_config, science_config=default_science,**kwargs):
+def main(qsub=False, config=default_config, science_config=default_science, **kwargs):
     """To run CABLE on single sites for the benchmarking.
     Keyword arguments are the same as the command line arguments for the benchsiterun command
     """
     # Always run site simulations without mpi and with multiprocess
-    mpi=False
-    multiprocess=True
+    mpi = False
+    multiprocess = True
 
     # Read setup and create directory structure for single site runs
     mysetup = BenchSetup(config)
@@ -58,26 +77,28 @@ def main(qsub=False, config=default_config, science_config=default_science,**kwa
     benchdirs.create_sitebenchtree()
 
     # Read science configurations
-    sci_configs= read_sci_configs(science_config)
+    sci_configs = read_sci_configs(science_config)
 
     if qsub:
         # Create a script to launch on NCI's compute nodes if requested
         # Create a run object instance using default values since we won't use those values
-        R = RunCableSite( )
+        R = RunCableSite()
         R.create_qsub_script(opt["project"], opt["user"], config, science_config)
 
     else:
 
         # Aliases to branches to use:
         branch_alias = opt["use_branches"]
-        run_branches=[opt[branch_alias[0]],]
+        run_branches = [
+            opt[branch_alias[0]],
+        ]
         run_branches.append(opt[branch_alias[1]])
- 
-        start_dir=Path.cwd()
-        os.chdir(benchdirs.runroot_dir/"site")
+
+        start_dir = Path.cwd()
+        os.chdir(benchdirs.runroot_dir / "site")
         for branchid, branch in enumerate(run_branches):
             branch_name = branch["name"]
-            cable_src = benchdirs.src_dir/branch_name
+            cable_src = benchdirs.src_dir / branch_name
 
             # Define the name for the executable: cable for serial, cable-mpi for mpi runs
             cable_exe = f"cable{'-mpi'*mpi}"
@@ -110,11 +131,13 @@ def main_parse_args(arglist):
     # otherwise py.test will fail
     return main(**vars(myparse(arglist)))
 
+
 def main_argv():
     """
     Call main and pass command line arguments. This is required for setup.py entry_points
     """
     mess = main_parse_args(sys.argv[1:])
+
 
 if __name__ == "__main__":
 
