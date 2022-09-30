@@ -59,6 +59,7 @@ class RunCableSite(object):
     ):
 
         self.met_dir = met_dir
+        self.met_subset = met_subset
         self.log_dir = log_dir
         self.output_dir = output_dir
         self.restart_dir = restart_dir
@@ -75,7 +76,6 @@ class RunCableSite(object):
         self.cnpbiome_fname = os.path.join(self.biogeochem_dir, cnpbiome_fname)
         self.elev_fname = elev_fname
         self.co2_conc = co2_conc
-        self.met_subset = met_subset
         self.cable_src = cable_src
         self.cable_exe = os.path.join(cable_src, "offline/%s" % (cable_exe))
         self.veg_nml = Path(cable_src, f"offline/{veg_nml}")

@@ -110,7 +110,7 @@ def main(qsub=False, config=default_config, science_config=default_science, **kw
                 restart_dir=benchdirs.site_run["restart_dir"],
                 aux_dir=benchdirs.aux_dir,
                 namelist_dir=benchdirs.site_run["namelist_dir"],
-                met_subset=[],
+                met_subset=opt["met_subset"],
                 cable_src=cable_src,
                 num_cores=None,
                 cable_exe=cable_exe,
