@@ -79,3 +79,5 @@ nav:
       - user_guide/default_science_configurations.md
       - user_guide/running_CABLE_v2.md
       - user_guide/expected_output.md
+  - Development Guide:
+      - dev_guide/contributing.md
