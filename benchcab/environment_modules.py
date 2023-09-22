@@ -1,3 +1,6 @@
+# Copyright 2022 ACCESS-NRI and contributors. See the top-level COPYRIGHT file for details.
+# SPDX-License-Identifier: Apache-2.0
+
 """Contains a wrapper around the environment modules API."""
 
 import sys

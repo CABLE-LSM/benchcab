@@ -1,3 +1,6 @@
+# Copyright 2022 ACCESS-NRI and contributors. See the top-level COPYRIGHT file for details.
+# SPDX-License-Identifier: Apache-2.0
+
 """A module containing utility functions that wraps around the `subprocess` module."""
 
 from abc import ABC as AbstractBaseClass, abstractmethod
