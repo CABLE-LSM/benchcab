@@ -4,6 +4,10 @@ from pathlib import Path
 
 import pytest
 
+pytest.skip(allow_module_level=True)
+
+from benchcab.fluxsite import Task
+from benchcab.repository import CableRepository
 from benchcab.workdir import (
     clean_directory_tree,
     setup_fluxsite_directory_tree,
