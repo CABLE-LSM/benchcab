@@ -3,6 +3,7 @@
 import contextlib
 import io
 import math
+from pathlib import Path
 
 import f90nml
 import netCDF4
@@ -76,26 +77,26 @@ class TestFetchFiles:
     """Tests for `Task.fetch_files()`."""
 
     @pytest.fixture(autouse=True)
-    def _setup(self, task, mock_cwd):
+    def _setup(self, task):
         """Setup precondition for `Task.fetch_files()`."""
-        (mock_cwd / internal.NAMELIST_DIR).mkdir()
-        (mock_cwd / internal.NAMELIST_DIR / internal.CABLE_NML).touch()
-        (mock_cwd / internal.NAMELIST_DIR / internal.CABLE_SOIL_NML).touch()
-        (mock_cwd / internal.NAMELIST_DIR / internal.CABLE_VEGETATION_NML).touch()
+        internal.NAMELIST_DIR.mkdir()
+        (internal.NAMELIST_DIR / internal.CABLE_NML).touch()
+        (internal.NAMELIST_DIR / internal.CABLE_SOIL_NML).touch()
+        (internal.NAMELIST_DIR / internal.CABLE_VEGETATION_NML).touch()
 
         task_name = task.get_task_name()
-        (mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task_name).mkdir(parents=True)
-        (mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
-        (mock_cwd / internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["TASKS"] / task_name).mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
 
-        exe_build_dir = mock_cwd / internal.SRC_DIR / "test-branch" / "offline"
+        exe_build_dir = internal.SRC_DIR / "test-branch" / "offline"
         exe_build_dir.mkdir(parents=True)
         (exe_build_dir / internal.CABLE_EXE).touch()
 
-    def test_required_files_are_copied_to_task_dir(self, task, mock_cwd):
+    def test_required_files_are_copied_to_task_dir(self, task):
         """Success case: test required files are copied to task directory."""
         task.fetch_files()
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         assert (task_dir / internal.CABLE_NML).exists()
         assert (task_dir / internal.CABLE_VEGETATION_NML).exists()
         assert (task_dir / internal.CABLE_SOIL_NML).exists()
@@ -106,46 +107,42 @@ class TestCleanTask:
     """Tests for `Task.clean_task()`."""
 
     @pytest.fixture(autouse=True)
-    def _setup(self, task, mock_cwd):
+    def _setup(self, task):
         """Setup precondition for `Task.clean_task()`."""
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         task_dir.mkdir(parents=True)
         (task_dir / internal.CABLE_NML).touch()
         (task_dir / internal.CABLE_VEGETATION_NML).touch()
         (task_dir / internal.CABLE_SOIL_NML).touch()
         (task_dir / internal.CABLE_EXE).touch()
 
-        (mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
-        (
-            mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"] / task.get_output_filename()
-        ).touch()
+        internal.FLUXSITE_DIRS["OUTPUT"].mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["OUTPUT"] / task.get_output_filename()).touch()
 
-        (mock_cwd / internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
-        (mock_cwd / internal.FLUXSITE_DIRS["LOG"] / task.get_log_filename()).touch()
+        internal.FLUXSITE_DIRS["LOG"].mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["LOG"] / task.get_log_filename()).touch()
 
-    def test_clean_files(self, task, mock_cwd):
+    def test_clean_files(self, task):
         """Success case: clean files produced from run."""
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         task.clean_task()
         assert not (task_dir / internal.CABLE_NML).exists()
         assert not (task_dir / internal.CABLE_VEGETATION_NML).exists()
         assert not (task_dir / internal.CABLE_SOIL_NML).exists()
         assert not (task_dir / internal.CABLE_EXE).exists()
         assert not (
-            mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"] / task.get_output_filename()
+            internal.FLUXSITE_DIRS["OUTPUT"] / task.get_output_filename()
         ).exists()
-        assert not (
-            mock_cwd / internal.FLUXSITE_DIRS["LOG"] / task.get_log_filename()
-        ).exists()
+        assert not (internal.FLUXSITE_DIRS["LOG"] / task.get_log_filename()).exists()
 
 
 class TestPatchNamelist:
     """Tests for `patch_namelist()`."""
 
     @pytest.fixture()
-    def nml_path(self, mock_cwd):
+    def nml_path(self):
         """Return a path to a namelist file used for testing."""
-        return mock_cwd / "test.nml"
+        return Path("test.nml")
 
     def test_patch_on_non_existing_namelist_file(self, nml_path):
         """Success case: patch non-existing namelist file."""
@@ -189,9 +186,9 @@ class TestPatchRemoveNamelist:
         }
 
     @pytest.fixture()
-    def nml_path(self, mock_cwd, nml):
+    def nml_path(self, nml):
         """Create a namelist file and return its path."""
-        _nml_path = mock_cwd / "test.nml"
+        _nml_path = Path("test.nml")
         f90nml.write(nml, _nml_path)
         return _nml_path
 
@@ -222,26 +219,26 @@ class TestSetupTask:
     """Tests for `Task.setup_task()`."""
 
     @pytest.fixture(autouse=True)
-    def _setup(self, task, mock_cwd):
+    def _setup(self, task):
         """Setup precondition for `Task.setup_task()`."""
-        (mock_cwd / internal.NAMELIST_DIR).mkdir()
-        (mock_cwd / internal.NAMELIST_DIR / internal.CABLE_NML).touch()
-        (mock_cwd / internal.NAMELIST_DIR / internal.CABLE_SOIL_NML).touch()
-        (mock_cwd / internal.NAMELIST_DIR / internal.CABLE_VEGETATION_NML).touch()
+        (internal.NAMELIST_DIR).mkdir()
+        (internal.NAMELIST_DIR / internal.CABLE_NML).touch()
+        (internal.NAMELIST_DIR / internal.CABLE_SOIL_NML).touch()
+        (internal.NAMELIST_DIR / internal.CABLE_VEGETATION_NML).touch()
 
         task_name = task.get_task_name()
-        (mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task_name).mkdir(parents=True)
-        (mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
-        (mock_cwd / internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["TASKS"] / task_name).mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
+        (internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
 
-        exe_build_dir = mock_cwd / internal.SRC_DIR / "test-branch" / "offline"
+        exe_build_dir = internal.SRC_DIR / "test-branch" / "offline"
         exe_build_dir.mkdir(parents=True)
         (exe_build_dir / internal.CABLE_EXE).touch()
 
     def test_all_settings_are_patched_into_namelist_file(self, task, mock_cwd):
         """Success case: test all settings are patched into task namelist file."""
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         task.setup_task()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         res_nml = f90nml.read(str(task_dir / internal.CABLE_NML))
         assert res_nml["cable"] == {
             "filename": {
@@ -268,45 +265,55 @@ class TestSetupTask:
             "some_branch_specific_setting": True,
         }
 
-    def test_default_standard_output(self, task):
-        """Success case: test default standard output."""
+    # TODO(Sean) fix for issue https://github.com/CABLE-LSM/benchcab/issues/162
+    @pytest.mark.skip(
+        reason="""This will always fail since `parametrize()` parameters are
+        dependent on the `mock_cwd` fixture."""
+    )
+    @pytest.mark.parametrize(
+        ("verbosity", "expected"),
+        [
+            (
+                False,
+                "",
+            ),
+            (
+                True,
+                "Setting up task: forcing-file_R1_S0\n"
+                "Creating runs/fluxsite/tasks/forcing-file_R1_S0 directory\n"
+                "  Cleaning task\n"
+                "  Copying namelist files from namelists to "
+                "runs/fluxsite/tasks/forcing-file_R1_S0\n"
+                "  Copying CABLE executable from src/test-branch/"
+                "offline/cable to runs/fluxsite/tasks/forcing-file_R1_S0/cable\n"
+                "  Adding base configurations to CABLE namelist file "
+                "runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
+                "  Adding science configurations to CABLE namelist file "
+                "runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
+                "  Adding branch specific configurations to CABLE namelist file "
+                "runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n",
+            ),
+        ],
+    )
+    def test_standard_output(self, task, verbosity, expected):
+        """Success case: test standard output."""
         with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.setup_task()
-        assert not buf.getvalue()
-
-    def test_verbose_standard_output(self, task, mock_cwd):
-        """Success case: test verbose output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.setup_task(verbose=True)
-        assert buf.getvalue() == (
-            "Setting up task: forcing-file_R1_S0\n"
-            "Creating runs/fluxsite/tasks/forcing-file_R1_S0 directory\n"
-            "  Cleaning task\n"
-            f"  Copying namelist files from {mock_cwd}/namelists to "
-            f"{mock_cwd / 'runs/fluxsite/tasks/forcing-file_R1_S0'}\n"
-            f"  Copying CABLE executable from {mock_cwd}/src/test-branch/"
-            f"offline/cable to {mock_cwd}/runs/fluxsite/tasks/forcing-file_R1_S0/cable\n"
-            "  Adding base configurations to CABLE namelist file "
-            f"{mock_cwd}/runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
-            "  Adding science configurations to CABLE namelist file "
-            f"{mock_cwd}/runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
-            "  Adding branch specific configurations to CABLE namelist file "
-            f"{mock_cwd}/runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
-        )
+            task.setup_task(verbose=verbosity)
+        assert buf.getvalue() == expected
 
 
 class TestRunCable:
     """Tests for `Task.run_cable()`."""
 
     @pytest.fixture(autouse=True)
-    def _setup(self, task, mock_cwd):
+    def _setup(self, task):
         """Setup precondition for `Task.run_cable()`."""
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         task_dir.mkdir(parents=True)
 
-    def test_cable_execution(self, task, mock_subprocess_handler, mock_cwd):
+    def test_cable_execution(self, task, mock_subprocess_handler):
         """Success case: run CABLE executable in subprocess."""
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         task.run_cable()
         assert (
             f"./{internal.CABLE_EXE} {internal.CABLE_NML}"
@@ -314,17 +321,12 @@ class TestRunCable:
         )
         assert (task_dir / internal.CABLE_STDOUT_FILENAME).exists()
 
-    def test_default_standard_output(self, task):
-        """Success case: test default standard output."""
+    @pytest.mark.parametrize(("verbosity", "expected"), [(False, ""), (True, "")])
+    def test_standard_output(self, task, verbosity, expected):
+        """Success case: test standard output."""
         with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.run_cable()
-        assert not buf.getvalue()
-
-    def test_verbose_standard_output(self, task):
-        """Success case: test verbose output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.run_cable(verbose=True)
-        assert not buf.getvalue()
+            task.run_cable(verbose=verbosity)
+        assert buf.getvalue() == expected
 
     def test_cable_error_exception(self, task, mock_subprocess_handler):
         """Failure case: raise CableError on subprocess non-zero exit code."""
@@ -347,23 +349,21 @@ class TestAddProvenanceInfo:
         }
 
     @pytest.fixture()
-    def nc_output_path(self, task, mock_cwd):
+    def nc_output_path(self, task):
         """Create and return a netcdf output file as if CABLE had just been run.
 
         Return value is the path to the file.
         """
-        _nc_output_path = (
-            mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"] / task.get_output_filename()
-        )
+        _nc_output_path = internal.FLUXSITE_DIRS["OUTPUT"] / task.get_output_filename()
         netCDF4.Dataset(_nc_output_path, "w")
         return _nc_output_path
 
     @pytest.fixture(autouse=True)
-    def _setup(self, task, mock_cwd, nml):
+    def _setup(self, task, nml):
         """Setup precondition for `Task.add_provenance_info()`."""
-        task_dir = mock_cwd / internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
+        task_dir = internal.FLUXSITE_DIRS["TASKS"] / task.get_task_name()
         task_dir.mkdir(parents=True)
-        fluxsite_output_dir = mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"]
+        fluxsite_output_dir = internal.FLUXSITE_DIRS["OUTPUT"]
         fluxsite_output_dir.mkdir()
 
         # Create mock namelist file in task directory:
@@ -383,20 +383,30 @@ class TestAddProvenanceInfo:
             assert atts[r"filename%foo"] == nml["cable"]["filename"]["foo"]
             assert atts[r"bar"] == ".true."
 
-    def test_default_standard_output(self, task):
-        """Success case: test default standard output."""
+    # TODO(Sean) fix for issue https://github.com/CABLE-LSM/benchcab/issues/162
+    @pytest.mark.skip(
+        reason="""This will always fail since `parametrize()` parameters are
+        dependent on the `mock_cwd` fixture."""
+    )
+    @pytest.mark.parametrize(
+        ("verbosity", "expected"),
+        [
+            (
+                False,
+                "",
+            ),
+            (
+                True,
+                "Adding attributes to output file: "
+                "runs/fluxsite/outputs/forcing-file_R1_S0_out.nc\n",
+            ),
+        ],
+    )
+    def test_standard_output(self, task, verbosity, expected):
+        """Success case: test standard output."""
         with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.add_provenance_info()
-        assert not buf.getvalue()
-
-    def test_verbose_standard_output(self, task, mock_cwd):
-        """Success case: test verbose standard output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.add_provenance_info(verbose=True)
-        assert buf.getvalue() == (
-            "Adding attributes to output file: "
-            f"{mock_cwd}/runs/fluxsite/outputs/forcing-file_R1_S0_out.nc\n"
-        )
+            task.add_provenance_info(verbose=verbosity)
+        assert buf.getvalue() == expected
 
 
 class TestGetFluxsiteTasks:
@@ -448,7 +458,6 @@ class TestGetFluxsiteComparisons:
 
     def test_comparisons_for_two_branches_with_two_tasks(self, mock_cwd):
         """Success case: comparisons for two branches with two tasks."""
-        output_dir = mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"]
         tasks = [
             Task(
                 repo=CableRepository("path/to/repo", repo_id=repo_id),
@@ -465,14 +474,17 @@ class TestGetFluxsiteComparisons:
             == math.comb(n_repos, 2) * n_science_configurations * n_met_forcings
         )
         assert comparisons[0].files == (
-            output_dir / tasks[0].get_output_filename(),
-            output_dir / tasks[1].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[0].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[1].get_output_filename(),
         )
         assert comparisons[0].task_name == "foo_S0_R0_R1"
 
     def test_comparisons_for_three_branches_with_three_tasks(self, mock_cwd):
         """Success case: comparisons for three branches with three tasks."""
-        output_dir = mock_cwd / internal.FLUXSITE_DIRS["OUTPUT"]
         tasks = [
             Task(
                 repo=CableRepository("path/to/repo", repo_id=repo_id),
@@ -489,16 +501,28 @@ class TestGetFluxsiteComparisons:
             == math.comb(n_repos, 2) * n_science_configurations * n_met_forcings
         )
         assert comparisons[0].files == (
-            output_dir / tasks[0].get_output_filename(),
-            output_dir / tasks[1].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[0].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[1].get_output_filename(),
         )
         assert comparisons[1].files == (
-            output_dir / tasks[0].get_output_filename(),
-            output_dir / tasks[2].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[0].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[2].get_output_filename(),
         )
         assert comparisons[2].files == (
-            output_dir / tasks[1].get_output_filename(),
-            output_dir / tasks[2].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[1].get_output_filename(),
+            mock_cwd
+            / internal.FLUXSITE_DIRS["OUTPUT"]
+            / tasks[2].get_output_filename(),
         )
         assert comparisons[0].task_name == "foo_S0_R0_R1"
         assert comparisons[1].task_name == "foo_S0_R0_R2"
