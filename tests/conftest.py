@@ -15,18 +15,23 @@ from benchcab.utils.subprocess import SubprocessWrapperInterface
 
 @pytest.fixture()
 def mock_cwd():
-    """Fixture for creating and changing into a mock CWD directory."""
-    prevdir = Path.cwd()
-    _mock_cwd = Path(tempfile.mkdtemp(prefix="benchcab_tests"))
-    if _mock_cwd.exists():
-        shutil.rmtree(_mock_cwd)
-    _mock_cwd.mkdir()
-    os.chdir(_mock_cwd.expanduser())
+    """Create and return a unique temporary directory to use as the CWD.
 
-    yield _mock_cwd
+    The return value is the path of the directory.
+    """
+    return Path(tempfile.mkdtemp(prefix="benchcab_tests"))
+
+
+@pytest.fixture(autouse=True)
+def _run_around_tests(mock_cwd):
+    """Change into the `mock_cwd` directory."""
+    prevdir = Path.cwd()
+    os.chdir(mock_cwd.expanduser())
+
+    yield
 
     os.chdir(prevdir)
-    shutil.rmtree(_mock_cwd)
+    shutil.rmtree(mock_cwd)
 
 
 @pytest.fixture()
