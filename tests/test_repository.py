@@ -10,6 +10,8 @@ import pytest
 from benchcab import internal
 from benchcab.repository import CableRepository, remove_module_lines
 
+from .conftest import DEFAULT_STDOUT
+
 
 @pytest.fixture()
 def repo(mock_cwd, mock_subprocess_handler, mock_environment_modules_handler):
@@ -61,20 +63,18 @@ class TestCheckout:
             in mock_subprocess_handler.commands
         )
 
-    def test_standard_output(self, repo, mock_subprocess_handler):
+    @pytest.mark.parametrize(
+        ("verbosity", "expected"),
+        [
+            (False, f"Successfully checked out trunk at revision {DEFAULT_STDOUT}\n"),
+            (True, f"Successfully checked out trunk at revision {DEFAULT_STDOUT}\n"),
+        ],
+    )
+    def test_standard_output(self, repo, verbosity, expected):
         """Success case: test standard output."""
         with contextlib.redirect_stdout(io.StringIO()) as buf:
-            repo.checkout()
-        assert (
-            buf.getvalue()
-            == f"Successfully checked out trunk at revision {mock_subprocess_handler.stdout}\n"
-        )
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            repo.checkout(verbose=True)
-        assert (
-            buf.getvalue()
-            == f"Successfully checked out trunk at revision {mock_subprocess_handler.stdout}\n"
-        )
+            repo.checkout(verbose=verbosity)
+        assert buf.getvalue() == expected
 
 
 class TestSVNInfoShowItem:
