@@ -1,4 +1,9 @@
-"""`pytest` tests for `comparison.py`."""
+"""`pytest` tests for `comparison.py`.
+
+Note: explicit teardown for generated files and directories are not required as
+the working directory used for testing is cleaned up in the `_run_around_tests`
+pytest autouse fixture.
+"""
 
 import contextlib
 import io

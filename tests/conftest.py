@@ -93,6 +93,10 @@ def config():
     }
 
 
+# Global string literal used so that it is accessible in tests
+DEFAULT_STDOUT = "mock standard output"
+
+
 @pytest.fixture()
 def mock_subprocess_handler():
     """Returns a mock implementation of `SubprocessWrapperInterface`."""
@@ -102,7 +106,7 @@ def mock_subprocess_handler():
 
         def __init__(self) -> None:
             self.commands: list[str] = []
-            self.stdout = "mock standard output"
+            self.stdout = DEFAULT_STDOUT
             self.error_on_call = False
             self.env = {}
 
