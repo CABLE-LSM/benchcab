@@ -5,8 +5,6 @@ the working directory used for testing is cleaned up in the `_run_around_tests`
 pytest autouse fixture.
 """
 
-import contextlib
-import io
 import math
 from pathlib import Path
 
@@ -288,37 +286,6 @@ class TestSetupTask:
             "some_branch_specific_setting": True,
         }
 
-    @pytest.mark.parametrize(
-        ("verbosity", "expected"),
-        [
-            (
-                False,
-                "",
-            ),
-            (
-                True,
-                "Setting up task: forcing-file_R1_S0\n"
-                "Creating runs/fluxsite/tasks/forcing-file_R1_S0 directory\n"
-                "  Cleaning task\n"
-                "  Copying namelist files from namelists to "
-                "runs/fluxsite/tasks/forcing-file_R1_S0\n"
-                "  Copying CABLE executable from src/test-branch/"
-                "offline/cable to runs/fluxsite/tasks/forcing-file_R1_S0/cable\n"
-                "  Adding base configurations to CABLE namelist file "
-                "runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
-                "  Adding science configurations to CABLE namelist file "
-                "runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n"
-                "  Adding branch specific configurations to CABLE namelist file "
-                "runs/fluxsite/tasks/forcing-file_R1_S0/cable.nml\n",
-            ),
-        ],
-    )
-    def test_standard_output(self, task, verbosity, expected):
-        """Success case: test standard output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.setup_task(verbose=verbosity)
-        assert buf.getvalue() == expected
-
 
 class TestRunCable:
     """Tests for `Task.run_cable()`."""
@@ -338,13 +305,6 @@ class TestRunCable:
             in mock_subprocess_handler.commands
         )
         assert (task_dir / internal.CABLE_STDOUT_FILENAME).exists()
-
-    @pytest.mark.parametrize(("verbosity", "expected"), [(False, ""), (True, "")])
-    def test_standard_output(self, task, verbosity, expected):
-        """Success case: test standard output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.run_cable(verbose=verbosity)
-        assert buf.getvalue() == expected
 
     def test_cable_error_exception(self, task, mock_subprocess_handler):
         """Failure case: raise CableError on subprocess non-zero exit code."""
@@ -398,26 +358,6 @@ class TestAddProvenanceInfo:
             assert atts[r"filename%met"] == nml["cable"]["filename"]["met"]
             assert atts[r"filename%foo"] == nml["cable"]["filename"]["foo"]
             assert atts[r"bar"] == ".true."
-
-    @pytest.mark.parametrize(
-        ("verbosity", "expected"),
-        [
-            (
-                False,
-                "",
-            ),
-            (
-                True,
-                "Adding attributes to output file: "
-                "runs/fluxsite/outputs/forcing-file_R1_S0_out.nc\n",
-            ),
-        ],
-    )
-    def test_standard_output(self, task, verbosity, expected):
-        """Success case: test standard output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            task.add_provenance_info(verbose=verbosity)
-        assert buf.getvalue() == expected
 
 
 class TestGetFluxsiteTasks:

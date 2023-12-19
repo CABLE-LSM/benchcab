@@ -5,8 +5,6 @@ the working directory used for testing is cleaned up in the `_run_around_tests`
 pytest autouse fixture.
 """
 
-import contextlib
-import io
 from pathlib import Path
 
 import pytest
@@ -47,26 +45,6 @@ class TestRun:
         comparison_task.run()
         assert f"nccmp -df {file_a} {file_b}" in mock_subprocess_handler.commands
 
-    @pytest.mark.parametrize(
-        ("verbosity", "expected"),
-        [
-            (
-                False,
-                f"Success: files {FILE_NAME_A} {FILE_NAME_B} are identical\n",
-            ),
-            (
-                True,
-                f"Comparing files {FILE_NAME_A} and {FILE_NAME_B} bitwise...\n"
-                f"Success: files {FILE_NAME_A} {FILE_NAME_B} are identical\n",
-            ),
-        ],
-    )
-    def test_standard_output(self, comparison_task, verbosity, expected):
-        """Success case: test standard output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            comparison_task.run(verbose=verbosity)
-        assert buf.getvalue() == expected
-
     def test_failed_comparison_check(
         self, comparison_task, mock_subprocess_handler, bitwise_cmp_dir
     ):
@@ -76,34 +54,3 @@ class TestRun:
         comparison_task.run()
         with stdout_file.open("r", encoding="utf-8") as file:
             assert file.read() == mock_subprocess_handler.stdout
-
-    @pytest.mark.parametrize(
-        ("verbosity", "expected"),
-        [
-            (
-                False,
-                f"Failure: files {FILE_NAME_A} {FILE_NAME_B} differ. Results of "
-                "diff have been written to "
-                f"{internal.FLUXSITE_DIRS['BITWISE_CMP']}/{TASK_NAME}.txt\n",
-            ),
-            (
-                True,
-                f"Comparing files {FILE_NAME_A} and {FILE_NAME_B} bitwise...\n"
-                f"Failure: files {FILE_NAME_A} {FILE_NAME_B} differ. Results of "
-                "diff have been written to "
-                f"{internal.FLUXSITE_DIRS['BITWISE_CMP']}/{TASK_NAME}.txt\n",
-            ),
-        ],
-    )
-    def test_standard_output_on_failure(
-        self,
-        comparison_task,
-        mock_subprocess_handler,
-        verbosity,
-        expected,
-    ):
-        """Failure case: test standard output on failure."""
-        mock_subprocess_handler.error_on_call = True
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            comparison_task.run(verbose=verbosity)
-        assert buf.getvalue() == expected

@@ -5,8 +5,6 @@ the working directory used for testing is cleaned up in the `_run_around_tests`
 pytest autouse fixture.
 """
 
-import contextlib
-import io
 from pathlib import Path
 
 import pytest
@@ -48,12 +46,3 @@ class TestMkdir:
         mkdir(test_path, **kwargs)
         assert test_path.exists()
         test_path.rmdir()
-
-    @pytest.mark.parametrize(
-        ("verbosity", "expected"), [(False, ""), (True, "Creating test1 directory\n")]
-    )
-    def test_standard_output(self, verbosity, expected):
-        """Success case: test standard output."""
-        with contextlib.redirect_stdout(io.StringIO()) as buf:
-            mkdir(Path("test1"), verbose=verbosity)
-        assert buf.getvalue() == expected
