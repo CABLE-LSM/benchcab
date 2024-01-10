@@ -19,7 +19,6 @@ requirements:
     host:
         - python >=3.9
         - pip
-        - pbr
     run:
         - python >=3.9
         - netCDF4
