@@ -75,7 +75,9 @@ nav:
   - About: index.md
   - User Guide:
       - user_guide/index.md
+      - user_guide/dev_docs.md
       - user_guide/config_options.md
       - user_guide/default_science_configurations.md
       - user_guide/running_CABLE_v2.md
       - user_guide/expected_output.md
+  - Developer Guide: dev_docs.md
