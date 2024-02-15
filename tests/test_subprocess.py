@@ -1,5 +1,6 @@
 """`pytest` tests for `utils/subprocess.py`."""
 
+import itertools
 import os
 import subprocess
 from pathlib import Path
@@ -17,90 +18,84 @@ class TestRunCmd:
         """Return an instance of `SubprocessWrapper` for testing."""
         return SubprocessWrapper()
 
-    def test_stdout_is_suppressed_in_non_verbose_mode(self, subprocess_handler, capfd):
-        """Success case: test stdout is suppressed in non-verbose mode."""
-        subprocess_handler.run_cmd("echo foo")
-        captured = capfd.readouterr()
-        assert not captured.out
-        assert not captured.err
+    # Parameterization
+    @pytest.fixture(params=list(itertools.product([False, True], repeat=3)))
+    def generate_params(self, request):
+        possible_inputs = request.param
+        return {
+            "param_verbose": possible_inputs[0],
+            "param_capture": possible_inputs[1],
+            "param_file": possible_inputs[2],
+        }
 
-    def test_stderr_is_suppressed_in_non_verbose_mode(self, subprocess_handler, capfd):
-        """Success case: test stderr is suppressed in non-verbose mode."""
-        subprocess_handler.run_cmd("echo foo 1>&2")
-        captured = capfd.readouterr()
-        assert not captured.out
-        assert not captured.err
+    @pytest.fixture(params=[("echo foo", "foo\n"), ("echo foo 1>&2", "foo\n")])
+    def generated_input(self, request, generate_params):
+        command = request.param
+        return generate_params | {
+            "command": {
+                "input": command[0],
+                "expected": command[1],
+            }
+        }
 
-    def test_command_and_stdout_is_printed_in_verbose_mode(
-        self, subprocess_handler, capfd
-    ):
-        """Success case: test command and stdout is printed in verbose mode."""
-        subprocess_handler.run_cmd("echo foo", verbose=True)
-        captured = capfd.readouterr()
-        assert captured.out == "echo foo\nfoo\n"
+    def _test_verbose(self, is_stdout_verbose, param_verbose, captured, command):
         assert not captured.err
+        expected = command["input"] + "\n"
+        if param_verbose and is_stdout_verbose:
+            expected += command["expected"]
+        if is_stdout_verbose or param_verbose:
+            assert captured.out == expected
+        else:
+            assert not captured.out
 
-    def test_command_and_stderr_is_redirected_to_stdout_in_verbose_mode(
-        self, subprocess_handler, capfd
-    ):
-        """Success case: test command and stderr is redirected to stdout in verbose mode."""
-        subprocess_handler.run_cmd("echo foo 1>&2", verbose=True)
-        captured = capfd.readouterr()
-        assert captured.out == "echo foo 1>&2\nfoo\n"
-        assert not captured.err
-
-    def test_output_is_captured_with_capture_output_enabled(
-        self, subprocess_handler, capfd
-    ):
-        """Success case: test output is captured with capture_output enabled."""
-        proc = subprocess_handler.run_cmd("echo foo", capture_output=True)
-        captured = capfd.readouterr()
-        assert not captured.out
-        assert not captured.err
-        assert proc.stdout == "foo\n"
+    def _test_capture_output(self, is_stdout_capture, proc, expected):
         assert not proc.stderr
+        if is_stdout_capture:
+            assert proc.stdout == expected
+        else:
+            assert not proc.stdout
 
-    def test_stderr_captured_to_stdout(self, subprocess_handler, capfd):
-        """Success case: test stderr is captured to stdout with capture_output enabled."""
-        proc = subprocess_handler.run_cmd("echo foo 1>&2", capture_output=True)
-        captured = capfd.readouterr()
-        assert not captured.out
-        assert not captured.err
-        assert proc.stdout == "foo\n"
-        assert not proc.stderr
+    def _test_output_file(self, is_stdout_file, file_path, expected):
+        if is_stdout_file:
+            with file_path.open("r", encoding="utf-8") as file:
+                assert file.read() == expected
+        else:
+            # TODO: Check for non-existent file
+            pass
 
-    def test_command_is_printed_and_stdout_is_captured_in_verbose_mode(
-        self, subprocess_handler, capfd
-    ):
-        """Success case: test command is printed and stdout is captured in verbose mode."""
-        proc = subprocess_handler.run_cmd("echo foo", capture_output=True, verbose=True)
-        captured = capfd.readouterr()
-        assert captured.out == "echo foo\n"
-        assert not captured.err
-        assert proc.stdout == "foo\n"
-        assert not proc.stderr
+    def test_subprocess_logic(self, subprocess_handler, generated_input, capfd):
 
-    def test_stdout_is_redirected_to_file(self, subprocess_handler, capfd):
-        """Success case: test stdout is redirected to file."""
-        file_path = Path("out.txt")
-        subprocess_handler.run_cmd("echo foo", output_file=file_path)
-        with file_path.open("r", encoding="utf-8") as file:
-            assert file.read() == "foo\n"
-        captured = capfd.readouterr()
-        assert not captured.out
-        assert not captured.err
+        is_stdout_verbose, is_stdout_output, is_stdout_capture = (False, False, False)
+        file_path = None
 
-    def test_command_is_printed_and_stdout_is_redirected_to_file_in_verbose_mode(
-        self, subprocess_handler, capfd
-    ):
-        """Success case: test command is printed and stdout is redirected to file in verbose mode."""
-        file_path = Path("out.txt")
-        subprocess_handler.run_cmd("echo foo", output_file=file_path, verbose=True)
-        with file_path.open("r", encoding="utf-8") as file:
-            assert file.read() == "foo\n"
+        if generated_input["param_capture"]:
+            is_stdout_capture = True
+        elif generated_input["param_file"]:
+            is_stdout_output = True
+            file_path = Path("out.txt")
+        elif generated_input["param_verbose"]:
+            is_stdout_verbose = True
+
+        proc = subprocess_handler.run_cmd(
+            generated_input["command"]["input"],
+            verbose=generated_input["param_verbose"],
+            capture_output=generated_input["param_capture"],
+            output_file=file_path,
+        )
         captured = capfd.readouterr()
-        assert captured.out == "echo foo\n"
-        assert not captured.err
+
+        self._test_verbose(
+            is_stdout_verbose,
+            generated_input["param_verbose"],
+            captured,
+            generated_input["command"],
+        )
+        self._test_capture_output(
+            is_stdout_capture, proc, generated_input["command"]["expected"]
+        )
+        self._test_output_file(
+            is_stdout_output, file_path, generated_input["command"]["expected"]
+        )
 
     def test_command_is_run_with_environment(self, subprocess_handler):
         """Success case: test command is run with environment."""
