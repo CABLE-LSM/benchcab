@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from benchcab import internal
-from benchcab.model import Model, remove_module_lines
+from benchcab.model import Model
 from benchcab.utils.repo import Repo
 
 
@@ -293,14 +293,6 @@ class TestCustomBuild:
         """Return a list of modules for testing."""
         return ["foo", "bar"]
 
-    def test_build_command_execution(
-        self, model, mock_subprocess_handler, build_script, modules
-    ):
-        """Success case: execute the build command for a custom build script."""
-        model.build_script = str(build_script)
-        model.custom_build(modules)
-        assert "./tmp-build.sh" in mock_subprocess_handler.commands
-
     def test_modules_loaded_at_runtime(
         self, model, mock_environment_modules_handler, build_script, modules
     ):
@@ -326,54 +318,3 @@ class TestCustomBuild:
             "option in config.yaml?",
         ):
             model.custom_build(modules)
-
-
-class TestRemoveModuleLines:
-    """Tests for `remove_module_lines()`."""
-
-    def test_module_lines_removed_from_shell_script(self):
-        """Success case: test 'module' lines are removed from mock shell script."""
-        file_path = Path("test-build.sh")
-        with file_path.open("w", encoding="utf-8") as file:
-            file.write(
-                """#!/bin/bash
-module add bar
-module purge
-
-host_gadi()
-{
-   . /etc/bashrc
-   module purge
-   module add intel-compiler/2019.5.281
-   module add netcdf/4.6.3
-   module load foo
-   modules
-   echo foo && module load
-   echo foo # module load
-   # module load foo
-
-   if [[ $1 = 'mpi' ]]; then
-      module add intel-mpi/2019.5.281
-   fi
-}
-"""
-            )
-
-        remove_module_lines(file_path)
-
-        with file_path.open("r", encoding="utf-8") as file:
-            assert file.read() == (
-                """#!/bin/bash
-
-host_gadi()
-{
-   . /etc/bashrc
-   modules
-   echo foo # module load
-   # module load foo
-
-   if [[ $1 = 'mpi' ]]; then
-   fi
-}
-"""
-            )

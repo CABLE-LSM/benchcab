@@ -388,7 +388,7 @@ realisations:
 
 ### [build_script](#build_script)
 
-: **Default:** unset, _optional key_. :octicons-dash-24: The path to a custom shell script to build the code in that branch, relative to the repository root directory. **Note:** any lines in the provided shell script that call the [environment modules API][environment-modules] will be ignored. To specify modules to use for the build script, please specify them using the [`modules`](#modules) key.
+: **Default:** unset, _optional key_. :octicons-dash-24: The path to a custom shell script to build the code in that branch, relative to the repository root directory. **Note:** invocations of the [`module`][environment-modules] command which modify the user environment (i.e. `add`, `load`, `rm`, `unload`, `purge`, ...) will be ignored. To specify modules to use for the build script, please specify them using the [`modules`](#modules) key.
 
 ```yaml
 realisations:

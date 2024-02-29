@@ -4,15 +4,12 @@
 """Contains functions and data structures relating to CABLE models."""
 
 import os
-import shlex
-import shutil
-import stat
 from pathlib import Path
 from typing import Optional
 
 from benchcab import internal
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
-from benchcab.utils import get_logger
+from benchcab.utils import get_logger, get_package_data_path
 from benchcab.utils.fs import chdir, copy2, rename
 from benchcab.utils.repo import GitRepo, LocalRepo, Repo
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
@@ -101,22 +98,13 @@ class Model:
             )
             raise FileNotFoundError(msg)
 
-        tmp_script_path = build_script_path.parent / "tmp-build.sh"
-
-        self.logger.debug(f"Copying {build_script_path} to {tmp_script_path}")
-        shutil.copy(build_script_path, tmp_script_path)
-
-        self.logger.debug(f"chmod +x {tmp_script_path}")
-        tmp_script_path.chmod(tmp_script_path.stat().st_mode | stat.S_IEXEC)
-
-        self.logger.debug(
-            f"Modifying {tmp_script_path.name}: remove lines that call environment modules"
-        )
-
-        remove_module_lines(tmp_script_path)
-
         with chdir(build_script_path.parent), self.modules_handler.load(modules):
-            self.subprocess_handler.run_cmd(f"./{tmp_script_path.name}")
+            modules_wrapper_path = get_package_data_path(
+                Path("environment_modules_wrapper.bash")
+            )
+            self.subprocess_handler.run_cmd(
+                f"source {modules_wrapper_path}; ./{build_script_path.name}"
+            )
 
     def pre_build(self, mpi=False):
         """Runs CABLE pre-build steps."""
@@ -172,14 +160,3 @@ class Model:
             tmp_dir / exe,
             path_to_repo / self.src_dir / "offline" / exe,
         )
-
-
-def remove_module_lines(file_path: Path) -> None:
-    """Remove lines from `file_path` that call the environment modules package."""
-    with file_path.open("r", encoding="utf-8") as file:
-        contents = file.read()
-    with file_path.open("w", encoding="utf-8") as file:
-        for line in contents.splitlines(True):
-            cmds = shlex.split(line, comments=True)
-            if "module" not in cmds:
-                file.write(line)

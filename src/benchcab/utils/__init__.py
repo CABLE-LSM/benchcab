@@ -32,6 +32,23 @@ def get_installed_root() -> Path:
     return Path(resources.files("benchcab"))
 
 
+def get_package_data_path(resource: Path) -> Path:
+    """Return the absolute path to a given resource in the package data directory.
+
+    Parameters
+    ----------
+    resource: Path
+        Path to the resource relative to the package data directory.
+
+    Returns
+    -------
+    Path
+        Absolute path to the resource.
+
+    """
+    return Path(sys.modules["benchcab"].__file__).parent / "data" / resource
+
+
 def load_package_data(filename: str) -> Union[str, dict]:
     """Load data out of the installed package data directory.
 
