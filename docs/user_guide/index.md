@@ -8,18 +8,13 @@ In this guide, we will describe:
 
 `benchcab` has been designed to work on NCI machine exclusively. It might be extended later on to other systems.
 
-!!! warning "Limitations"
-    Currently,
-
-    * `benchcab` can only run simulations at flux sites. 
-    * spin-up for CASA simulations are not supported.
-
 ## Pre-requisites
 
 To use `benchcab`, you need to join the following projects at NCI:
 
 - [ks32][ks32_mynci]
 - [hh5][hh5_mynci]
+- [wd9][wd9_mynci] if not part of the [cable][cable_mynci] project
 
 ## Installation
 
@@ -44,15 +39,15 @@ You need to load the module on each new session at NCI on login or compute nodes
 - *New feature:* running two versions of CABLE with the same standard set of science configurations except one version is patched to use a new feature.
 - *Ensemble run:* running any number of versions of CABLE with the same set of customised science configurations.
 
-The regression and new feature run modes should be used as necessary when evaluating new development in CABLE.
-
-The code will: (i) check out and (ii) build the code branches. Then it will run each executable across N standard science configurations for a given number of sites. It is possible to produce some plots locally from the output produced. But [the modelevaluation website][meorg] can be used for further benchmarking and evaluation.
+The regression and new feature run modes should be used as necessary when evaluating new developments in CABLE.
 
 ### Create a work directory
 
 #### Choose a location
 
-You can run the benchmark from any directory you want under `/scratch` or `/g/data`. `/scratch` is preferred as the data in the run directory does not need to be preserved for a long time. The code will create sub-directories as needed. Please ensure you have enough space to store the CABLE outputs in your directory, at least temporary, until you upload them to [modelevaluation.org][meorg]. You will need about 16GB for the outputs for the `forty-two-site` experiment (with 4 different science configurations).
+You can run the benchmark from any directory you want under `/scratch` or `/g/data`. `/scratch` is preferred as the data in the run directory does not need to be preserved for a long time. The code will create sub-directories as needed. Please ensure you have enough space to store the CABLE outputs in your directory, at least temporarily until you upload them to [modelevaluation.org][meorg]. 
+
+The full test suite will require about 22GB of storage space.
 
 !!! Warning "The HOME directory is unsuitable"
 
@@ -83,7 +78,7 @@ cd bench_example
 !!! warning
     `benchcab` will stop if it is not run within a work directory with the proper structure.
 
-Currently, `benchcab` can only run CABLE for flux sites. **To run the whole workflow**, run
+Currently, `benchcab` can only run CABLE for flux site and offline spatial configurations. **To run the whole workflow**, run
 
 ```bash
 benchcab run
@@ -93,7 +88,8 @@ The tool will follow the steps:
 
 1. Checkout the code branches. The codes will be stored under `src/` directory in your work directory. The sub-directories are created automatically.
 2. Compile the source code from all branches
-3. Setup and launch a PBS job to run the simulations in parallel. When `benchcab` launches the PBS job, it will print out the job ID to the terminal. You can check the status of the job with `qstat`. `benchcab` will not warn you when the simulations are over.
+3. Setup and launch a PBS job to run the flux site simulations in parallel. When `benchcab` launches the PBS job, it will print out the job ID to the terminal. You can check the status of the job with `qstat`. `benchcab` will not warn you when the simulations are over.
+4. Setup and run an ensemble of offline spatial runs using the [`payu`][payu-github] framework.
 
 !!! tip "Expected output"
 
@@ -119,22 +115,27 @@ The following files and directories are created when `benchcab run` executes suc
 ├── benchmark_cable_qsub.sh.o<jobid>
 ├── rev_number-1.log
 ├── runs
-│   └── fluxsite
-│       ├── logs
-│       │   ├── <task>_log.txt
-│       │   └── ...
-│       ├── outputs
-│       │   ├── <task>_out.nc
-│       │   └── ...
-│       ├── analysis
-│       │   └── bitwise-comparisons
-│       └── tasks
-│           ├── <task>
-│           │   ├── cable (executable)
-│           │   ├── cable.nml
-│           │   ├── cable_soilparm.nml
-│           │   └── pft_params.nml
-│           └── ...
+│   ├── fluxsite
+│   │   ├── logs
+│   │   │   ├── <task>_log.txt
+│   │   │   └── ...
+│   │   ├── outputs
+│   │   │   ├── <task>_out.nc
+│   │   │   └── ...
+│   │   ├── analysis
+│   │   │   └── bitwise-comparisons
+│   │   └── tasks
+│   │       ├── <task>
+│   │       │   ├── cable (executable)
+│   │       │   ├── cable.nml
+│   │       │   ├── cable_soilparm.nml
+│   │       │   └── pft_params.nml
+│   │       └── ...
+│   ├── spatial
+│   │   └── tasks
+│   │       ├── <task> (a payu control / experiment directory)
+│   │       └── ...
+│   └── payu-laboratory
 └── src
     ├── CABLE-AUX
     ├── <realisation-0>
@@ -155,11 +156,11 @@ The following files and directories are created when `benchcab run` executes suc
 
 `runs/fluxsite/`
 
-:   directory that contains the log files, output files, and tasks for running CABLE. 
+:   directory that contains the log files, output files, and tasks for running CABLE in the fluxsite configuration. 
 
 `runs/fluxsite/tasks`
 
-:   directory that contains task directories. A task consists of a CABLE run for a branch (realisation), a meteorological forcing, and a science configuration. In the above directory structure, `<task>` uses the following naming convention:
+:   directory that contains fluxsite task directories. A task consists of a CABLE run for a branch (realisation), a meteorological forcing, and a science configuration. In the above directory structure, `<task>` uses the following naming convention:
 
 ```
 <met_file_basename>_R<realisation_key>_S<science_config_key>
@@ -183,6 +184,29 @@ The following files and directories are created when `benchcab run` executes suc
 
 :   directory that contains the standard output produced by the bitwise comparison command: `benchcab fluxsite-bitwise-cmp`. Standard output is only saved when the netcdf files being compared differ from each other
 
+`runs/spatial/`
+
+:   directory that contains task directories for running CABLE in the offline spatial configuration.
+
+`runs/spatial/tasks`
+
+:   directory that contains payu control directories (or experiments) configured for each spatial task. A task consists of a CABLE run for a branch (realisation), a meteorological forcing, and a science configuration. In the above directory structure, `<task>` uses the following naming convention:
+
+```
+<met_forcing_name>_R<realisation_key>_S<science_config_key>
+```
+
+:   where `met_forcing_name` is the name of the spatial met forcing, `realisation_key` is the branch key specified in the config file, and `science_config_key` identifies the science configuration used. See the [`met_forcings`](config_options.md#met_forcings) option for more information on how to configure the met forcings used.
+
+
+`runs/spatial/tasks/<task>/`
+
+:   a payu control directory (or experiment). See [Configuring your experiment](https://payu.readthedocs.io/en/latest/config.html) for more information on payu experiments.
+
+`runs/payu-laboratory/`
+
+:   a custom payu laboratory directory. See [Laboratory Structure](https://payu.readthedocs.io/en/latest/design.html#laboratory-structure) for more information on the payu laboratory directory.
+
 !!! warning "Re-running `benchcab` multiple times in the same working directory"
     We recommend the user to manually delete the generated files when re-running `benchcab`. Re-running `benchcab` multiple times in the same working directory is currently not yet supported (see issue [CABLE-LSM/benchcab#20](https://github.com/CABLE-LSM/benchcab/issues/20)). To clean the current working directory, run the following command in the working directory
 
@@ -192,9 +216,10 @@ The following files and directories are created when `benchcab run` executes suc
 
 ## Analyse the output with [modelevaluation.org][meorg]
 
-<!-- **Prerequisite**: To run the model evaluation step, you will need to create an account on [modelevaluation.org][meorg]. -->
-
 Once the benchmarking has finished running all the simulations, you need to upload the output files to [modelevaluation.org][meorg] via the web interface. To do this:
+
+!!! warning "Limitations"
+    Model evaluation for offline spatial outputs is not yet available (see issue [CABLE-LSM/benchcab#193](https://github.com/CABLE-LSM/benchcab/issues/193)).
 
 1. Go to [modelevaluation.org][meorg] and login or create a new account.
 2. Navigate to the `benchcab-evaluation` workspace. To do this, click the **Current Workspace** button at the top of the page, and select `benchcab-evaluation` under "Workspaces Shared With Me".
@@ -262,6 +287,8 @@ Alternatively, you can also access the ACCESS-NRI User support via [the ACCESS-H
 
 [hh5_mynci]: https://my.nci.org.au/mancini/project/hh5
 [ks32_mynci]: https://my.nci.org.au/mancini/project/ks32
+[wd9_mynci]: https://my.nci.org.au/mancini/project/wd9
+[cable_mynci]: https://my.nci.org.au/mancini/project/cable
 [bench_example]: https://github.com/CABLE-LSM/bench_example.git
 [config_options]: config_options.md
 [forum-support]: https://forum.access-hive.org.au/t/access-help-and-support/908
@@ -272,3 +299,4 @@ Alternatively, you can also access the ACCESS-NRI User support via [the ACCESS-H
 [benchmark_5]: https://modelevaluation.org/modelOutput/display/diLdf49PfpEwZemTz
 [benchmark_42]: https://modelevaluation.org/modelOutput/display/pvkuY5gpR2n4FKZw3
 [run_CABLE_v2]: running_CABLE_v2.md
+[payu-github]: https://github.com/payu-org/payu

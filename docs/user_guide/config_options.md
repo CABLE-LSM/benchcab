@@ -32,7 +32,7 @@ The different running modes of `benchcab` are solely dependent on the options us
 
 ## project
 
-: **Default:** _required key, no default_. :octicons-dash-24: NCI project ID to charge the simulations to.
+: **Default:** user's default project, _optional key_. :octicons-dash-24: NCI project ID to charge the simulations to. The user's default project defined in the $PROJECT environment variable is used by default.
 
 ``` yaml
 
@@ -161,6 +161,69 @@ fluxsite:
 fluxsites:
   multiprocess: True
 
+```
+
+## spatial
+
+Contains settings specific to spatial tests.
+
+This key is _optional_. **Default** settings for the spatial tests will be used if it is not present.
+
+```yaml
+spatial:
+  met_forcings:
+    crujra_access: https://github.com/CABLE-LSM/cable_example.git
+  payu:
+    config:
+      walltime: 1:00:00
+    args: -n 2
+```
+
+### [met_forcings](#met_forcings)
+
+Specify one or more spatial met forcings to use in the spatial test suite. Each entry is a key-value pair where the key is the name of the met forcing and the value is a URL to a payu experiment that is configured to run CABLE with that forcing.
+
+This key is _optional_. **Default** values for the `met_forcings` key is as follows:
+
+```yaml
+spatial:
+  met_forcings:
+    crujra_access: https://github.com/CABLE-LSM/cable_example.git
+```
+
+### [payu](#payu)
+
+Contains settings specific to the payu workflow manager.
+
+This key is _optional_. **Default** values for the payu settings will apply if not specified.
+
+```yaml
+spatial:
+  payu:
+    config:
+      walltime: 1:00:00
+    args: -n 2
+```
+
+[`config`](#+payu.config){ #+payu.config }
+
+: **Default:** unset, _optional key_. :octicons-dash-24: Specify global configuration options for running payu. Settings specified here are passed into to the payu configuration file for each experiment.
+
+```yaml
+spatial:
+  payu:
+    config:
+      walltime: 1:00:00
+```
+
+[`args`](#+payu.args){ #+payu.args }
+
+: **Default:** unset, _optional key_. :octicons-dash-24: Specify command line arguments to the `payu run` command in the form of a string. Arguments are used for all spatial payu runs.
+
+```yaml
+spatial:
+  payu:
+    args: -n 2
 ```
 
 ## realisations
@@ -337,7 +400,7 @@ realisations:
 
 ### [patch_remove](#patch_remove)
 
-: **Default:** unset, no effect, _optional key. :octicons-dash-24: Specifies branch-specific namelist settings to be removed from the `cable.nml` namelist settings. When the `patch_remove` key is specified, the specified namelists are removed from all namelist files for this branch for all science configurations run by `benchcab`. When specifying a namelist parameter in `patch_remove`, the value of the namelist parameter is ignored.
+: **Default:** unset, _optional key. :octicons-dash-24: Specifies branch-specific namelist settings to be removed from the `cable.nml` namelist settings. When the `patch_remove` key is specified, the specified namelists are removed from all namelist files for this branch for all science configurations run by `benchcab`. When specifying a namelist parameter in `patch_remove`, the value of the namelist parameter is ignored.
 : The `patch_remove` key must be a dictionary-like data structure that is compliant with the [`f90nml`][f90nml-github] python package.
 
 ```yaml
@@ -356,7 +419,7 @@ realisations:
 
 ## science_configurations
 
-: **Default:** unset, no impact, _optional key_. :octicons-dash-24: User defined science configurations. Science configurations that are specified here will replace [the default science configurations](default_science_configurations.md). In the output filenames, each configuration is identified with S<N\> where N is an integer starting from 0 for the first listed configuration and increasing by 1 for each subsequent configuration.
+: **Default:** unset, _optional key_. :octicons-dash-24: User defined science configurations. Science configurations that are specified here will replace [the default science configurations](default_science_configurations.md). In the output filenames, each configuration is identified with S<N\> where N is an integer starting from 0 for the first listed configuration and increasing by 1 for each subsequent configuration.
 
 ```yaml
 science_configurations: [

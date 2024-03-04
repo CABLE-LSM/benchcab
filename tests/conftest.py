@@ -88,7 +88,21 @@ def config():
                 "walltime": "01:00:00",
                 "storage": ["gdata/foo123"],
             },
-            "multiprocessing": True,
+            "multiprocess": True,
+        },
+        "spatial": {
+            "met_forcings": {
+                "crujra_access": "https://github.com/CABLE-LSM/cable_example.git",
+                "gswp": "foo",
+            },
+            "payu": {
+                "config": {
+                    "ncpus": 16,
+                    "walltime": "1:00:00",
+                    "mem": "64GB",
+                },
+                "args": "-n 2",
+            },
         },
     }
 
@@ -111,7 +125,6 @@ def mock_subprocess_handler():
             cmd: str,
             capture_output: bool = False,
             output_file: Optional[Path] = None,
-            verbose: bool = False,
             env: Optional[dict] = None,
         ) -> CompletedProcess:
             self.commands.append(cmd)

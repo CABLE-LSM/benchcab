@@ -15,7 +15,7 @@
 #
 # Strings can be given with or without double or single quotes.
 
-project: w97
+# Uses minimal set of parameters required to run benchcab
 
 realisations:
   - repo:

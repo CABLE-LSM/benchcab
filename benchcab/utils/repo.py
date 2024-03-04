@@ -8,6 +8,7 @@ from typing import Optional
 import git
 
 from benchcab import internal
+from benchcab.utils import get_logger
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
 
 
@@ -19,14 +20,8 @@ class Repo(AbstractBaseClass):
     """
 
     @abstractmethod
-    def checkout(self, verbose=False):
-        """Checkout the source code.
-
-        Parameters
-        ----------
-        verbose: bool, optional
-            Enable or disable verbose output. By default `verbose` is `False`.
-        """
+    def checkout(self):
+        """Checkout the source code."""
 
     @abstractmethod
     def get_revision(self) -> str:
@@ -36,6 +31,7 @@ class Repo(AbstractBaseClass):
         -------
         str
             Human readable string describing the latest revision.
+
         """
 
     @abstractmethod
@@ -46,6 +42,7 @@ class Repo(AbstractBaseClass):
         -------
         str
             Branch name of the source code.
+
         """
 
 
@@ -56,6 +53,7 @@ class GitRepo(Repo):
     ----------
     subprocess_handler: SubprocessWrapper
         Object for handling subprocess calls.
+
     """
 
     subprocess_handler = SubprocessWrapper()
@@ -78,33 +76,29 @@ class GitRepo(Repo):
         commit: str, optional
             Commit hash (long). When specified the repository will reset to this
             commit when cloning.
+
         """
         self.url = url
         self.branch = branch
         self.path = path / branch if path.is_dir() else path
         self.commit = commit
+        self.logger = get_logger()
 
-    def checkout(self, verbose=False):
-        """Checkout the source code.
-
-        Parameters
-        ----------
-        verbose: bool, optional
-            Enable or disable verbose output.
-        """
+    def checkout(self):
+        """Checkout the source code."""
         # TODO(Sean) the gitpython package provides an interface for displaying
         # remote progress. See
         # https://gitpython.readthedocs.io/en/stable/reference.html#git.remote.RemoteProgress
         self.subprocess_handler.run_cmd(
-            f"git clone --branch {self.branch} -- {self.url} {self.path}",
-            verbose=verbose,
+            f"git clone --branch {self.branch} -- {self.url} {self.path}"
         )
         if self.commit:
-            if verbose:
-                print(f"Reset to commit {self.commit} (hard reset)")
+            self.logger.debug(f"Reset to commit {self.commit} (hard reset)")
             repo = git.Repo(self.path)
             repo.head.reset(self.commit, working_tree=True)
-        print(f"Successfully checked out {self.branch} - {self.get_revision()}")
+        self.logger.info(
+            f"Successfully checked out {self.branch} - {self.get_revision()}"
+        )
 
     def get_revision(self) -> str:
         """Return the latest revision of the source code.
@@ -113,6 +107,7 @@ class GitRepo(Repo):
         -------
         str
             Human readable string describing the latest revision.
+
         """
         repo = git.Repo(self.path)
         return f"commit {repo.head.commit.hexsha}"
@@ -124,6 +119,7 @@ class GitRepo(Repo):
         -------
         str
             Branch name of the source code.
+
         """
         return self.branch
 
@@ -135,6 +131,7 @@ class SVNRepo(Repo):
     ----------
     subprocess_handler: SubprocessWrapper
         Object for handling subprocess calls.
+
     """
 
     subprocess_handler: SubprocessWrapperInterface = SubprocessWrapper()
@@ -162,20 +159,16 @@ class SVNRepo(Repo):
         revision: int, optional
             SVN revision number. When specified the branch will be set to this
             revision on checkout.
+
         """
         self.svn_root = svn_root
         self.branch_path = branch_path
         self.revision = revision
         self.path = path / Path(branch_path).name if path.is_dir() else path
+        self.logger = get_logger()
 
-    def checkout(self, verbose=False):
-        """Checkout the source code.
-
-        Parameters
-        ----------
-        verbose: bool, optional
-            Enable or disable verbose output. By default `verbose` is `False`.
-        """
+    def checkout(self):
+        """Checkout the source code."""
         cmd = "svn checkout"
 
         if self.revision:
@@ -183,9 +176,11 @@ class SVNRepo(Repo):
 
         cmd += f" {internal.CABLE_SVN_ROOT}/{self.branch_path} {self.path}"
 
-        self.subprocess_handler.run_cmd(cmd, verbose=verbose)
+        self.subprocess_handler.run_cmd(cmd)
 
-        print(f"Successfully checked out {self.path.name} - {self.get_revision()}")
+        self.logger.info(
+            f"Successfully checked out {self.path.name} - {self.get_revision()}"
+        )
 
     def get_revision(self) -> str:
         """Return the latest revision of the source code.
@@ -194,6 +189,7 @@ class SVNRepo(Repo):
         -------
         str
             Human readable string describing the latest revision.
+
         """
         proc = self.subprocess_handler.run_cmd(
             f"svn info --show-item last-changed-revision {self.path}",
@@ -208,6 +204,7 @@ class SVNRepo(Repo):
         -------
         str
             Branch name of the source code.
+
         """
         return Path(self.branch_path).name
 
@@ -231,6 +228,7 @@ def create_repo(spec: dict, path: Path) -> Repo:
     -------
     Repo
         A subclass instance of `Repo`.
+
     """
     if "git" in spec:
         if "url" not in spec["git"]:

@@ -10,6 +10,10 @@ from abc import ABC as AbstractBaseClass  # noqa: N811
 from abc import abstractmethod
 from typing import Any, Optional
 
+from benchcab.utils import get_logger
+
+DEBUG_LEVEL = 10
+
 
 class SubprocessWrapperInterface(AbstractBaseClass):
     """An abstract class (interface) that defines abstract methods for running subprocess commands.
@@ -24,7 +28,6 @@ class SubprocessWrapperInterface(AbstractBaseClass):
         cmd: str,
         capture_output: bool = False,
         output_file: Optional[pathlib.Path] = None,
-        verbose: bool = False,
         env: Optional[dict] = None,
     ) -> subprocess.CompletedProcess:
         """A wrapper around the `subprocess.run` function for executing system commands."""
@@ -38,9 +41,29 @@ class SubprocessWrapper(SubprocessWrapperInterface):
         cmd: str,
         capture_output: bool = False,
         output_file: Optional[pathlib.Path] = None,
-        verbose: bool = False,
         env: Optional[dict] = None,
     ) -> subprocess.CompletedProcess:
+        """Constructor.
+
+        Parameters
+        ----------
+        cmd : str
+            Command to run.
+        capture_output : bool, optional
+            Capture the output, by default False
+        output_file : Optional[pathlib.Path], optional
+            Output file, by default None
+        env : Optional[dict], optional
+            Environment vars to pass, by default None
+
+        Returns
+        -------
+        subprocess.CompletedProcess
+            _description_
+
+        """
+        # Use the logging level (10 = Debug) to determine verbosity.
+        verbose = get_logger().getEffectiveLevel() == DEBUG_LEVEL
         kwargs: Any = {}
         with contextlib.ExitStack() as stack:
             if capture_output:
@@ -59,6 +82,7 @@ class SubprocessWrapper(SubprocessWrapperInterface):
 
             if verbose:
                 print(cmd)
+
             proc = subprocess.run(cmd, shell=True, check=True, **kwargs)
 
         return proc

@@ -3,4 +3,7 @@ select = ["F", "E", "I", "PL", "PTH", "PT", "N", "EM", "D"]
 ignore = [
     "E501",  # https://docs.astral.sh/ruff/rules/line-too-long/
     "D401",  # https://docs.astral.sh/ruff/rules/non-imperative-mood/
+    "D104",  # D104 Missing docstring in public package
+    "PLR0913", # PLR0913 Too many arguments in function definition
+    "D100", # D100 Missing docstring in public module
 ]

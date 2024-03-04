@@ -2,6 +2,8 @@
 
 channels:
   - conda-forge
+  - accessnri
+  - coecms
   - default
 
 dependencies:

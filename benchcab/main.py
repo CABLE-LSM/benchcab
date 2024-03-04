@@ -5,6 +5,7 @@ import sys
 
 from benchcab.benchcab import Benchcab
 from benchcab.cli import generate_parser
+from benchcab.utils import get_logger
 
 
 def parse_and_dispatch(parser):
@@ -14,8 +15,19 @@ def parse_and_dispatch(parser):
     ----
     parser : argparse.ArgumentParser
         Parser object.
+
     """
     args = vars(parser.parse_args(sys.argv[1:] if sys.argv[1:] else ["-h"]))
+
+    # Intercept the verbosity flag to engage the logger
+    log_level = "debug" if args.get("verbose", False) is True else "info"
+
+    # Remove the verbose argument
+    _ = args.pop("verbose")
+
+    # We just need to instantiate this with the desired level
+    get_logger(level=log_level)
+
     func = args.pop("func")
     func(**args)
 

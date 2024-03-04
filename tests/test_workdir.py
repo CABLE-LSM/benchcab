@@ -12,6 +12,7 @@ import pytest
 from benchcab.workdir import (
     clean_directory_tree,
     setup_fluxsite_directory_tree,
+    setup_spatial_directory_tree,
 )
 
 
@@ -34,6 +35,25 @@ class TestSetupFluxsiteDirectoryTree:
         """Success case: generate the full fluxsite directory structure."""
         setup_fluxsite_directory_tree()
         for path in fluxsite_directory_list:
+            assert path.exists()
+
+
+class TestSetupSpatialDirectoryTree:
+    """Tests for `setup_spatial_directory_tree()`."""
+
+    @pytest.fixture()
+    def spatial_directory_list(self):
+        """Return the list of work directories we want benchcab to create."""
+        return [
+            Path("runs", "spatial"),
+            Path("runs", "spatial", "tasks"),
+            Path("runs", "payu-laboratory"),
+        ]
+
+    def test_directory_structure_generated(self, spatial_directory_list):
+        """Success case: generate spatial directory structure."""
+        setup_spatial_directory_tree()
+        for path in spatial_directory_list:
             assert path.exists()
 
 

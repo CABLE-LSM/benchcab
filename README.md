@@ -7,12 +7,19 @@
 
 - checks out the model versions specified by the user
 - builds the required executables
-- runs each model version across N standard science configurations
+- runs each model version across N standard science configurations for a variety of meteorological forcings
 - performs bitwise comparison checks on model outputs across model versions
 
 The user can then pipe the model outputs into a benchmark analysis via [modelevaluation.org][meorg] to assess model performance.
 
 The full documentation is available at [benchcab.readthedocs.io][docs].
+
+## Supported configurations
+
+`benchcab` currently tests the following model configurations for CABLE:
+
+- **Flux site simulations (offline)** - running CABLE forced with observed eddy covariance data at a single site
+- **Global/regional simulations (offline)** - running CABLE forced with meteorological fields over a region (global or regional)
 
 ## License
 

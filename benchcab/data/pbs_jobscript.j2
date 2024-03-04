@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -l wd
+#PBS -l ncpus={{ncpus}}
+#PBS -l mem={{mem}}
+#PBS -l walltime={{walltime}}
+#PBS -q normal
+#PBS -P {{project}}
+#PBS -j oe
+#PBS -m e
+#PBS -l storage={{storage}}
+
+module purge
+{% for module in modules -%}
+module load {{module}}
+{% endfor %}
+set -ev
+
+{{benchcab_path}} fluxsite-run-tasks --config={{config_path}}{{verbose_flag}}
+{% if skip_bitwise_cmp == False %}{{benchcab_path}} fluxsite-bitwise-cmp --config={{config_path}}{{verbose_flag}}{% endif %}

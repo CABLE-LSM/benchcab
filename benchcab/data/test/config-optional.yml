@@ -1,0 +1,43 @@
+# Config with optional data
+project: hh5 
+
+fluxsite:
+  experiment: AU-Tum
+  multiprocess: False
+  pbs:
+    ncpus: 6
+    mem: 10GB
+    walltime: "10:00:00"
+    storage:
+      - scratch/$PROJECT
+
+spatial:
+  met_forcings:
+    crujra_access: https://github.com/CABLE-LSM/cable_example.git
+  payu:
+    config:
+      walltime: "1:00:00"
+    args: -n 2
+
+science_configurations:
+  - cable:
+      cable_user: 
+        GS_SWITCH: "test_gs"
+        FWSOIL_SWITCH: "test_fw"
+
+realisations:
+  - repo:
+      svn:
+        branch_path: trunk
+    name: svn_trunk
+  - repo:
+      svn:
+        branch_path: branches/Users/ccc561/v3.0-YP-changes
+    name: git_branch
+
+
+modules: [
+  intel-compiler/2021.1.1,
+  netcdf/4.7.4,
+  openmpi/4.1.0
+]

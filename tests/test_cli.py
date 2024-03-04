@@ -15,7 +15,6 @@ def test_cli_parser():
     res = vars(parser.parse_args(["run"]))
     assert res == {
         "config_path": "config.yaml",
-        "no_submit": False,
         "verbose": False,
         "skip": [],
         "func": app.run,
@@ -42,6 +41,7 @@ def test_cli_parser():
     assert res == {
         "config_path": "config.yaml",
         "verbose": False,
+        "mpi": False,
         "func": app.build,
     }
 
@@ -93,7 +93,24 @@ def test_cli_parser():
     assert res == {
         "config_path": "config.yaml",
         "verbose": False,
+        "skip": [],
         "func": app.spatial,
+    }
+
+    # Success case: default spatial-setup-work-dir command
+    res = vars(parser.parse_args(["spatial-setup-work-dir"]))
+    assert res == {
+        "config_path": "config.yaml",
+        "verbose": False,
+        "func": app.spatial_setup_work_directory,
+    }
+
+    # Success case: default spatial-run-tasks command
+    res = vars(parser.parse_args(["spatial-run-tasks"]))
+    assert res == {
+        "config_path": "config.yaml",
+        "verbose": False,
+        "func": app.spatial_run_tasks,
     }
 
     # Failure case: pass --no-submit to a non 'run' command

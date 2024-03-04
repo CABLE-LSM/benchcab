@@ -1,13 +1,26 @@
 name: benchcab-dev
 channels:
   - conda-forge
+  - accessnri
+  - coecms
   - defaults
+
 dependencies:
   - python=3.9
+  - payu
+  - pip
   - f90nml
   - netcdf4
-  - pytest-cov
   - pyyaml
   - flatdict
   - cerberus>=1.3.5
   - gitpython
+  # CI
+  - pytest-cov
+  # Dev Dependencies
+  - pytest
+  - mypy
+  - black
+  - ruff
+  - pip:
+    - -r mkdocs-requirements.txt

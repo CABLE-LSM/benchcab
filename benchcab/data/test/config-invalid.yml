@@ -1,5 +1,4 @@
 # A sample configuration that should fail validation.
-project: w97
 
 fluxsite:
   experiment:  NON EXISTENT EXPERIMENT!!!
