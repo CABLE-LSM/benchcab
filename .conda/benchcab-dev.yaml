@@ -7,7 +7,7 @@ channels:
 
 dependencies:
   - python=3.9
-  - payu
+  - payu>=1.0.30
   - pip
   - f90nml
   - netcdf4

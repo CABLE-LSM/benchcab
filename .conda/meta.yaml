@@ -21,6 +21,7 @@ requirements:
         - pip
     run:
         - python >=3.9
+        - payu >=1.0.30
         - netCDF4
         - PyYAML
         - f90nml
