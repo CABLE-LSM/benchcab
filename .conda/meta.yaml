@@ -28,3 +28,4 @@ requirements:
         - flatdict
         - cerberus >=1.3.5
         - gitpython
+        - jinja2
