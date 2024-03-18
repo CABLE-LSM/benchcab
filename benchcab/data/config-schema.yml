@@ -58,6 +58,9 @@ realisations:
       build_script:
         type: "string"
         required: false
+      install_dir:
+        type: "string"
+        required: false
       patch:
         type: "dict"
         required: false

@@ -31,6 +31,7 @@ class Model:
         patch: Optional[dict] = None,
         patch_remove: Optional[dict] = None,
         build_script: Optional[str] = None,
+        install_dir: Optional[str] = None,
         model_id: Optional[int] = None,
     ) -> None:
         """Constructor.
@@ -47,6 +48,9 @@ class Model:
             Patch remove, by default None
         build_script : Optional[str], optional
             Build script, by default None
+        install_dir : Optional[str], optional
+            Path to installed executables relative to the project root directory
+            of the CABLE repository, by default None.
         model_id : Optional[int], optional
             Model ID, by default None
 
@@ -56,6 +60,7 @@ class Model:
         self.patch = patch
         self.patch_remove = patch_remove
         self.build_script = build_script
+        self.install_dir = install_dir
         self._model_id = model_id
         self.src_dir = Path()
         self.logger = get_logger()
@@ -79,13 +84,10 @@ class Model:
 
     def get_exe_path(self, mpi=False) -> Path:
         """Return the path to the built executable."""
-        return (
-            internal.SRC_DIR
-            / self.name
-            / self.src_dir
-            / "offline"
-            / (internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE)
-        )
+        exe = internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE
+        if self.install_dir:
+            return internal.SRC_DIR / self.name / self.install_dir / exe
+        return internal.SRC_DIR / self.name / self.src_dir / "offline" / exe
 
     def custom_build(self, modules: list[str]):
         """Build CABLE using a custom build script."""
