@@ -31,6 +31,11 @@ jobs:
       - name: Test with pytest
         run: |
           conda install pytest-cov
+          pytest
+      - name: Generate coverage reports
+        run: |
+          conda remove --force benchcab
+          pip install -e .
           pytest --cov=./ --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
