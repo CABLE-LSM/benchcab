@@ -399,6 +399,18 @@ realisations:
     build_script: offline/build.sh
 ```
 
+### [install_dir](#install-dir)
+
+: **Default:** unset, _optional key_. :octicons-dash-24: The path to the directory containing the installed executables relative to the project root directory of the CABLE repository. If specified, `benchcab` will look for executables in this directory when building up the run directories.
+
+```yaml
+realisations:
+  - repo:
+      git:
+        branch: my_branch
+    install_dir: path/to/bin/directory
+```
+
 ### [patch](#patch)
 
 : **Default:** unset, _optional key_. :octicons-dash-24: Branch-specific namelist settings for `cable.nml`. Settings specified in `patch` get "patched" to the base namelist settings used for both branches. Any namelist settings specified here will overwrite settings defined in the default namelist file and in the science configurations. This means these settings will be set as stipulated in the `patch` for this branch for all science configurations run by `benchcab`.
