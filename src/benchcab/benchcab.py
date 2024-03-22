@@ -248,9 +248,9 @@ class Benchcab:
         self._validate_environment(project=config["project"], modules=config["modules"])
 
         for repo in self._get_models(config):
-            if repo.build_script:
+            if repo.build_script or repo.build_run:
 
-                self.logger.info("Compiling CABLE using custom build script for")
+                self.logger.info("Compiling CABLE using custom build for")
                 self.logger.info(f"realisation {repo.name}")
                 repo.custom_build(modules=config["modules"])
 

@@ -58,6 +58,9 @@ realisations:
       build_script:
         type: "string"
         required: false
+      build_run:
+        type: "string"
+        required: false
       install_dir:
         type: "string"
         required: false

@@ -28,6 +28,7 @@ class Model:
         patch: Optional[dict] = None,
         patch_remove: Optional[dict] = None,
         build_script: Optional[str] = None,
+        build_run: Optional[str] = None,
         install_dir: Optional[str] = None,
         model_id: Optional[int] = None,
     ) -> None:
@@ -45,6 +46,10 @@ class Model:
             Patch remove, by default None
         build_script : Optional[str], optional
             Build script, by default None
+        build_run : Optional[str], optional
+            A custom shell command (or a series of shell commands by specifying
+            a multiline string) run from the root directory of the CABLE
+            repository, by default None
         install_dir : Optional[str], optional
             Path to installed executables relative to the project root directory
             of the CABLE repository, by default None.
@@ -57,6 +62,7 @@ class Model:
         self.patch = patch
         self.patch_remove = patch_remove
         self.build_script = build_script
+        self.build_run = build_run
         self.install_dir = install_dir
         self._model_id = model_id
         self.src_dir = Path()
@@ -88,6 +94,18 @@ class Model:
 
     def custom_build(self, modules: list[str]):
         """Build CABLE using a custom build script."""
+        modules_wrapper_path = get_package_data_path(
+            Path("environment_modules_wrapper.bash")
+        )
+
+        if self.build_run:
+            repo_dir = internal.SRC_DIR / self.name
+            with chdir(repo_dir):
+                self.subprocess_handler.run_cmd(
+                    f"source {modules_wrapper_path}; {self.build_run}"
+                )
+            return
+
         build_script_path = internal.SRC_DIR / self.name / self.build_script
 
         if not build_script_path.is_file():
@@ -99,9 +117,6 @@ class Model:
             raise FileNotFoundError(msg)
 
         with chdir(build_script_path.parent), self.modules_handler.load(modules):
-            modules_wrapper_path = get_package_data_path(
-                Path("environment_modules_wrapper.bash")
-            )
             self.subprocess_handler.run_cmd(
                 f"source {modules_wrapper_path}; ./{build_script_path.name}"
             )
