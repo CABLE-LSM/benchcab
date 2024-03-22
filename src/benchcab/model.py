@@ -100,7 +100,7 @@ class Model:
 
         if self.build_run:
             repo_dir = internal.SRC_DIR / self.name
-            with chdir(repo_dir):
+            with chdir(repo_dir), self.modules_handler.load(modules):
                 self.subprocess_handler.run_cmd(
                     f"source {modules_wrapper_path}; {self.build_run}"
                 )
