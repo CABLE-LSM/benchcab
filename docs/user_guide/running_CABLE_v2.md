@@ -41,6 +41,7 @@ There are two differences one might need to deal with to run with an older versi
 
 - ensure your build script is using exactly the same modules as listed in the [`config.yaml` file](config_options.md#modules) of the `benchcab` work directory. For this you can either modify the modules in your build script or in the `config.yaml` file. Make sure to commit the build script with the correct modules to your branch before running `benchcab`.
 - give the path to the build script for that older branch using the [`build_script` option](config_options.md#build_script) in the `config.yaml` file.
+- give the path to the install directory of built executables using the [`install_dir` option](config_options.md#install_dir) in the `config.yaml`.
 
 ## FLUXNET data
 

@@ -255,13 +255,11 @@ class Benchcab:
                 repo.custom_build(modules=config["modules"])
 
             else:
-                build_mode = "with MPI" if mpi else "serially"
+                build_mode = "serial and MPI" if mpi else "serial"
                 self.logger.info(
                     f"Compiling CABLE {build_mode} for realisation {repo.name}..."
                 )
-                repo.pre_build(mpi=mpi)
-                repo.run_build(modules=config["modules"], mpi=mpi)
-                repo.post_build(mpi=mpi)
+                repo.build(modules=config["modules"], mpi=mpi)
             self.logger.info(f"Successfully compiled CABLE for realisation {repo.name}")
 
     def fluxsite_setup_work_directory(self, config_path: str):
@@ -366,7 +364,6 @@ class Benchcab:
     def run(self, config_path: str, skip: list[str]):
         """Endpoint for `benchcab run`."""
         self.checkout(config_path)
-        self.build(config_path)
         self.build(config_path, mpi=True)
         self.fluxsite_setup_work_directory(config_path)
         self.spatial_setup_work_directory(config_path)

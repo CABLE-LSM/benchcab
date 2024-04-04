@@ -6,11 +6,11 @@ pytest autouse fixture.
 """
 
 import logging
+import os
 from pathlib import Path
 
 import pytest
-
-from benchcab.utils.fs import chdir, mkdir, next_path
+from benchcab.utils.fs import chdir, mkdir, next_path, prepend_path
 
 
 class TestNextPath:
@@ -68,3 +68,25 @@ class TestMkdir:
         mkdir(test_path, **kwargs)
         assert test_path.exists()
         test_path.rmdir()
+
+
+class TestPrependPath:
+    """Tests for `prepend_path()`."""
+
+    var = "PATHS"
+    new_path = "/path/to/bar"
+
+    @pytest.mark.parametrize(
+        ("env", "expected"),
+        [
+            ({}, new_path),
+            (
+                {var: "/path/to/foo"},
+                f"{new_path}{os.pathsep}/path/to/foo",
+            ),
+        ],
+    )
+    def test_prepend_path(self, env, expected):
+        """Success case: test prepend_path for unset and existing variables."""
+        prepend_path(self.var, self.new_path, env=env)
+        assert env[self.var] == expected

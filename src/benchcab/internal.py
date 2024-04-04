@@ -12,6 +12,12 @@ _, NODENAME, _, _, _ = os.uname()
 
 CONFIG_REQUIRED_KEYS = ["realisations", "modules"]
 
+# CMake module used for compilation:
+CMAKE_MODULE = "cmake/3.24.2"
+
+# Number of parallel jobs used when compiling with CMake:
+CMAKE_BUILD_PARALLEL_LEVEL = 4
+
 # Parameters for job script:
 QSUB_FNAME = "benchmark_cable_qsub.sh"
 FLUXSITE_DEFAULT_PBS: PBSConfig = {

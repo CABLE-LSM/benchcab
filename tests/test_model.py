@@ -5,11 +5,9 @@ the working directory used for testing is cleaned up in the `_run_around_tests`
 pytest autouse fixture.
 """
 
-import os
 from pathlib import Path
 
 import pytest
-
 from benchcab import internal
 from benchcab.model import Model, remove_module_lines
 from benchcab.utils.repo import Repo
@@ -81,7 +79,7 @@ class TestGetExePath:
         """Success case: get path to executable."""
         assert (
             model.get_exe_path(mpi=mpi)
-            == internal.SRC_DIR / model.name / "offline" / expected_exe
+            == internal.SRC_DIR / model.name / "bin" / expected_exe
         )
 
 
@@ -140,138 +138,6 @@ class TestSVNInfoShowItem:
             model.svn_info_show_item("some-mock-item")
             == mock_subprocess_handler.stdout.strip()
         )
-
-
-class TestPreBuild:
-    """Tests for `Model.pre_build()`."""
-
-    @pytest.fixture(autouse=True)
-    def _setup(self, model):
-        """Setup precondition for `Model.pre_build()`."""
-        (internal.SRC_DIR / model.name / "offline").mkdir(parents=True)
-        (internal.SRC_DIR / model.name / "offline" / "Makefile").touch()
-        (internal.SRC_DIR / model.name / "offline" / "foo.f90").touch()
-
-    @pytest.fixture()
-    def tmp_dir(self, model, mpi):
-        """Return the relative path to the temporary build directory."""
-        return (
-            internal.SRC_DIR
-            / model.name
-            / (internal.TMP_BUILD_DIR_MPI if mpi else internal.TMP_BUILD_DIR)
-        )
-
-    def test_source_files_and_scripts_are_copied_to_tmp_dir(self, model, mpi, tmp_dir):
-        """Success case: test source files and scripts are copied to .tmp."""
-        model.pre_build(mpi=mpi)
-        assert (tmp_dir / "Makefile").exists()
-        assert (tmp_dir / "foo.f90").exists()
-
-
-class TestRunBuild:
-    """Tests for `Model.run_build()`."""
-
-    @pytest.fixture()
-    def netcdf_root(self):
-        """Return an absolute path to use as the NETCDF_ROOT environment variable."""
-        return "/mock/path/to/root"
-
-    @pytest.fixture()
-    def modules(self):
-        """Return a list of modules for testing."""
-        return ["foo", "bar"]
-
-    @pytest.fixture()
-    def expected_env(self, netcdf_root, mpi):
-        """Return a dictionary of expected environment variables to be defined."""
-        return {
-            "NCDIR": f"{netcdf_root}/lib/Intel",
-            "NCMOD": f"{netcdf_root}/include/Intel",
-            "CFLAGS": "-O2 -fp-model precise",
-            "LDFLAGS": f"-L{netcdf_root}/lib/Intel -O0",
-            "LD": "-lnetcdf -lnetcdff",
-            "FC": "mpif90" if mpi else "ifort",
-        }
-
-    @pytest.fixture(autouse=True)
-    def _setup(self, model, netcdf_root):
-        """Setup precondition for `Model.run_build()`."""
-        (internal.SRC_DIR / model.name / internal.TMP_BUILD_DIR).mkdir(parents=True)
-        (internal.SRC_DIR / model.name / internal.TMP_BUILD_DIR_MPI).mkdir(parents=True)
-
-        # This is required so that we can use the NETCDF_ROOT environment
-        # variable when running `make`:
-        os.environ["NETCDF_ROOT"] = netcdf_root
-
-    @pytest.mark.parametrize(
-        ("mpi", "expected_commands"), [(False, ["make"]), (True, ["make mpi"])]
-    )
-    def test_build_command_execution(
-        self, model, mock_subprocess_handler, modules, mpi, expected_commands
-    ):
-        """Success case: test build commands are run."""
-        model.run_build(modules, mpi=mpi)
-        assert mock_subprocess_handler.commands == expected_commands
-
-    def test_modules_loaded_at_runtime(
-        self, model, mock_environment_modules_handler, modules
-    ):
-        """Success case: test modules are loaded at runtime."""
-        model.run_build(modules)
-        assert (
-            "module load " + " ".join(modules)
-        ) in mock_environment_modules_handler.commands
-        assert (
-            "module unload " + " ".join(modules)
-        ) in mock_environment_modules_handler.commands
-
-    def test_commands_are_run_with_environment_variables(
-        self, model, mock_subprocess_handler, modules, mpi, expected_env
-    ):
-        """Success case: test commands are run with the correct environment variables."""
-        model.run_build(modules, mpi=mpi)
-        for kv in expected_env.items():
-            assert kv in mock_subprocess_handler.env.items()
-
-
-class TestPostBuild:
-    """Tests for `Model.post_build()`."""
-
-    @pytest.fixture(autouse=True)
-    def _setup(self, model):
-        """Setup precondition for `Model.post_build()`."""
-        tmp_build_dir = internal.SRC_DIR / model.name / internal.TMP_BUILD_DIR
-        tmp_build_dir.mkdir(parents=True)
-        (tmp_build_dir / internal.CABLE_EXE).touch()
-
-        tmp_build_dir_mpi = internal.SRC_DIR / model.name / internal.TMP_BUILD_DIR_MPI
-        tmp_build_dir_mpi.mkdir(parents=True)
-        (tmp_build_dir_mpi / internal.CABLE_MPI_EXE).touch()
-
-    @pytest.fixture()
-    def tmp_dir(self, model, mpi):
-        """Return the relative path to the temporary build directory."""
-        return (
-            internal.SRC_DIR
-            / model.name
-            / (internal.TMP_BUILD_DIR_MPI if mpi else internal.TMP_BUILD_DIR)
-        )
-
-    @pytest.fixture()
-    def exe(self, mpi):
-        """Return the name of the CABLE executable."""
-        return internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE
-
-    @pytest.fixture()
-    def offline_dir(self, model):
-        """Return the relative path to the offline source directory."""
-        return internal.SRC_DIR / model.name / "offline"
-
-    def test_exe_moved_to_offline_dir(self, model, mpi, tmp_dir, exe, offline_dir):
-        """Success case: test executable is moved to offline directory."""
-        model.post_build(mpi=mpi)
-        assert not (tmp_dir / exe).exists()
-        assert (offline_dir / exe).exists()
 
 
 class TestCustomBuild:

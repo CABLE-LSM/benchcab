@@ -72,3 +72,19 @@ def mkdir(new_path: Path, **kwargs):
     """
     get_logger().debug(f"Creating {new_path} directory")
     new_path.mkdir(**kwargs)
+
+
+def prepend_path(var: str, path: str, env=os.environ):
+    """Prepend path to environment variable.
+
+    Parameters
+    ----------
+    var : str
+        Name of environment variable.
+    path : str
+        Path to prepend.
+    env : dict
+        Environment dictionary.
+
+    """
+    env[var] = os.pathsep.join(filter(None, [path, env.get(var)]))
