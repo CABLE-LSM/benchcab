@@ -5,19 +5,14 @@ the working directory used for testing is cleaned up in the `_run_around_tests`
 pytest autouse fixture.
 """
 
-import contextlib
-import io
 import logging
-from pathlib import Path
 
 import f90nml
 import pytest
 import yaml
-
 from benchcab import internal
 from benchcab.model import Model
 from benchcab.spatial import SpatialTask, get_spatial_tasks
-from benchcab.utils import get_logger
 from benchcab.utils.repo import Repo
 
 
@@ -92,7 +87,7 @@ class TestConfigureExperiment:
             config = yaml.safe_load(file)
         assert config["exe"] == str(
             (
-                internal.SRC_DIR / "test-branch" / "offline" / internal.CABLE_MPI_EXE
+                internal.SRC_DIR / "test-branch" / "bin" / internal.CABLE_MPI_EXE
             ).absolute()
         )
         assert config["laboratory"] == str(internal.PAYU_LABORATORY_DIR.absolute())

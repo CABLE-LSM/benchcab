@@ -10,7 +10,6 @@ import math
 import f90nml
 import netCDF4
 import pytest
-
 from benchcab import __version__, internal
 from benchcab.fluxsite import (
     CableError,
@@ -107,7 +106,7 @@ class TestFetchFiles:
         (internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
         (internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
 
-        exe_build_dir = internal.SRC_DIR / "test-branch" / "offline"
+        exe_build_dir = internal.SRC_DIR / "test-branch" / "bin"
         exe_build_dir.mkdir(parents=True)
         (exe_build_dir / internal.CABLE_EXE).touch()
 
@@ -170,7 +169,7 @@ class TestSetupTask:
         (internal.FLUXSITE_DIRS["OUTPUT"]).mkdir(parents=True)
         (internal.FLUXSITE_DIRS["LOG"]).mkdir(parents=True)
 
-        exe_build_dir = internal.SRC_DIR / "test-branch" / "offline"
+        exe_build_dir = internal.SRC_DIR / "test-branch" / "bin"
         exe_build_dir.mkdir(parents=True)
         (exe_build_dir / internal.CABLE_EXE).touch()
 

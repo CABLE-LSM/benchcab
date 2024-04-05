@@ -13,7 +13,7 @@ from typing import Optional
 from benchcab import internal
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
 from benchcab.utils import get_logger
-from benchcab.utils.fs import chdir, copy2, rename
+from benchcab.utils.fs import chdir, prepend_path
 from benchcab.utils.repo import GitRepo, LocalRepo, Repo
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
 
@@ -87,7 +87,7 @@ class Model:
         exe = internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE
         if self.install_dir:
             return internal.SRC_DIR / self.name / self.install_dir / exe
-        return internal.SRC_DIR / self.name / self.src_dir / "offline" / exe
+        return internal.SRC_DIR / self.name / "bin" / exe
 
     def custom_build(self, modules: list[str]):
         """Build CABLE using a custom build script."""
@@ -118,60 +118,37 @@ class Model:
         with chdir(build_script_path.parent), self.modules_handler.load(modules):
             self.subprocess_handler.run_cmd(f"./{tmp_script_path.name}")
 
-    def pre_build(self, mpi=False):
-        """Runs CABLE pre-build steps."""
+    def build(self, modules: list[str], mpi=False):
+        """Build CABLE with CMake."""
         path_to_repo = internal.SRC_DIR / self.name
-        tmp_dir = (
-            path_to_repo
-            / self.src_dir
-            / (internal.TMP_BUILD_DIR_MPI if mpi else internal.TMP_BUILD_DIR)
-        )
-        if not tmp_dir.exists():
-            self.logger.debug(f"mkdir {tmp_dir}")
-            tmp_dir.mkdir()
-
-        for pattern in internal.OFFLINE_SOURCE_FILES:
-            for path in (path_to_repo / self.src_dir).glob(pattern):
-                if not path.is_file():
-                    continue
-                copy2(path, tmp_dir)
-
-        copy2(path_to_repo / self.src_dir / "offline" / "Makefile", tmp_dir)
-
-    def run_build(self, modules: list[str], mpi=False):
-        """Runs CABLE build scripts."""
-        path_to_repo = internal.SRC_DIR / self.name
-        tmp_dir = (
-            path_to_repo
-            / self.src_dir
-            / (internal.TMP_BUILD_DIR_MPI if mpi else internal.TMP_BUILD_DIR)
-        )
-
-        with chdir(tmp_dir), self.modules_handler.load(modules):
+        cmake_args = [
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCABLE_MPI=" + ("ON" if mpi else "OFF"),
+        ]
+        with chdir(path_to_repo), self.modules_handler.load(
+            [internal.CMAKE_MODULE, *modules]
+        ):
             env = os.environ.copy()
-            env["NCDIR"] = f"{env['NETCDF_ROOT']}/lib/Intel"
-            env["NCMOD"] = f"{env['NETCDF_ROOT']}/include/Intel"
-            env["CFLAGS"] = "-O2 -fp-model precise"
-            env["LDFLAGS"] = f"-L{env['NETCDF_ROOT']}/lib/Intel -O0"
-            env["LD"] = "-lnetcdf -lnetcdff"
-            env["FC"] = "mpif90" if mpi else "ifort"
+            # This is required so that the netcdf-fortran library is discoverable by
+            # pkg-config:
+            prepend_path(
+                "PKG_CONFIG_PATH", f"{env['NETCDF_BASE']}/lib/Intel/pkgconfig", env=env
+            )
 
-            self.subprocess_handler.run_cmd("make mpi" if mpi else "make", env=env)
+            if self.modules_handler.module_is_loaded("openmpi"):
+                # This is required so that the openmpi MPI libraries are discoverable
+                # via CMake's `find_package` mechanism:
+                prepend_path(
+                    "CMAKE_PREFIX_PATH", f"{env['OPENMPI_BASE']}/include/Intel", env=env
+                )
 
-    def post_build(self, mpi=False):
-        """Runs CABLE post-build steps."""
-        path_to_repo = internal.SRC_DIR / self.name
-        tmp_dir = (
-            path_to_repo
-            / self.src_dir
-            / (internal.TMP_BUILD_DIR_MPI if mpi else internal.TMP_BUILD_DIR)
-        )
-        exe = internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE
+            env["CMAKE_BUILD_PARALLEL_LEVEL"] = str(internal.CMAKE_BUILD_PARALLEL_LEVEL)
 
-        rename(
-            tmp_dir / exe,
-            path_to_repo / self.src_dir / "offline" / exe,
-        )
+            self.subprocess_handler.run_cmd(
+                "cmake -S . -B build " + " ".join(cmake_args), env=env
+            )
+            self.subprocess_handler.run_cmd("cmake --build build ", env=env)
+            self.subprocess_handler.run_cmd("cmake --install build --prefix .", env=env)
 
 
 def remove_module_lines(file_path: Path) -> None:
