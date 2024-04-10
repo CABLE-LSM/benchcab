@@ -137,7 +137,7 @@ class Benchcab:
             self._config = read_config(config_path)
         return self._config
 
-    def _get_models_spack(self, config: dict) -> list[Model]:
+    def _get_models_via_spack(self, config: dict) -> list[Model]:
         if not self._models:
             self.subprocess_handler.run_cmd(
                 "spack env activate . && spack concretize --force && spack install"
@@ -148,8 +148,16 @@ class Benchcab:
                     capture_output=True,
                 )
                 data = json.loads(proc.stdout)
-                print(data)
-            sys.exit(1)
+                for package_data in data:
+                    id = len(self._models)
+                    proc = self.subprocess_handler.run_cmd(
+                        f"spack env activate . && spack find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
+                        capture_output=True,
+                    )
+                    name, version, hash, prefix = proc.stdout.strip().split(" ")
+                    self.logger.info(f"R{id} : {name}@{version} {hash}")
+                    self._models.append(Model(install_dir_absolute=Path(prefix, "bin"), model_id=id))
+
         return self._models
 
     def _get_models(self, config: dict) -> list[Model]:
