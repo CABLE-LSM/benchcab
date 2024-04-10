@@ -4,6 +4,7 @@
 """Contains the benchcab application class."""
 
 import grp
+import json
 import os
 import sys
 from pathlib import Path
@@ -135,6 +136,21 @@ class Benchcab:
         if not self._config:
             self._config = read_config(config_path)
         return self._config
+
+    def _get_models_spack(self, config: dict) -> list[Model]:
+        if not self._models:
+            self.subprocess_handler.run_cmd(
+                "spack env activate . && spack concretize --force && spack install"
+            )
+            for model_spec in config["model_specs"]:
+                proc = self.subprocess_handler.run_cmd(
+                    f"spack env activate . && spack find --json {model_spec['spec']}",
+                    capture_output=True,
+                )
+                data = json.loads(proc.stdout)
+                print(data)
+            sys.exit(1)
+        return self._models
 
     def _get_models(self, config: dict) -> list[Model]:
         if not self._models:

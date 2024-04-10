@@ -9,12 +9,28 @@ modules:
 
 science_configurations:
   type: "list"
-  schema: 
+  schema:
     type: "dict"
+
+model_specs:
+  type: "list"
+  required: false
+  schema:
+    type: "dict"
+    schema:
+      spec:
+        type: "string"
+        required: true
+      patch:
+        type: "dict"
+        required: false
+      patch_remove:
+        type: "dict"
+        required: false
 
 realisations:
   type: "list"
-  required: true
+  required: false
   schema:
     type: "dict"
     schema:

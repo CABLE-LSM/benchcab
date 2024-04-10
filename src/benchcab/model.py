@@ -26,12 +26,13 @@ class Model:
 
     def __init__(
         self,
-        repo: Repo,
+        repo: Optional[Repo] = None,
         name: Optional[str] = None,
         patch: Optional[dict] = None,
         patch_remove: Optional[dict] = None,
         build_script: Optional[str] = None,
         install_dir: Optional[str] = None,
+        install_dir_absolute: Optional[str] = None,
         model_id: Optional[int] = None,
     ) -> None:
         """Constructor.
@@ -51,16 +52,19 @@ class Model:
         install_dir : Optional[str], optional
             Path to installed executables relative to the project root directory
             of the CABLE repository, by default None.
+        install_dir_absolute: Optional[Path], optional
+            Absolute path to installed executables for this model instance, by default None.
         model_id : Optional[int], optional
             Model ID, by default None
 
         """
         self.repo = repo
-        self.name = name if name else repo.get_branch_name()
+        self.name = name if name else (repo.get_branch_name() if repo else None)
         self.patch = patch
         self.patch_remove = patch_remove
         self.build_script = build_script
         self.install_dir = install_dir
+        self.install_dir_absolute = install_dir_absolute
         self._model_id = model_id
         self.src_dir = Path()
         self.logger = get_logger()

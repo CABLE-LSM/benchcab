@@ -88,6 +88,9 @@ def read_optional_key(config: dict):
     if "project" not in config:
         config["project"] = os.environ.get("PROJECT", None)
 
+    if "model_specs" not in config:
+        config["model_specs"] = [{"spec": "cable"}]
+
     if "realisations" in config:
         for r in config["realisations"]:
             r["name"] = r.get("name")
