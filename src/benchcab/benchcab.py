@@ -29,6 +29,9 @@ from benchcab.workdir import (
     setup_spatial_directory_tree,
 )
 
+def _get_spack_exe():
+    return Path(os.environ["SPACK_ROOT"]) / "bin" / "spack"
+
 
 class Benchcab:
     """A class that represents the `benchcab` application."""
@@ -141,20 +144,23 @@ class Benchcab:
         return Path("spack.yaml").is_file()
 
     def _get_models_via_spack(self, config: dict) -> list[Model]:
+        spack_path = _get_spack_exe()
         if not self._models:
             self.subprocess_handler.run_cmd(
-                "spack env activate . && spack concretize --force && spack install"
+                f"{spack_path} concretize --force && {spack_path} install",
+                env={"SPACK_ENV": str(Path())},
             )
             for model_spec in config["model_specs"]:
                 proc = self.subprocess_handler.run_cmd(
-                    f"spack env activate . && spack find --json {model_spec['spec']}",
+                    f"{spack_path} find --json {model_spec['spec']}",
                     capture_output=True,
+                    env={"SPACK_ENV": str(Path())},
                 )
                 data = json.loads(proc.stdout)
                 for package_data in data:
                     id = len(self._models)
                     proc = self.subprocess_handler.run_cmd(
-                        f"spack find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
+                        f"{spack_path} find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
                         capture_output=True,
                     )
                     name, version, hash, prefix = proc.stdout.strip().split(" ")
@@ -237,7 +243,7 @@ class Benchcab:
 
         try:
             proc = self.subprocess_handler.run_cmd(
-                f"qsub {job_script_path}",
+                "qsub" + (f" -v SPACK_ROOT={os.environ['SPACK_ROOT']}" if self._spack_enabled() else "") + f" {job_script_path}",
                 capture_output=True,
             )
         except CalledProcessError as exc:
