@@ -262,11 +262,8 @@ class FluxsiteTask:
                             nml["cable"], delimiter="%"
                         ).items()
                     },
-                    **{
-                        "cable_branch": self.model.repo.get_branch_name(),
-                        "svn_revision_number": self.model.repo.get_revision(),
-                        "benchcab_version": __version__,
-                    },
+                    **self.model.get_metadata(),
+                    "benchcab_version": __version__,
                 }
             )
 

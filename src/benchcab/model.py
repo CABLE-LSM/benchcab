@@ -8,7 +8,7 @@ import shlex
 import shutil
 import stat
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from benchcab import internal
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
@@ -34,6 +34,7 @@ class Model:
         install_dir: Optional[str] = None,
         install_dir_absolute: Optional[str] = None,
         model_id: Optional[int] = None,
+        spack_meta: Optional[dict] = None,
     ) -> None:
         """Constructor.
 
@@ -56,6 +57,8 @@ class Model:
             Absolute path to installed executables for this model instance, by default None.
         model_id : Optional[int], optional
             Model ID, by default None
+        spack_meta : Optional[dict], optional
+            Spack metadata describing the model instance.
 
         """
         self.repo = repo
@@ -66,6 +69,7 @@ class Model:
         self.install_dir = install_dir
         self.install_dir_absolute = install_dir_absolute
         self._model_id = model_id
+        self.spack_meta = spack_meta
         self.src_dir = Path()
         self.logger = get_logger()
         # TODO(Sean) we should not have to know whether `repo` is a `GitRepo` or
@@ -89,9 +93,21 @@ class Model:
     def get_exe_path(self, mpi=False) -> Path:
         """Return the path to the built executable."""
         exe = internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE
-        if self.install_dir:
+        if self.install_dir and self.name:
             return internal.SRC_DIR / self.name / self.install_dir / exe
+        if self.install_dir_absolute:
+            return Path(self.install_dir_absolute) / exe
         return internal.SRC_DIR / self.name / "bin" / exe
+
+    def get_metadata(self) -> dict:
+        """Return metadata which describes the model instance."""
+        ret: dict[Any, Any] = {"model_id": self._model_id}
+        if self.repo:
+            ret["branch"] = self.repo.get_branch_name()
+            ret["revision"] = self.repo.get_revision()
+        if self.spack_meta:
+            ret = {**ret, **self.spack_meta}
+        return ret
 
     def custom_build(self, modules: list[str]):
         """Build CABLE using a custom build script."""
