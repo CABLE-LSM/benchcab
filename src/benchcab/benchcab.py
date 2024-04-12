@@ -137,6 +137,9 @@ class Benchcab:
             self._config = read_config(config_path)
         return self._config
 
+    def _spack_enabled(self) -> bool:
+        return Path("spack.yaml").is_file()
+
     def _get_models_via_spack(self, config: dict) -> list[Model]:
         if not self._models:
             self.subprocess_handler.run_cmd(
@@ -151,24 +154,34 @@ class Benchcab:
                 for package_data in data:
                     id = len(self._models)
                     proc = self.subprocess_handler.run_cmd(
-                        f"spack env activate . && spack find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
+                        f"spack find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
                         capture_output=True,
                     )
                     name, version, hash, prefix = proc.stdout.strip().split(" ")
                     self.logger.info(f"R{id} : {name}@{version} {hash}")
-                    self._models.append(Model(install_dir_absolute=Path(prefix, "bin"), model_id=id))
-
+                    self._models.append(
+                        Model(
+                            install_dir_absolute=os.path.join(prefix, "bin"),
+                            model_id=id,
+                        )
+                    )
         return self._models
 
     def _get_models(self, config: dict) -> list[Model]:
-        if not self._models:
-            for id, sub_config in enumerate(config["realisations"]):
-                repo = create_repo(
-                    spec=sub_config.pop("repo"),
-                    path=internal.SRC_DIR
-                    / (sub_config["name"] if sub_config["name"] else Path()),
-                )
-                self._models.append(Model(repo=repo, model_id=id, **sub_config))
+        if self._models:
+            return self._models
+
+        if self._spack_enabled():
+            self._models = self._get_models_via_spack(config)
+            return self._models
+
+        for id, sub_config in enumerate(config["realisations"]):
+            repo = create_repo(
+                spec=sub_config.pop("repo"),
+                path=internal.SRC_DIR
+                / (sub_config["name"] if sub_config["name"] else Path()),
+            )
+            self._models.append(Model(repo=repo, model_id=id, **sub_config))
         return self._models
 
     def _get_fluxsite_tasks(self, config: dict) -> list[fluxsite.FluxsiteTask]:
@@ -336,8 +349,9 @@ class Benchcab:
 
     def fluxsite(self, config_path: str, no_submit: bool, skip: list[str]):
         """Endpoint for `benchcab fluxsite`."""
-        self.checkout(config_path)
-        self.build(config_path)
+        if not self._spack_enabled():
+            self.checkout(config_path)
+            self.build(config_path)
         self.fluxsite_setup_work_directory(config_path)
         if no_submit:
             self.fluxsite_run_tasks(config_path)
@@ -380,15 +394,17 @@ class Benchcab:
 
     def spatial(self, config_path: str, skip: list):
         """Endpoint for `benchcab spatial`."""
-        self.checkout(config_path)
-        self.build(config_path, mpi=True)
+        if not self._spack_enabled():
+            self.checkout(config_path)
+            self.build(config_path, mpi=True)
         self.spatial_setup_work_directory(config_path)
         self.spatial_run_tasks(config_path)
 
     def run(self, config_path: str, skip: list[str]):
         """Endpoint for `benchcab run`."""
-        self.checkout(config_path)
-        self.build(config_path, mpi=True)
+        if not self._spack_enabled():
+            self.checkout(config_path)
+            self.build(config_path, mpi=True)
         self.fluxsite_setup_work_directory(config_path)
         self.spatial_setup_work_directory(config_path)
         self.fluxsite_submit_job(config_path, skip)
