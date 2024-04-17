@@ -129,6 +129,15 @@ class Model:
             [internal.CMAKE_MODULE, *modules]
         ):
             env = os.environ.copy()
+
+            # This is required to prevent CMake from finding the conda
+            # installation of netcdf-fortran (#279):
+            env.pop("LDFLAGS", None)
+
+            # This is required to prevent CMake from finding MPI libraries in
+            # the conda environment (#279):
+            env.pop("CMAKE_PREFIX_PATH", None)
+
             # This is required so that the netcdf-fortran library is discoverable by
             # pkg-config:
             prepend_path(
