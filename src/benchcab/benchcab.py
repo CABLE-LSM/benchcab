@@ -29,6 +29,7 @@ from benchcab.workdir import (
     setup_spatial_directory_tree,
 )
 
+
 def _get_spack_exe():
     return Path(os.environ["SPACK_ROOT"]) / "bin" / "spack"
 
@@ -169,6 +170,8 @@ class Benchcab:
                         Model(
                             install_dir_absolute=os.path.join(prefix, "bin"),
                             model_id=id,
+                            patch=model_spec["patch"],
+                            patch_remove=model_spec["patch_remove"],
                         )
                     )
         return self._models
@@ -243,7 +246,13 @@ class Benchcab:
 
         try:
             proc = self.subprocess_handler.run_cmd(
-                "qsub" + (f" -v SPACK_ROOT={os.environ['SPACK_ROOT']}" if self._spack_enabled() else "") + f" {job_script_path}",
+                "qsub"
+                + (
+                    f" -v SPACK_ROOT={os.environ['SPACK_ROOT']}"
+                    if self._spack_enabled()
+                    else ""
+                )
+                + f" {job_script_path}",
                 capture_output=True,
             )
         except CalledProcessError as exc:
