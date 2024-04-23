@@ -24,9 +24,11 @@ model_specs:
       patch:
         type: "dict"
         required: false
+        nullable: true
       patch_remove:
         type: "dict"
         required: false
+        nullable: true
 
 realisations:
   type: "list"

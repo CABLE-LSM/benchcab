@@ -90,8 +90,9 @@ def read_optional_key(config: dict):
 
     if "model_specs" not in config:
         config["model_specs"] = [{"spec": "cable", "patch": None, "patch_remove": None}]
-    config["model_specs"]["patch"] = config["model_specs"].get("patch")
-    config["model_specs"]["patch_remove"] = config["model_specs"].get("patch_remove")
+    for model_spec in config["model_specs"]:
+        model_spec["patch"] = model_spec.get("patch")
+        model_spec["patch_remove"] = model_spec.get("patch_remove")
 
     if "realisations" in config:
         for r in config["realisations"]:
