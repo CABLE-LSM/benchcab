@@ -174,9 +174,9 @@ class Benchcab:
                     )
                     model.add_metadata(
                         {
-                            "spack:model-name": name,
-                            "spack:model-version": version,
-                            "spack:model-hash": hash,
+                            "spack-model-name": name,
+                            "spack-model-version": version,
+                            "spack-model-hash": hash,
                         }
                     )
                     self._models.append(model)
