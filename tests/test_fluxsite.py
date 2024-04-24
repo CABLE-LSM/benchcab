@@ -267,7 +267,6 @@ class TestAddProvenanceInfo:
         task.add_provenance_info()
         with netCDF4.Dataset(str(nc_output_path), "r") as nc_output:
             atts = vars(nc_output)
-            assert atts["model_id"] == str(MODEL_ID)
             assert atts["benchcab_version"] == __version__
             assert atts[r"filename%met"] == nml["cable"]["filename"]["met"]
             assert atts[r"filename%foo"] == nml["cable"]["filename"]["foo"]

@@ -67,7 +67,7 @@ class Model:
         self.install_dir_absolute = install_dir_absolute
         self._model_id = model_id
 
-        self.metadata: dict[str, str] = {"model_id": str(self._model_id)}
+        self.metadata: dict[str, str] = {}
         self.src_dir = Path()
         self.logger = get_logger()
         # TODO(Sean) we should not have to know whether `repo` is a `GitRepo` or

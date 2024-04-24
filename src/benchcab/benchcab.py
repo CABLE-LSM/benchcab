@@ -174,6 +174,7 @@ class Benchcab:
                     )
                     model.add_metadata(
                         {
+                            "model_id": str(id),
                             "spack-model-name": name,
                             "spack-model-version": version,
                             "spack-model-hash": hash,
@@ -199,6 +200,7 @@ class Benchcab:
             model = Model(repo=repo, model_id=id, **sub_config)
             model.add_metadata(
                 {
+                    "model_id": str(id),
                     "branch": repo.get_branch_name(),
                     "revision": repo.get_revision(),
                 }
