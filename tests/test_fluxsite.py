@@ -21,6 +21,8 @@ from benchcab.fluxsite import (
 from benchcab.model import Model
 from benchcab.utils.repo import Repo
 
+MODEL_ID = 1
+
 
 @pytest.fixture()
 def mock_repo():  # noqa: D103
@@ -45,7 +47,7 @@ def mock_repo():  # noqa: D103
 def model(mock_subprocess_handler, mock_repo):
     """Returns a `Model` instance."""
     _model = Model(
-        model_id=1,
+        model_id=MODEL_ID,
         repo=mock_repo,
         patch={"cable": {"some_branch_specific_setting": True}},
     )
@@ -260,13 +262,12 @@ class TestAddProvenanceInfo:
         # Create mock namelist file in task directory:
         f90nml.write(nml, task_dir / internal.CABLE_NML)
 
-    def test_netcdf_global_attributes(self, task, nc_output_path, mock_repo, nml):
+    def test_netcdf_global_attributes(self, task, nc_output_path, model, nml):
         """Success case: add global attributes to netcdf file."""
         task.add_provenance_info()
         with netCDF4.Dataset(str(nc_output_path), "r") as nc_output:
             atts = vars(nc_output)
-            assert atts["cable_branch"] == mock_repo.branch
-            assert atts["svn_revision_number"] == mock_repo.revision
+            assert atts["model_id"] == str(MODEL_ID)
             assert atts["benchcab_version"] == __version__
             assert atts[r"filename%met"] == nml["cable"]["filename"]["met"]
             assert atts[r"filename%foo"] == nml["cable"]["filename"]["foo"]

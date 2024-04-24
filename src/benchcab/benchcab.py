@@ -166,14 +166,20 @@ class Benchcab:
                     )
                     name, version, hash, prefix = proc.stdout.strip().split(" ")
                     self.logger.info(f"R{id} : {name}@{version} {hash}")
-                    self._models.append(
-                        Model(
-                            install_dir_absolute=os.path.join(prefix, "bin"),
-                            model_id=id,
-                            patch=model_spec["patch"],
-                            patch_remove=model_spec["patch_remove"],
-                        )
+                    model = Model(
+                        install_dir_absolute=os.path.join(prefix, "bin"),
+                        model_id=id,
+                        patch=model_spec["patch"],
+                        patch_remove=model_spec["patch_remove"],
                     )
+                    model.add_metadata(
+                        {
+                            "spack:model-name": name,
+                            "spack:model-version": version,
+                            "spack:model-hash": hash,
+                        }
+                    )
+                    self._models.append(model)
         return self._models
 
     def _get_models(self, config: dict) -> list[Model]:
@@ -190,7 +196,14 @@ class Benchcab:
                 path=internal.SRC_DIR
                 / (sub_config["name"] if sub_config["name"] else Path()),
             )
-            self._models.append(Model(repo=repo, model_id=id, **sub_config))
+            model = Model(repo=repo, model_id=id, **sub_config)
+            model.add_metadata(
+                {
+                    "branch": repo.get_branch_name(),
+                    "revision": repo.get_revision(),
+                }
+            )
+            self._models.append(model)
         return self._models
 
     def _get_fluxsite_tasks(self, config: dict) -> list[fluxsite.FluxsiteTask]:
