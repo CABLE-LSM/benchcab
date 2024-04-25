@@ -41,6 +41,7 @@ def model(mock_subprocess_handler, mock_repo):
     _model = Model(
         model_id=1,
         repo=mock_repo,
+        name=mock_repo.get_branch_name(),
         patch={"cable": {"some_branch_specific_setting": True}},
     )
     _model.subprocess_handler = mock_subprocess_handler

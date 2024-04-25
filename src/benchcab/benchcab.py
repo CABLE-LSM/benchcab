@@ -197,7 +197,9 @@ class Benchcab:
                 path=internal.SRC_DIR
                 / (sub_config["name"] if sub_config["name"] else Path()),
             )
-            model = Model(repo=repo, model_id=id, **sub_config)
+            model = Model(
+                repo=repo, name=repo.get_branch_name(), model_id=id, **sub_config
+            )
             model.add_metadata(
                 {
                     "model_id": str(id),

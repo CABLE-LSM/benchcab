@@ -39,7 +39,7 @@ class Model:
 
         Parameters
         ----------
-        repo : Repo
+        repo : Optional[Repo], optional
             Repository.
         name : Optional[str], optional
             Name, by default None
@@ -59,7 +59,7 @@ class Model:
 
         """
         self.repo = repo
-        self.name = name if name else (repo.get_branch_name() if repo else None)
+        self.name = name
         self.patch = patch
         self.patch_remove = patch_remove
         self.build_script = build_script
@@ -95,7 +95,10 @@ class Model:
             return internal.SRC_DIR / self.name / self.install_dir / exe
         if self.install_dir_absolute:
             return Path(self.install_dir_absolute) / exe
-        return internal.SRC_DIR / self.name / "bin" / exe
+        if self.name:
+            return internal.SRC_DIR / self.name / "bin" / exe
+        msg = "Unknown path to executable."
+        raise RuntimeError(msg)
 
     def add_metadata(self, data: dict[str, str]):
         """Append metadata which describes the model instance.

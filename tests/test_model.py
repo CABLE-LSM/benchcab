@@ -44,7 +44,7 @@ def mpi(request):
 @pytest.fixture()
 def model(mock_repo, mock_subprocess_handler, mock_environment_modules_handler):
     """Return a mock `Model` instance for testing against."""
-    _model = Model(repo=mock_repo)
+    _model = Model(repo=mock_repo, name=mock_repo.get_branch_name())
     _model.subprocess_handler = mock_subprocess_handler
     _model.modules_handler = mock_environment_modules_handler
     return _model
