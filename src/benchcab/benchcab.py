@@ -165,7 +165,6 @@ class Benchcab:
                         capture_output=True,
                     )
                     name, version, hash, prefix = proc.stdout.strip().split(" ")
-                    self.logger.info(f"R{id} : {name}@{version} {hash}")
                     model = Model(
                         install_dir_absolute=os.path.join(prefix, "bin"),
                         model_id=id,
@@ -175,12 +174,16 @@ class Benchcab:
                     model.add_metadata(
                         {
                             "model_id": str(id),
-                            "spack-model-name": name,
-                            "spack-model-version": version,
-                            "spack-model-hash": hash,
+                            "spack-model-spec": f"{name}@{version} /{hash}",
                         }
                     )
                     self._models.append(model)
+
+        self.logger.info(f"Model realisations found: {len(self._models)}")
+        for m in self._models:
+            metadata = m.get_metadata()
+            self.logger.info(f"  R{m.model_id} : {metadata['spack-model-spec']}")
+
         return self._models
 
     def _get_models(self, config: dict) -> list[Model]:
