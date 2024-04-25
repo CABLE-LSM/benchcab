@@ -149,13 +149,13 @@ class Benchcab:
         spack_path = _get_spack_exe()
         self.subprocess_handler.run_cmd(
             f"{spack_path} concretize --force && {spack_path} install",
-            env={"SPACK_ENV": str(Path())},
+            env={**os.environ, "SPACK_ENV": "."},
         )
         for model_spec in config["model_specs"]:
             proc = self.subprocess_handler.run_cmd(
                 f"{spack_path} find --json {model_spec['spec']}",
                 capture_output=True,
-                env={"SPACK_ENV": str(Path())},
+                env={**os.environ, "SPACK_ENV": "."},
             )
             data = json.loads(proc.stdout)
             for package_data in data:
