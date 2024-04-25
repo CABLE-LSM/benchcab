@@ -174,15 +174,19 @@ class Benchcab:
                     model.add_metadata(
                         {
                             "model_id": str(id),
-                            "spack-model-spec": f"{name}@{version} /{hash}",
+                            "spack-model-name": name,
+                            "spack-model-version": version,
+                            "spack-model-hash": hash,
                         }
                     )
                     self._models.append(model)
 
         self.logger.info(f"Model realisations found: {len(self._models)}")
         for m in self._models:
-            metadata = m.get_metadata()
-            self.logger.info(f"  R{m.model_id} : {metadata['spack-model-spec']}")
+            data = m.get_metadata()
+            self.logger.info(
+                f"  R{m.model_id} : {data['spack-model-name']}@{data['spack-model-version']} (spack-model-hash={data['spack-model-hash']})"
+            )
 
         return self._models
 
