@@ -145,50 +145,50 @@ class Benchcab:
         return Path("spack.yaml").is_file()
 
     def _get_models_via_spack(self, config: dict) -> list[Model]:
+        models: list[Model] = []
         spack_path = _get_spack_exe()
-        if not self._models:
-            self.subprocess_handler.run_cmd(
-                f"{spack_path} concretize --force && {spack_path} install",
+        self.subprocess_handler.run_cmd(
+            f"{spack_path} concretize --force && {spack_path} install",
+            env={"SPACK_ENV": str(Path())},
+        )
+        for model_spec in config["model_specs"]:
+            proc = self.subprocess_handler.run_cmd(
+                f"{spack_path} find --json {model_spec['spec']}",
+                capture_output=True,
                 env={"SPACK_ENV": str(Path())},
             )
-            for model_spec in config["model_specs"]:
+            data = json.loads(proc.stdout)
+            for package_data in data:
+                id = len(models)
                 proc = self.subprocess_handler.run_cmd(
-                    f"{spack_path} find --json {model_spec['spec']}",
+                    f"{spack_path} find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
                     capture_output=True,
-                    env={"SPACK_ENV": str(Path())},
                 )
-                data = json.loads(proc.stdout)
-                for package_data in data:
-                    id = len(self._models)
-                    proc = self.subprocess_handler.run_cmd(
-                        f"{spack_path} find --format '{{name}} {{version}} {{hash:10}} {{prefix}}' /{package_data['hash']}",
-                        capture_output=True,
-                    )
-                    name, version, hash, prefix = proc.stdout.strip().split(" ")
-                    model = Model(
-                        install_dir_absolute=os.path.join(prefix, "bin"),
-                        model_id=id,
-                        patch=model_spec["patch"],
-                        patch_remove=model_spec["patch_remove"],
-                    )
-                    model.add_metadata(
-                        {
-                            "model_id": str(id),
-                            "spack-model-name": name,
-                            "spack-model-version": version,
-                            "spack-model-hash": hash,
-                        }
-                    )
-                    self._models.append(model)
+                name, version, hash, prefix = proc.stdout.strip().split(" ")
+                model = Model(
+                    install_dir_absolute=os.path.join(prefix, "bin"),
+                    model_id=id,
+                    patch=model_spec["patch"],
+                    patch_remove=model_spec["patch_remove"],
+                )
+                model.add_metadata(
+                    {
+                        "model_id": str(id),
+                        "spack-model-name": name,
+                        "spack-model-version": version,
+                        "spack-model-hash": hash,
+                    }
+                )
+                models.append(model)
 
-        self.logger.info(f"Model realisations found: {len(self._models)}")
-        for m in self._models:
+        self.logger.info(f"Model realisations found: {len(models)}")
+        for m in models:
             data = m.get_metadata()
             self.logger.info(
                 f"  R{m.model_id} : {data['spack-model-name']}@{data['spack-model-version']} (spack-model-hash={data['spack-model-hash']})"
             )
 
-        return self._models
+        return models
 
     def _get_models(self, config: dict) -> list[Model]:
         if self._models:
