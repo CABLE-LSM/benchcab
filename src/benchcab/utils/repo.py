@@ -137,8 +137,11 @@ class GitRepo(Repo):
         """
         self.url = url
         self.branch = branch
+        is_bare_directory = realisation_path.is_dir() and (
+            not (realisation_path / ".git").exists()
+        )
         self.realisation_path = (
-            realisation_path / branch if realisation_path.is_dir() else realisation_path
+            realisation_path / branch if is_bare_directory else realisation_path
         )
         self.commit = commit
         self.logger = get_logger()
@@ -223,9 +226,12 @@ class SVNRepo(Repo):
         self.svn_root = svn_root
         self.branch_path = branch_path
         self.revision = revision
+        is_bare_directory = realisation_path.is_dir() and (
+            not (realisation_path / ".svn").exists()
+        )
         self.realisation_path = (
             realisation_path / Path(branch_path).name
-            if realisation_path.is_dir()
+            if is_bare_directory
             else realisation_path
         )
         self.logger = get_logger()
