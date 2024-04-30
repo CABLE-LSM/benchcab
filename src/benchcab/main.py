@@ -8,13 +8,15 @@ from benchcab.cli import generate_parser
 from benchcab.utils import get_logger
 
 
-def parse_and_dispatch(parser):
+def parse_and_dispatch(parser, app):
     """Parse arguments for the script and dispatch to the correct function.
 
     Args:
     ----
     parser : argparse.ArgumentParser
         Parser object.
+    app : Benchcab
+        Benchcab application instance.
 
     """
     args = vars(parser.parse_args(sys.argv[1:] if sys.argv[1:] else ["-h"]))
@@ -26,7 +28,8 @@ def parse_and_dispatch(parser):
     _ = args.pop("verbose")
 
     # We just need to instantiate this with the desired level
-    get_logger(level=log_level)
+    logger = get_logger(level=log_level)
+    app.set_logger(logger)
 
     func = args.pop("func")
     func(**args)
@@ -39,7 +42,7 @@ def main():
     """
     app = Benchcab(benchcab_exe_path=shutil.which(sys.argv[0]))
     parser = generate_parser(app)
-    parse_and_dispatch(parser)
+    parse_and_dispatch(parser, app)
 
 
 if __name__ == "__main__":

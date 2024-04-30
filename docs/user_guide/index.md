@@ -16,6 +16,21 @@ To use `benchcab`, you need to join the following projects at NCI:
 - [hh5][hh5_mynci]
 - [wd9][wd9_mynci] if not part of the [cable][cable_mynci] project
 
+## Quick-start
+
+To launch a `benchcab` run, execute the following in the command line:
+
+```sh
+module use /g/data/hh5/public/modules
+module load conda/analysis3-unstable
+cd /scratch/$PROJECT/$USER
+git clone https://github.com/CABLE-LSM/bench_example.git
+cd bench_example
+# Edit config.yaml to your liking
+vim config.yaml
+benchcab run
+```
+
 ## Installation
 
 The package is already installed for you in the Conda environments under the hh5 project. You simply need to load the module for the conda environment:
