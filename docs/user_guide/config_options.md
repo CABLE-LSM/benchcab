@@ -232,14 +232,14 @@ Entries for each CABLE branch to use. Each entry is a key-value pair and are lis
 
 ```yaml
 realisations:
-  # head of the trunk (SVN)
+  # head of main branch
   - repo:
-      svn:
-        branch_path: trunk
+      git:
+        branch: main
   # some development branch
   - repo:
-      svn:
-        branch_path: branches/Users/foo/my_branch
+      git:
+        branch: my_branch
     patch:
       cable:
         cable_user:
@@ -379,9 +379,9 @@ realisations:
 ```yaml
 realisations:
   - repo:
-      svn:
-        branch_path: branches/Users/foo/my_branch
-      name: my_feature # (1)
+      git:
+        branch: my_branch
+    name: my_feature # (1)
 ```
 
 1. Checkout the branch in the directory `src/my_feature`
@@ -392,10 +392,9 @@ realisations:
 
 ```yaml
 realisations:
-  # head of the trunk
-  - path: trunk
-  # some development branch
-  - path: branches/Users/foo/my_branch
+  - repo:
+      git:
+        branch: my_branch
     build_script: offline/build.sh
 ```
 
@@ -418,10 +417,9 @@ realisations:
 
 ```yaml
 realisations:
-  # head of the trunk
-  - path: trunk
-  # some development branch
-  - path: branches/Users/foo/my_branch
+  - repo:
+      git:
+        branch: my_branch
     patch:  # (1)
       cable:
         cable_user:
@@ -437,10 +435,9 @@ realisations:
 
 ```yaml
 realisations:
-  # head of the trunk
-  - path: trunk
-  # some development branch
-  - path: branches/Users/foo/my_branch
+  - repo:
+      git:
+        branch: my_branch
     patch_remove:
       cable:
         soilparmnew: nil # (1)
