@@ -253,7 +253,7 @@ realisations:
 
 Contains settings to specify the CABLE branch to test against. 
 
-This key is _required_. The `repo` key must specify either the [`svn`](#+repo.svn) key or the [`git`](#+repo.git) key.
+This key is _required_. The `repo` key must specify the [`svn`](#+repo.svn), the [`git`](#+repo.git) or the [`local`](#+repo.local) key.
 
 ```yaml
 realisations:
