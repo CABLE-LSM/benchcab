@@ -11,6 +11,7 @@ from subprocess import CalledProcessError
 
 from benchcab import internal
 from benchcab.utils import get_logger
+from benchcab.utils.state import State
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
 
 
@@ -37,12 +38,20 @@ class ComparisonTask:
         self.files = files
         self.task_name = task_name
         self.logger = get_logger()
+        self.state = State(
+            state_dir=internal.STATE_DIR / "fluxsite" / "comparisons" / self.task_name
+        )
+
+    def is_done(self) -> bool:
+        """Return status of current task."""
+        return self.state.is_set("done")
 
     def run(self) -> None:
         """Executes `nccmp -df` on the NetCDF files pointed to by `self.files`."""
         file_a, file_b = self.files
         self.logger.debug(f"Comparing files {file_a.name} and {file_b.name} bitwise...")
 
+        self.state.reset()
         try:
             self.subprocess_handler.run_cmd(
                 f"nccmp -df {file_a} {file_b}",
@@ -51,6 +60,7 @@ class ComparisonTask:
             self.logger.info(
                 f"Success: files {file_a.name} {file_b.name} are identical"
             )
+            self.state.set("done")
         except CalledProcessError as exc:
             output_file = (
                 internal.FLUXSITE_DIRS["BITWISE_CMP"] / f"{self.task_name}.txt"
