@@ -10,7 +10,7 @@ from abc import ABC as AbstractBaseClass  # noqa: N811
 from abc import abstractmethod
 from typing import Any, Optional
 
-from benchcab.utils import get_logger
+from benchcab.utils import is_verbose
 
 DEBUG_LEVEL = 10
 
@@ -63,7 +63,7 @@ class SubprocessWrapper(SubprocessWrapperInterface):
 
         """
         # Use the logging level (10 = Debug) to determine verbosity.
-        verbose = get_logger().getEffectiveLevel() == DEBUG_LEVEL
+        verbose = is_verbose()
         kwargs: Any = {}
         with contextlib.ExitStack() as stack:
             if capture_output:

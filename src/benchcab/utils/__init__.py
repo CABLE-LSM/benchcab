@@ -143,3 +143,8 @@ def get_logger(name="benchcab", level="debug"):
     logger.addHandler(handler)
 
     return logger
+
+
+def is_verbose():
+    """Return True if verbose output is enabled, False otherwise."""
+    return get_logger().getEffectiveLevel() == logging.DEBUG
