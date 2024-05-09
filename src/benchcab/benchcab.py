@@ -17,6 +17,7 @@ from benchcab.config import read_config
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
 from benchcab.internal import get_met_forcing_file_names
 from benchcab.model import Model
+from benchcab.utils import is_verbose
 from benchcab.utils.fs import mkdir, next_path
 from benchcab.utils.pbs import render_job_script
 from benchcab.utils.repo import create_repo
@@ -202,6 +203,7 @@ class Benchcab:
                 modules=config["modules"],
                 pbs_config=config["fluxsite"]["pbs"],
                 skip_bitwise_cmp="fluxsite-bitwise-cmp" in skip,
+                verbose=is_verbose(),
                 benchcab_path=str(self.benchcab_exe_path),
             )
             file.write(contents)
