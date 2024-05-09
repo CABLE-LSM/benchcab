@@ -239,7 +239,7 @@ class FluxsiteTask:
                     output_file=stdout_path.relative_to(task_dir),
                 )
         except CalledProcessError as exc:
-            self.logger.debug(f"Error: CABLE returned an error for task {task_name}")
+            self.logger.error(f"Error: CABLE returned an error for task {task_name}")
             raise CableError from exc
 
     def add_provenance_info(self):
