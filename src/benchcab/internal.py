@@ -32,7 +32,7 @@ FLUXSITE_DEFAULT_MULTIPROCESS = True
 
 # Path to hidden state directory:
 STATE_DIR = Path(".state")
-STATE_PREFIX = ".attr_"
+STATE_PREFIX = ".state_attr_"
 
 # Default system paths in Unix
 SYSTEM_PATHS = ["/bin", "/usr/bin", "/usr/local/bin"]
