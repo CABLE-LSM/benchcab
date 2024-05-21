@@ -158,7 +158,7 @@ class FluxsiteTask:
             patch_remove_namelist(nml_path, self.model.patch_remove)
 
     def clean_task(self):
-        """Cleans output files, namelist files, log files and cable executables if they exist."""
+        """Cleans output files, namelist files, log files and cable executables if they exist and resets the task state."""
         self.logger.debug("  Cleaning task")
 
         task_dir = internal.FLUXSITE_DIRS["TASKS"] / self.get_task_name()
@@ -186,6 +186,8 @@ class FluxsiteTask:
         log_file = internal.FLUXSITE_DIRS["LOG"] / self.get_log_filename()
         if log_file.exists():
             log_file.unlink()
+
+        self.state.reset()
 
         return self
 
@@ -220,7 +222,6 @@ class FluxsiteTask:
         self.logger.debug(f"Running task {task_name}... CABLE standard output ")
         self.logger.debug(f"saved in {task_dir / internal.CABLE_STDOUT_FILENAME}")
 
-        self.state.reset()
         try:
             self.run_cable()
             self.add_provenance_info()
