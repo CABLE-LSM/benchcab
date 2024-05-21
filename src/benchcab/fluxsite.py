@@ -19,6 +19,7 @@ from benchcab.model import Model
 from benchcab.utils import get_logger
 from benchcab.utils.fs import chdir, mkdir
 from benchcab.utils.namelist import patch_namelist, patch_remove_namelist
+from benchcab.utils.state import State
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
 
 f90_logical_repr = {True: ".true.", False: ".false."}
@@ -59,6 +60,13 @@ class FluxsiteTask:
         self.sci_conf_id = sci_conf_id
         self.sci_config = sci_config
         self.logger = get_logger()
+        self.state = State(
+            state_dir=internal.STATE_DIR / "fluxsite" / "runs" / self.get_task_name()
+        )
+
+    def is_done(self) -> bool:
+        """Return status of current task."""
+        return self.state.is_set("done")
 
     def get_task_name(self) -> str:
         """Returns the file name convention used for this task."""
@@ -150,7 +158,7 @@ class FluxsiteTask:
             patch_remove_namelist(nml_path, self.model.patch_remove)
 
     def clean_task(self):
-        """Cleans output files, namelist files, log files and cable executables if they exist."""
+        """Cleans output files, namelist files, log files and cable executables if they exist and resets the task state."""
         self.logger.debug("  Cleaning task")
 
         task_dir = internal.FLUXSITE_DIRS["TASKS"] / self.get_task_name()
@@ -178,6 +186,8 @@ class FluxsiteTask:
         log_file = internal.FLUXSITE_DIRS["LOG"] / self.get_log_filename()
         if log_file.exists():
             log_file.unlink()
+
+        self.state.reset()
 
         return self
 
@@ -215,6 +225,7 @@ class FluxsiteTask:
         try:
             self.run_cable()
             self.add_provenance_info()
+            self.state.set("done")
         except CableError:
             # Note: here we suppress CABLE specific errors so that `benchcab`
             # exits successfully. This then allows us to run bitwise comparisons
@@ -239,7 +250,7 @@ class FluxsiteTask:
                     output_file=stdout_path.relative_to(task_dir),
                 )
         except CalledProcessError as exc:
-            self.logger.debug(f"Error: CABLE returned an error for task {task_name}")
+            self.logger.error(f"Error: CABLE returned an error for task {task_name}")
             raise CableError from exc
 
     def add_provenance_info(self):

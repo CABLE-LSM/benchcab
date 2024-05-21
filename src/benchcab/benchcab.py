@@ -157,6 +157,16 @@ class Benchcab:
                 self._models.append(Model(repo=repo, model_id=id, **sub_config))
         return self._models
 
+    def _fluxsite_show_task_composition(self, config: dict) -> str:
+        n_models = len(self._get_models(config))
+        n_sites = len(get_met_forcing_file_names(config["fluxsite"]["experiment"]))
+        n_science_configurations = len(config["science_configurations"])
+        return (
+            f"models: {n_models}, "
+            f"sites: {n_sites}, "
+            f"science configurations: {n_science_configurations}"
+        )
+
     def _get_fluxsite_tasks(self, config: dict) -> list[fluxsite.FluxsiteTask]:
         if not self._fluxsite_tasks:
             self._fluxsite_tasks = fluxsite.get_fluxsite_tasks(
@@ -295,12 +305,18 @@ class Benchcab:
         tasks = self._get_fluxsite_tasks(config)
 
         logger.info("Running fluxsite tasks...")
+        logger.info(
+            f"tasks: {len(tasks)} ({self._fluxsite_show_task_composition(config)})"
+        )
         if config["fluxsite"]["multiprocess"]:
             ncpus = config["fluxsite"]["pbs"]["ncpus"]
             fluxsite.run_tasks_in_parallel(tasks, n_processes=ncpus)
         else:
             fluxsite.run_tasks(tasks)
-        logger.info("Successfully ran fluxsite tasks")
+
+        tasks_failed = [task for task in tasks if not task.is_done()]
+        n_failed, n_success = len(tasks_failed), len(tasks) - len(tasks_failed)
+        logger.info(f"{n_failed} failed, {n_success} passed")
 
     def fluxsite_bitwise_cmp(self, config_path: str):
         """Endpoint for `benchcab fluxsite-bitwise-cmp`."""
@@ -318,12 +334,18 @@ class Benchcab:
         )
 
         logger.info("Running comparison tasks...")
+        logger.info(
+            f"tasks: {len(comparisons)} ({self._fluxsite_show_task_composition(config)})"
+        )
         if config["fluxsite"]["multiprocess"]:
             ncpus = config["fluxsite"]["pbs"]["ncpus"]
             run_comparisons_in_parallel(comparisons, n_processes=ncpus)
         else:
             run_comparisons(comparisons)
-        logger.info("Successfully ran comparison tasks")
+
+        tasks_failed = [task for task in comparisons if not task.is_done()]
+        n_failed, n_success = len(tasks_failed), len(comparisons) - len(tasks_failed)
+        logger.info(f"{n_failed} failed, {n_success} passed")
 
     def fluxsite(self, config_path: str, no_submit: bool, skip: list[str]):
         """Endpoint for `benchcab fluxsite`."""

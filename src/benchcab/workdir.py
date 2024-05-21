@@ -24,6 +24,9 @@ def clean_submission_files():
     if internal.RUN_DIR.exists():
         shutil.rmtree(internal.RUN_DIR)
 
+    if internal.STATE_DIR.exists():
+        shutil.rmtree(internal.STATE_DIR)
+
     for pbs_job_file in Path.cwd().glob(f"{internal.QSUB_FNAME}*"):
         pbs_job_file.unlink()
 
