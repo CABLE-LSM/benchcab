@@ -244,6 +244,17 @@ def generate_parser(app: Benchcab) -> argparse.ArgumentParser:
         submissions: deletes runs/ and benchmark submission files
         all: deletes in both stages of submissions and realisations""",
     )
-
     parser_clean.set_defaults(func=app.clean)
+
+    # subcommand: 'benchcab gen_codecov"
+    parser_codecov = subparsers.add_parser(
+        "gen_codecov",
+        parents=[args_help, args_subcommand],
+        help="Runs code coverage tasks when runs are finised.",
+        description="""Uses profmerge and codecov utilties to do code coverage
+        analysis. Note: All sources must be built using Intel compiler.
+        """,
+        add_help=False,
+    )
+    parser_codecov.set_defaults(func=app.gen_codecov)
     return main_parser

@@ -35,6 +35,8 @@ realisations:
         branch_path: branches/Users/ccc561/v3.0-YP-changes
     name: git_branch
 
+codecov:
+  true
 
 modules: [
   intel-compiler/2021.1.1,

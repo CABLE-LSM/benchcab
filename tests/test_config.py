@@ -81,6 +81,7 @@ def all_optional_default_config(no_optional_config) -> dict:
             "payu": {"config": {}, "args": None},
             "met_forcings": internal.SPATIAL_DEFAULT_MET_FORCINGS,
         },
+        "codecov": False,
     }
     for c_r in config["realisations"]:
         c_r["name"] = None
@@ -119,6 +120,7 @@ def all_optional_custom_config(no_optional_config) -> dict:
                 "crujra_access": "https://github.com/CABLE-LSM/cable_example.git"
             },
         },
+        "codecov": True,
     }
     branch_names = ["svn_trunk", "git_branch"]
 

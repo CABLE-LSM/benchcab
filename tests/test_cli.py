@@ -113,6 +113,14 @@ def test_cli_parser():
         "func": app.spatial_run_tasks,
     }
 
+    # Success case: default gen_codecov command
+    res = vars(parser.parse_args(["gen_codecov"]))
+    assert res == {
+        "config_path": "config.yaml",
+        "verbose": False,
+        "func": app.gen_codecov,
+    }
+
     # Failure case: pass --no-submit to a non 'run' command
     with pytest.raises(SystemExit):
         parser.parse_args(["fluxsite-setup-work-dir", "--no-submit"])

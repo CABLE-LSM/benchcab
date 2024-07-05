@@ -120,6 +120,8 @@ def read_optional_key(config: dict):
         "pbs", {}
     )
 
+    config["codecov"] = config.get("codecov", False)
+
 
 def read_config_file(config_path: str) -> dict:
     """Load the config file in a dict.

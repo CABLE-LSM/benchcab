@@ -14,6 +14,11 @@ from typing import Optional
 from benchcab import fluxsite, internal, spatial
 from benchcab.comparison import run_comparisons, run_comparisons_in_parallel
 from benchcab.config import read_config
+from benchcab.coverage import (
+    get_coverage_tasks_default,
+    run_coverage_tasks,
+    run_coverages_in_parallel,
+)
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
 from benchcab.internal import get_met_forcing_file_names
 from benchcab.model import Model
@@ -203,6 +208,7 @@ class Benchcab:
                 modules=config["modules"],
                 pbs_config=config["fluxsite"]["pbs"],
                 skip_bitwise_cmp="fluxsite-bitwise-cmp" in skip,
+                skip_codecov="gen_codecov" in skip or not config["codecov"],
                 verbose=is_verbose(),
                 benchcab_path=str(self.benchcab_exe_path),
             )
@@ -225,6 +231,29 @@ class Benchcab:
         logger.info(f"{internal.FLUXSITE_DIRS['TASKS']}/<task_name>/out.txt")
         logger.info("The NetCDF output for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['OUTPUT']}/<task_name>_out.nc")
+
+    def gen_codecov(self, config_path: str):
+        """Endpoint for `benchcab codecov`."""
+        logger = self._get_logger()
+        config = self._get_config(config_path)
+        self._validate_environment(project=config["project"], modules=config["modules"])
+
+        coverage_tasks = get_coverage_tasks_default(
+            models=self._get_models(config=config)
+        )
+
+        if not config["codecov"]:
+            msg = """`config.yaml` should have set `codecov: true` before building and
+            running `gen_codecov`."""
+            raise ValueError(msg)
+
+        logger.info("Running coverage tasks...")
+        if config["fluxsite"]["multiprocess"]:
+            ncpus = config["fluxsite"]["pbs"]["ncpus"]
+            run_coverages_in_parallel(coverage_tasks, n_processes=ncpus)
+        else:
+            run_coverage_tasks(coverage_tasks)
+        logger.info("Successfully ran coverage tasks")
 
     def checkout(self, config_path: str):
         """Endpoint for `benchcab checkout`."""
@@ -271,7 +300,11 @@ class Benchcab:
                 logger.info(
                     f"Compiling CABLE {build_mode} for realisation {repo.name}..."
                 )
-                repo.build(modules=config["modules"], mpi=mpi)
+                repo.build(
+                    modules=config["modules"],
+                    mpi=mpi,
+                    coverage=config["codecov"],
+                )
             logger.info(f"Successfully compiled CABLE for realisation {repo.name}")
 
     def fluxsite_setup_work_directory(self, config_path: str):
@@ -334,6 +367,8 @@ class Benchcab:
             self.fluxsite_run_tasks(config_path)
             if "fluxsite-bitwise-cmp" not in skip:
                 self.fluxsite_bitwise_cmp(config_path)
+            if "codecov" not in skip:
+                self.gen_codecov(config_path)
         else:
             self.fluxsite_submit_job(config_path, skip)
 
