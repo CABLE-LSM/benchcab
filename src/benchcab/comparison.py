@@ -11,6 +11,7 @@ from subprocess import CalledProcessError
 
 from benchcab import internal
 from benchcab.utils import get_logger
+from benchcab.utils.state import State
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
 
 
@@ -37,8 +38,29 @@ class ComparisonTask:
         self.files = files
         self.task_name = task_name
         self.logger = get_logger()
+        self.state = State(
+            state_dir=internal.STATE_DIR / "fluxsite" / "comparisons" / self.task_name
+        )
+        self.output_file = (
+            internal.FLUXSITE_DIRS["BITWISE_CMP"] / f"{self.task_name}.txt"
+        )
+
+    def is_done(self) -> bool:
+        """Return status of current task."""
+        return self.state.is_set("done")
 
     def run(self) -> None:
+        """Runs a single comparison task."""
+        self.clean()
+        self.execute_comparison()
+
+    def clean(self):
+        """Cleans output files if they exist and resets the task state."""
+        if self.output_file.exists():
+            self.output_file.unlink()
+        self.state.reset()
+
+    def execute_comparison(self) -> None:
         """Executes `nccmp -df` on the NetCDF files pointed to by `self.files`."""
         file_a, file_b = self.files
         self.logger.debug(f"Comparing files {file_a.name} and {file_b.name} bitwise...")
@@ -51,15 +73,15 @@ class ComparisonTask:
             self.logger.info(
                 f"Success: files {file_a.name} {file_b.name} are identical"
             )
+            self.state.set("done")
         except CalledProcessError as exc:
-            output_file = (
-                internal.FLUXSITE_DIRS["BITWISE_CMP"] / f"{self.task_name}.txt"
-            )
-            with output_file.open("w", encoding="utf-8") as file:
+            with self.output_file.open("w", encoding="utf-8") as file:
                 file.write(exc.stdout)
 
             self.logger.error(f"Failure: files {file_a.name} {file_b.name} differ. ")
-            self.logger.error(f"Results of diff have been written to {output_file}")
+            self.logger.error(
+                f"Results of diff have been written to {self.output_file}"
+            )
 
         sys.stdout.flush()
 

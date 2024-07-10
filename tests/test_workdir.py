@@ -87,6 +87,13 @@ class TestCleanFiles:
         return runs_path
 
     @pytest.fixture()
+    def state_path(self) -> Path:
+        """Mock internal.STATE_DIR."""
+        state_path = Path(".state")
+        state_path.mkdir()
+        return state_path
+
+    @pytest.fixture()
     def pbs_job_files(self) -> List[Path]:
         """Create sample files of the form benchmark_cable_qsub.sh*."""
         pbs_job_files = [
@@ -133,8 +140,11 @@ class TestCleanFiles:
         clean_realisation_files()
         assert not src_path_with_git.exists()
 
-    def test_clean_submission_files(self, runs_path, pbs_job_files: List[Path]):
+    def test_clean_submission_files(
+        self, runs_path, state_path, pbs_job_files: List[Path]
+    ):
         """Success case: Submission files created by benchcab are removed after clean."""
         clean_submission_files()
         assert not runs_path.exists()
+        assert not state_path.exists()
         assert not self._check_if_any_files_exist(pbs_job_files)

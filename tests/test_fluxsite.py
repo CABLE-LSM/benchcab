@@ -152,6 +152,13 @@ class TestCleanTask:
         ).exists()
         assert not (internal.FLUXSITE_DIRS["LOG"] / task.get_log_filename()).exists()
 
+    def test_state_is_reset(self, task):
+        """Success case: test state is reset on clean."""
+        state = task.state
+        state.set("foo")
+        task.clean_task()
+        assert not state.is_set("foo")
+
 
 class TestSetupTask:
     """Tests for `FluxsiteTask.setup_task()`."""
