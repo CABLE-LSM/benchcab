@@ -471,6 +471,15 @@ science_configurations: [
 ]
 ```
 
+## codecov
+
+: **Default:** False, _optional key. :octicons-dash-24: Specifies whether to build `benchcab` with code-coverage flags, which can then be used in post-run analysis (`benchcab gen_codecov`).
+
+```yaml
+codecov:
+  true
+```
+
 [meorg]: https://modelevaluation.org/
 [forty-two-me]: https://modelevaluation.org/experiment/display/s6k22L3WajmiS9uGv
 [five-me]: https://modelevaluation.org/experiment/display/Nb37QxkAz3FczWDd7

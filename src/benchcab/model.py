@@ -13,7 +13,7 @@ from typing import Optional
 from benchcab import internal
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
 from benchcab.utils import get_logger
-from benchcab.utils.fs import chdir, prepend_path
+from benchcab.utils.fs import chdir, mkdir, prepend_path
 from benchcab.utils.repo import GitRepo, LocalRepo, Repo
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
 
@@ -82,6 +82,40 @@ class Model:
     def model_id(self, value: int):
         self._model_id = value
 
+    def get_coverage_dir(self) -> Path:
+        """Get absolute path for code coverage analysis."""
+        return (internal.CODECOV_DIR / f"R{self.model_id}").absolute()
+
+    def _get_build_flags(self, mpi: bool, coverage: bool, compiler_id: str) -> dict:
+        """Get flags for CMake build."""
+        # Supported compilers for code coverage
+        codecov_compilers = ["ifort", "ifx"]
+
+        build_flags = {}
+
+        build_flags["build_type"] = "Debug" if coverage else "Release"
+        build_flags["mpi"] = "ON" if mpi else "OFF"
+
+        build_flags["flags_init"] = ""
+
+        if coverage:
+            if compiler_id not in codecov_compilers:
+                msg = f"""For code coverage, the only supported compilers are {codecov_compilers}
+                User has {compiler_id} in their environment"""
+                raise RuntimeError(msg)
+
+            codecov_dir = self.get_coverage_dir()
+
+            self.logger.info("Building with Intel code coverage")
+
+            # `ifort` checks for pre-existing profile directories before compilation
+            mkdir(codecov_dir, parents=True, exist_ok=True)
+
+            self.logger.debug(f"Analysis directory set as {codecov_dir}")
+            build_flags["flags_init"] += f'"-prof-gen=srcpos -prof-dir={codecov_dir}"'
+
+        return build_flags
+
     def get_exe_path(self, mpi=False) -> Path:
         """Return the path to the built executable."""
         exe = internal.CABLE_MPI_EXE if mpi else internal.CABLE_EXE
@@ -118,46 +152,67 @@ class Model:
         with chdir(build_script_path.parent), self.modules_handler.load(modules):
             self.subprocess_handler.run_cmd(f"./{tmp_script_path.name}")
 
-    def build(self, modules: list[str], mpi=False):
+    def build(self, modules: list[str], mpi: bool, coverage: bool):
         """Build CABLE with CMake."""
         path_to_repo = internal.SRC_DIR / self.name
-        cmake_args = [
-            "-DCMAKE_BUILD_TYPE=Release",
-            "-DCABLE_MPI=" + ("ON" if mpi else "OFF"),
-        ]
-        with chdir(path_to_repo), self.modules_handler.load(
-            [internal.CMAKE_MODULE, *modules]
-        ):
-            env = os.environ.copy()
 
-            # This is required to prevent CMake from finding the conda
-            # installation of netcdf-fortran (#279):
-            env.pop("LDFLAGS", None)
+        with self.modules_handler.load([internal.DEFAULT_MODULES["cmake"], *modules]):
 
-            # This is required to prevent CMake from finding MPI libraries in
-            # the conda environment (#279):
-            env.pop("CMAKE_PREFIX_PATH", None)
-
-            # This is required so that the netcdf-fortran library is discoverable by
-            # pkg-config:
-            prepend_path(
-                "PKG_CONFIG_PATH", f"{env['NETCDF_BASE']}/lib/Intel/pkgconfig", env=env
+            # $FC is loaded after compiler module is loaded,
+            # but we need runs/ dir relative to project rootdir
+            env_fc = os.environ.get("FC", "")
+            self.logger.debug(
+                f"Getting environment variable for compiler $FC = {env_fc}"
             )
+            build_flags = self._get_build_flags(mpi, coverage, env_fc)
+            env_fc = None
 
-            if self.modules_handler.module_is_loaded("openmpi"):
-                # This is required so that the openmpi MPI libraries are discoverable
-                # via CMake's `find_package` mechanism:
+            with chdir(path_to_repo):
+                env = os.environ.copy()
+
+                cmake_args = [
+                    f"-DCABLE_MPI={build_flags['mpi']}",
+                    f"-DCMAKE_BUILD_TYPE={build_flags['build_type']}",
+                    f"-DCMAKE_Fortran_FLAGS_INIT={build_flags['flags_init']}",
+                    "-DCMAKE_VERBOSE_MAKEFILE=ON",
+                ]
+
+                # This is required to prevent CMake from finding the conda
+                # installation of netcdf-fortran (#279):
+                env.pop("LDFLAGS", None)
+
+                # This is required to prevent CMake from finding MPI libraries in
+                # the conda environment (#279):
+                env.pop("CMAKE_PREFIX_PATH", None)
+
+                # This is required so that the netcdf-fortran library is discoverable by
+                # pkg-config:
                 prepend_path(
-                    "CMAKE_PREFIX_PATH", f"{env['OPENMPI_BASE']}/include/Intel", env=env
+                    "PKG_CONFIG_PATH",
+                    f"{env['NETCDF_BASE']}/lib/Intel/pkgconfig",
+                    env=env,
                 )
 
-            env["CMAKE_BUILD_PARALLEL_LEVEL"] = str(internal.CMAKE_BUILD_PARALLEL_LEVEL)
+                if self.modules_handler.module_is_loaded("openmpi"):
+                    # This is required so that the openmpi MPI libraries are discoverable
+                    # via CMake's `find_package` mechanism:
+                    prepend_path(
+                        "CMAKE_PREFIX_PATH",
+                        f"{env['OPENMPI_BASE']}/include/Intel",
+                        env=env,
+                    )
 
-            self.subprocess_handler.run_cmd(
-                "cmake -S . -B build " + " ".join(cmake_args), env=env
-            )
-            self.subprocess_handler.run_cmd("cmake --build build ", env=env)
-            self.subprocess_handler.run_cmd("cmake --install build --prefix .", env=env)
+                env["CMAKE_BUILD_PARALLEL_LEVEL"] = str(
+                    internal.CMAKE_BUILD_PARALLEL_LEVEL
+                )
+
+                self.subprocess_handler.run_cmd(
+                    "cmake -S . -B build " + " ".join(cmake_args), env=env
+                )
+                self.subprocess_handler.run_cmd("cmake --build build ", env=env)
+                self.subprocess_handler.run_cmd(
+                    "cmake --install build --prefix .", env=env
+                )
 
 
 def remove_module_lines(file_path: Path) -> None:

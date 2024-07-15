@@ -13,7 +13,10 @@ _, NODENAME, _, _, _ = os.uname()
 CONFIG_REQUIRED_KEYS = ["realisations", "modules"]
 
 # CMake module used for compilation:
-CMAKE_MODULE = "cmake/3.24.2"
+DEFAULT_MODULES = {
+    "cmake": "cmake/3.24.2",
+    "intel-compiler": "intel-compiler/2021.10.0",
+}
 
 # Number of parallel jobs used when compiling with CMake:
 CMAKE_BUILD_PARALLEL_LEVEL = 4
@@ -54,6 +57,9 @@ CABLE_AUX_DIR = Path("/g/data/wd9/BenchMarking/CABLE-AUX_v20240122")
 
 # Path CABLE grid info file
 GRID_FILE = CABLE_AUX_DIR / "offline" / "gridinfo_CSIRO_1x1.nc"
+
+# Relative path to directory that stores codecov files
+CODECOV_DIR = RUN_DIR / "coverage"
 
 # Fluxsite directory tree
 FLUXSITE_DIRS: dict[str, Path] = {}
@@ -247,7 +253,7 @@ MEORG_EXPERIMENTS = {
 
 FLUXSITE_DEFAULT_EXPERIMENT = "forty-two-site-test"
 
-OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp"]
+OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
 
 
 def get_met_forcing_file_names(experiment: str) -> list[str]:

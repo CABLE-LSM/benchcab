@@ -131,3 +131,7 @@ spatial:
           nullable: true
           type: "string"
           required: false
+
+codecov:
+  type: "boolean"
+  required: false

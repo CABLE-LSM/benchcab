@@ -5,12 +5,16 @@ the working directory used for testing is cleaned up in the `_run_around_tests`
 pytest autouse fixture.
 """
 
+import re
 from pathlib import Path
 
 import pytest
+
 from benchcab import internal
 from benchcab.model import Model, remove_module_lines
 from benchcab.utils.repo import Repo
+
+TEST_MODEL_ID = 0
 
 
 @pytest.fixture()
@@ -44,7 +48,7 @@ def mpi(request):
 @pytest.fixture()
 def model(mock_repo, mock_subprocess_handler, mock_environment_modules_handler):
     """Return a mock `Model` instance for testing against."""
-    _model = Model(repo=mock_repo)
+    _model = Model(repo=mock_repo, model_id=TEST_MODEL_ID)
     _model.subprocess_handler = mock_subprocess_handler
     _model.modules_handler = mock_environment_modules_handler
     return _model
@@ -81,6 +85,62 @@ class TestGetExePath:
             model.get_exe_path(mpi=mpi)
             == internal.SRC_DIR / model.name / "bin" / expected_exe
         )
+
+
+class TestGetBuildFlags:
+    """Tests for `Model.get_build_flags()`."""
+
+    @pytest.fixture(params=[False, True])
+    def codecov(self, request) -> bool:
+        """Return a parametrized codecov option for testing."""
+        return request.param
+
+    @pytest.fixture(params=["gfortran", "ifort"])
+    def compiler_id(self, request):
+        """Return a parametrized compiler_id flag for testing."""
+        return request.param
+
+    @pytest.fixture()
+    def cmake_flags(self, codecov, mpi, compiler_id):
+        """Generate build flags used in CMake build."""
+        codecov_build_type = {
+            False: "Release",
+            True: "Debug",
+        }
+
+        mpi_args = {True: "ON", False: "OFF"}
+
+        codecov_init_args = {
+            False: "",
+            True: (
+                f"\"-prof-gen=srcpos -prof-dir={(internal.CODECOV_DIR / 'R0').absolute()}\""
+                if compiler_id in ["ifort", "ifx"]
+                else ""
+            ),
+        }
+
+        return {
+            "build_type": codecov_build_type[codecov],
+            "mpi": mpi_args[mpi],
+            "flags_init": codecov_init_args[codecov],
+        }
+
+    def test_get_build_flags(self, model, mpi, codecov, compiler_id, cmake_flags):
+        """Failure case: If coverage flags are passed to non-Intel compiler."""
+        codecov_compilers = ["ifort", "ifx"]
+        if compiler_id not in codecov_compilers and codecov:
+            with pytest.raises(
+                RuntimeError,
+                match=re.escape(
+                    f"""For code coverage, the only supported compilers are {codecov_compilers}
+                User has {compiler_id} in their environment"""
+                ),
+            ):
+                model._get_build_flags(mpi, codecov, compiler_id)
+            return
+
+        # Success case: get expected build flags to pass to CMake.
+        assert model._get_build_flags(mpi, codecov, compiler_id) == cmake_flags
 
 
 # TODO(Sean) remove for issue https://github.com/CABLE-LSM/benchcab/issues/211

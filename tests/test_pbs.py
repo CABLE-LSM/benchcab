@@ -29,8 +29,8 @@ class TestRenderJobScript:
             benchcab_path="/absolute/path/to/benchcab",
         ) == load_package_data("test/pbs_jobscript_verbose.sh")
 
-    def test_skip_bitwise_comparison_step(self):
-        """Success case: skip fluxsite-bitwise-cmp step."""
+    def test_skip_optional(self):
+        """Success case: skip optional steps."""
         assert render_job_script(
             project="tm70",
             config_path="/path/to/config.yaml",
@@ -38,4 +38,15 @@ class TestRenderJobScript:
             pbs_config=internal.FLUXSITE_DEFAULT_PBS,
             skip_bitwise_cmp=True,
             benchcab_path="/absolute/path/to/benchcab",
-        ) == load_package_data("test/pbs_jobscript_skip_bitwise.sh")
+        ) == load_package_data("test/pbs_jobscript_skip_optional.sh")
+
+    def test_no_skip_coverage_step(self):
+        """Success case: not skip coverage step."""
+        assert render_job_script(
+            project="tm70",
+            config_path="/path/to/config.yaml",
+            modules=["foo", "bar", "baz"],
+            pbs_config=internal.FLUXSITE_DEFAULT_PBS,
+            skip_codecov=False,
+            benchcab_path="/absolute/path/to/benchcab",
+        ) == load_package_data("test/pbs_jobscript_no_skip_codecov.sh")

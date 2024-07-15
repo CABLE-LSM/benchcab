@@ -3,7 +3,7 @@
 
 """Contains helper functions for manipulating PBS job scripts."""
 
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 from benchcab.utils import interpolate_file_template
 
@@ -23,8 +23,9 @@ def render_job_script(
     modules: list,
     benchcab_path: str,
     pbs_config: PBSConfig,
-    verbose=False,
-    skip_bitwise_cmp=False,
+    verbose: Optional[bool] = False,
+    skip_bitwise_cmp: Optional[bool] = False,
+    skip_codecov: Optional[bool] = True,
 ) -> str:
     """Returns the text for a PBS job script that executes all computationally expensive commands.
 
@@ -45,6 +46,7 @@ def render_job_script(
         benchcab_path=benchcab_path,
         config_path=config_path,
         skip_bitwise_cmp=skip_bitwise_cmp,
+        skip_codecov=skip_codecov,
     )
 
     return interpolate_file_template("pbs_jobscript.j2", **context)
