@@ -22,7 +22,7 @@ from benchcab.coverage import (
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
 from benchcab.internal import get_met_forcing_file_names
 from benchcab.model import Model
-from benchcab.utils import is_verbose
+from benchcab.utils import is_verbose, task_summary
 from benchcab.utils.fs import mkdir, next_path
 from benchcab.utils.pbs import render_job_script
 from benchcab.utils.repo import create_repo
@@ -347,8 +347,7 @@ class Benchcab:
         else:
             fluxsite.run_tasks(tasks)
 
-        tasks_failed = [task for task in tasks if not task.is_done()]
-        n_failed, n_success = len(tasks_failed), len(tasks) - len(tasks_failed)
+        n_tasks, n_success, n_failed, all_complete = task_summary(tasks)
         logger.info(f"{n_failed} failed, {n_success} passed")
 
     def fluxsite_bitwise_cmp(self, config_path: str):
@@ -374,10 +373,9 @@ class Benchcab:
             ncpus = config["fluxsite"]["pbs"]["ncpus"]
             run_comparisons_in_parallel(comparisons, n_processes=ncpus)
         else:
-            run_comparisons(comparisons)
-
-        tasks_failed = [task for task in comparisons if not task.is_done()]
-        n_failed, n_success = len(tasks_failed), len(comparisons) - len(tasks_failed)
+            run_comparisons(comparisons)        
+        
+        n_tasks, n_success, n_failed, all_complete = task_summary(comparisons)
         logger.info(f"{n_failed} failed, {n_success} passed")
 
     def fluxsite(self, config_path: str, no_submit: bool, skip: list[str]):
