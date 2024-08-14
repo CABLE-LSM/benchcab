@@ -414,6 +414,7 @@ realisations:
 
 : **Default:** unset, _optional key_. :octicons-dash-24: Branch-specific namelist settings for `cable.nml`. Settings specified in `patch` get "patched" to the base namelist settings used for both branches. Any namelist settings specified here will overwrite settings defined in the default namelist file and in the science configurations. This means these settings will be set as stipulated in the `patch` for this branch for all science configurations run by `benchcab`.
 : The `patch` key must be a dictionary-like data structure that is compliant with the [`f90nml`][f90nml-github] python package.
+: To specify a boolean namelist option, one needs to use the Python booleans, True and False, **not the Fortran booleans**
 
 ```yaml
 realisations:
@@ -424,10 +425,12 @@ realisations:
       cable:
         cable_user:
           FWSOIL_SWITCH: "Lai and Ktaul 2000"
+          litter: True # (2)
 ```
 
 1. Sets FWSOIL_SWITCH to "Lai and Ktaul 2000" for all science configurations for this branch
-
+2. The Python boolean will be translated to a Fortran boolean when writing to the namelist file
+   
 ### [patch_remove](#patch_remove)
 
 : **Default:** unset, _optional key. :octicons-dash-24: Specifies branch-specific namelist settings to be removed from the `cable.nml` namelist settings. When the `patch_remove` key is specified, the specified namelists are removed from all namelist files for this branch for all science configurations run by `benchcab`. When specifying a namelist parameter in `patch_remove`, the value of the namelist parameter is ignored.
@@ -449,6 +452,7 @@ realisations:
 ## science_configurations
 
 : **Default:** unset, _optional key_. :octicons-dash-24: User defined science configurations. Science configurations that are specified here will replace [the default science configurations](default_science_configurations.md). In the output filenames, each configuration is identified with S<N\> where N is an integer starting from 0 for the first listed configuration and increasing by 1 for each subsequent configuration.
+: To specify a boolean namelist option, one needs to use the Python booleans, True and False, **not the Fortran booleans**
 
 ```yaml
 science_configurations: [
@@ -456,7 +460,8 @@ science_configurations: [
     cable: {
       cable_user: {
         GS_SWITCH: "medlyn",
-        FWSOIL_SWITCH: "Haverd2013"
+        FWSOIL_SWITCH: "Haverd2013",
+        litter: True # (1)
       }
     }
   },
@@ -470,6 +475,8 @@ science_configurations: [
   }
 ]
 ```
+
+1. The Python boolean will be translated to a Fortran boolean when writing the namelist file.
 
 ## codecov
 
