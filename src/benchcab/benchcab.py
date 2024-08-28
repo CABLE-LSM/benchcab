@@ -24,6 +24,7 @@ from benchcab.internal import get_met_forcing_file_names
 from benchcab.model import Model
 from benchcab.utils import is_verbose, task_summary
 from benchcab.utils.fs import mkdir, next_path
+import benchcab.utils.meorg as bm
 from benchcab.utils.pbs import render_job_script
 from benchcab.utils.repo import create_repo
 from benchcab.utils.subprocess import SubprocessWrapper, SubprocessWrapperInterface
@@ -234,13 +235,24 @@ class Benchcab:
             logger.error(exc.output)
             raise
 
-        logger.info(f"PBS job submitted: {proc.stdout.strip()}")
+        # Get the job ID
+        job_id = proc.stdout.strip()
+
+        logger.info(f"PBS job submitted: {job_id}")
         logger.info("CABLE log file for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['LOG']}/<task_name>_log.txt")
         logger.info("The CABLE standard output for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['TASKS']}/<task_name>/out.txt")
         logger.info("The NetCDF output for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['OUTPUT']}/<task_name>_out.nc")
+        
+        # Upload to meorg by default
+        bm.do_meorg(
+            config,
+            upload_dir=internal.FLUXSITE_DIRS['OUTPUT'],
+            benchcab_bin=str(self.benchcab_exe_path)
+        )
+        
 
     def gen_codecov(self, config_path: str):
         """Endpoint for `benchcab codecov`."""

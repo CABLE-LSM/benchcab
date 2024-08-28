@@ -107,6 +107,9 @@ fluxsite:
           schema:
             type: "string"
             required: false
+    meorg_model_output_id:
+      type: "string"
+      required: false
 
 spatial:
   type: "dict"
