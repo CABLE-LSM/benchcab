@@ -277,9 +277,9 @@ def get_met_forcing_file_names(experiment: str) -> list[str]:
 
 # Configuration for the client upload
 MEORG_CLIENT = dict(
-    num_threads=4, # Parallel uploads over 4 cores
+    num_threads=1, # Parallel uploads over 4 cores
     cache_delay=60*5, # 5mins between upload and analysis triggering
     mem="8G",
     walltime="01:00:00",
-    storage=["gdata/ks32", "gdata/hh5", "gdata/wd9"]
+    storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"]
 )

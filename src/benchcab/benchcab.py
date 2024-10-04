@@ -250,7 +250,8 @@ class Benchcab:
         bm.do_meorg(
             config,
             upload_dir=internal.FLUXSITE_DIRS['OUTPUT'],
-            benchcab_bin=str(self.benchcab_exe_path)
+            benchcab_bin=str(self.benchcab_exe_path),
+            benchcab_job_id=job_id
         )
         
 

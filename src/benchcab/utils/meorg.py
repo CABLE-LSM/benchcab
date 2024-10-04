@@ -1,11 +1,12 @@
 """Utility methods for interacting with the ME.org client."""
 from benchcab.internal import MEORG_CLIENT
 from meorg_client.client import Client as MeorgClient
-from hpcpy.client import PBSClient
+from hpcpy import get_client
 import benchcab.utils as bu
 import os
+from glob import glob
 
-def do_meorg(config: dict, upload_dir: str, benchcab_bin: str):
+def do_meorg(config: dict, upload_dir: str, benchcab_bin: str, benchcab_job_id: str):
     """Perform the upload of model outputs to modelevaluation.org
 
     Parameters
@@ -27,28 +28,26 @@ def do_meorg(config: dict, upload_dir: str, benchcab_bin: str):
 
     model_output_id = config.get("fluxsite").get("meorg_model_output_id", False)
     num_threads = MEORG_CLIENT["num_threads"]
-
-    # Only run if upload is enabled and a model output id is configured
-    if config.get("meorg_upload", True) == False:
-        logger.debug("meorg_upload is disabled")
-        return False
     
     # Check if a model output id has been assigned
     if model_output_id == False:
-        logger.error("meorg_upload is set to True, but no meorg_model_output_id key found.")
-        logger.error("NOT uploading to modelevaluation.org")
+        logger.info("No model_output_id found in fluxsite configuration.")
+        logger.info("NOT uploading to modelevaluation.org")
         return False
     
-    # Allow the user to specify an absolute path to the meorg bin
+    # Allow the user to specify an absolute path to the meorg bin in config
     meorg_bin = config.get("meorg_bin", False)
     
     # Otherwise infer the path from the benchcab installation
     if meorg_bin == False:
+        logger.debug(f"Inferring meorg bin from {benchcab_bin}")
         bin_segments = benchcab_bin.split("/")
         bin_segments[-1] = "meorg"
         meorg_bin = "/".join(bin_segments)
+    
+    logger.debug(f"meorg_bin = {meorg_bin}")
 
-    # Now check if that actually exists
+    # Now, check if that actually exists
     if os.path.isfile(meorg_bin) == False:
         logger.error(f"No meorg_client executable found at {meorg_bin}")
         logger.error("NOT uploading to modelevaluation.org")
@@ -57,7 +56,7 @@ def do_meorg(config: dict, upload_dir: str, benchcab_bin: str):
     # Also only run if the client is initialised
     if MeorgClient().is_initialised() == False:
 
-        logger.warn("meorg_upload is set to True, but the client is not initialised.")
+        logger.warn("A model_output_id has been supplied, but the meorg_client is not initialised.")
         logger.warn("To initialise, run `meorg initialise` in the installation environment.")
         logger.warn("Once initialised, the outputs from this run can be uploaded with the following command:")
         logger.warn(f"meorg file upload {upload_dir}/*.nc -n {num_threads} --attach_to {model_output_id}")
@@ -71,18 +70,20 @@ def do_meorg(config: dict, upload_dir: str, benchcab_bin: str):
         logger.info("Uploading outputs to modelevaluation.org")
 
         # Submit the outputs
-        client = PBSClient()
+        client = get_client()
         meorg_jobid = client.submit(
         
             bu.get_installed_root() / "data" / "meorg_jobscript.j2",
             render=True,
             dry_run=False,
+            depends_on=benchcab_job_id,
 
+            # Interpolate into the job script
             model_output_id=model_output_id,
             data_dir=upload_dir,
             cache_delay=MEORG_CLIENT["cache_delay"],
             mem=MEORG_CLIENT["mem"],
-            
+            num_threads=MEORG_CLIENT["num_threads"],
             walltime=MEORG_CLIENT["walltime"],
             storage=MEORG_CLIENT['storage'],
             project=config['project'],
