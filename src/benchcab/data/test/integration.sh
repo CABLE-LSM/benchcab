@@ -22,7 +22,7 @@ cd $CABLE_DIR
 # Clone the example repo
 git clone $EXAMPLE_REPO $TEST_DIR
 cd $TEST_DIR
-git reset --hard 6287539e96fc8ef36dc578201fbf9847314147fb
+git reset --hard 9bfba54ee8bf23141d95b1abe4b7207b0f3498e2
 
 cat > config.yaml << EOL
 project: $PROJECT
