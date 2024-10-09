@@ -252,6 +252,7 @@ MEORG_EXPERIMENTS = {
 }
 
 FLUXSITE_DEFAULT_EXPERIMENT = "forty-two-site-test"
+FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID = False
 
 OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
 
@@ -275,11 +276,12 @@ def get_met_forcing_file_names(experiment: str) -> list[str]:
 
     return file_names
 
+
 # Configuration for the client upload
 MEORG_CLIENT = dict(
-    num_threads=1, # Parallel uploads over 4 cores
-    cache_delay=60*5, # 5mins between upload and analysis triggering
+    num_threads=1,  # Parallel uploads over 4 cores
+    cache_delay=60 * 5,  # 5mins between upload and analysis triggering
     mem="8G",
     walltime="01:00:00",
-    storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"]
+    storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"],
 )

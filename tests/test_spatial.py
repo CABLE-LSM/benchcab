@@ -10,6 +10,7 @@ import logging
 import f90nml
 import pytest
 import yaml
+
 from benchcab import internal
 from benchcab.model import Model
 from benchcab.spatial import SpatialTask, get_spatial_tasks

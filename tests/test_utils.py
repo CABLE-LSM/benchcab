@@ -64,7 +64,7 @@ def test_get_logger_singleton_fail():
 
 
 def test_task_summary():
-    
+
     # Create some mocked tasks
     t1 = ComparisonTask(files=(), task_name="t1")
     t2 = ComparisonTask(files=(), task_name="t2")
@@ -72,7 +72,7 @@ def test_task_summary():
     # Inject success/fail cases
     t1.is_done = lambda: True
     t2.is_done = lambda: False
-    
+
     # Run the function
     n_tasks, n_success, n_failed, all_complete = bu.task_summary([t1, t2])
 

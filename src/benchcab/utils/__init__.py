@@ -11,7 +11,7 @@ import pkgutil
 import sys
 from importlib import resources
 from pathlib import Path
-from typing import Union, Iterable
+from typing import Iterable, Union
 
 import yaml
 from jinja2 import BaseLoader, Environment
@@ -162,9 +162,10 @@ def task_summary(tasks: Iterable) -> tuple:
     -------
     tuple
         num_tasks, num_complete, num_failed, all_complete
+
     """
     num_tasks = len(tasks)
     num_complete = len([task for task in tasks if task.is_done()])
     num_failed = num_tasks - num_complete
-    
+
     return num_tasks, num_complete, num_failed, num_complete == num_tasks

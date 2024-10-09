@@ -1,9 +1,10 @@
 import time
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pytest
+
 from benchcab.utils.state import State, StateAttributeError
-from tempfile import TemporaryDirectory
 
 
 def test_state_is_set():

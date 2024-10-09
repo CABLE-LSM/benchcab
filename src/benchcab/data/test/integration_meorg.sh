@@ -46,6 +46,7 @@ fluxsite:
     storage:
       - scratch/$PROJECT
       - gdata/$PROJECT
+  # This ID is currently configured on the me.org server.
   meorg_model_output_id: Sss7qupAHEZ8ovbCv
 EOL
 
