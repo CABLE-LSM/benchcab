@@ -155,7 +155,7 @@ fluxsite:
 
 ### [multiprocess](#multiprocess)
 
-
+: **Default:** True, _optional key_. :octicons-dash-24: Enables or disables multiprocessing for executing embarrassingly parallel tasks.
 
 ```yaml
 
