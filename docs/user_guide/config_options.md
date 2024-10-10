@@ -68,6 +68,7 @@ fluxsite:
     walltime: 06:00:00
     storage: [scratch/a00, gdata/xy11]
   multiprocess: True
+  meorg_model_output_id: XXXXXXXX
 ```
 
 ### [experiment](#experiment)
@@ -162,6 +163,14 @@ fluxsites:
   multiprocess: True
 
 ```
+
+### [meorg_model_output_id](#meorg_model_output_id)
+
+: **Default:** False, _optional key_. :octicons-dash-24: The unique Model Output ID from modelevaluation.org to which output files will be automatically uploaded for analysis.
+
+A separate upload job will be submitted at the successful completion of benchcab tasks if this key is present, however, the validity is not checked by benchcab at this stage.
+
+Note: It is the user's responsbility to ensure the model output is configured on modelevaluation.org.
 
 ## spatial
 
@@ -494,3 +503,13 @@ codecov:
 [environment-modules]: https://modules.sourceforge.net/
 [nci-pbs-directives]: https://opus.nci.org.au/display/Help/PBS+Directives+Explained
 [cable-github]: https://github.com/CABLE-LSM/CABLE
+
+## meorg_bin
+
+: **Default:** False, _optional key. :octicons-dash-24: Specifies the absolute system path to the ME.org client executable. In the absence of this key it will be inferred from the same directory as benchcab should `meorg_model_output_id` be set in `fluxsite` above.
+
+``` yaml
+
+meorg_bin: /path/to/meorg
+
+```

@@ -8,6 +8,7 @@ pytest autouse fixture.
 from pathlib import Path
 
 import pytest
+
 from benchcab import internal
 from benchcab.comparison import ComparisonTask
 

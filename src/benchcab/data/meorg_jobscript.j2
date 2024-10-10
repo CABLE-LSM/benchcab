@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -l wd
+#PBS -l ncpus={{num_threads}}
+#PBS -l mem={{mem}}
+#PBS -l walltime={{walltime}}
+#PBS -q copyq
+#PBS -P {{project}}
+#PBS -j oe
+#PBS -m e
+#PBS -l storage={{storage_str}}
+
+module purge
+{% for module in modules -%}
+module load {{module}}
+{% endfor %}
+set -ev
+
+# Set some things
+DATA_DIR={{data_dir}}
+NUM_THREADS={{num_threads}}
+MODEL_OUTPUT_ID={{model_output_id}}
+CACHE_DELAY={{cache_delay}}
+MEORG_BIN={{meorg_bin}}
+
+{% if purge_outputs %}
+# Purge existing model outputs
+echo "Purging existing outputs from $MODEL_OUTPUT_ID"
+$MEORG_BIN file detach_all $MODEL_OUTPUT_ID
+{% endif %}
+
+# Upload the data
+echo "Uploading data to $MODEL_OUTPUT_ID"
+$MEORG_BIN file upload $DATA_DIR/*.nc -n $NUM_THREADS --attach_to $MODEL_OUTPUT_ID
+
+# Wait for the cache to transfer to the object store.
+echo "Waiting for object store transfer ($CACHE_DELAY sec)"
+sleep $CACHE_DELAY
+
+# Trigger the analysis
+echo "Triggering analysis on $MODEL_OUTPUT_ID"
+$MEORG_BIN analysis start $MODEL_OUTPUT_ID
+
+echo "DONE"
