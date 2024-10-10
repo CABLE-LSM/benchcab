@@ -6,7 +6,7 @@ channels:
   - defaults
 
 dependencies:
-  - python<3.13
+  - python=3.13
   - payu>=1.0.30
   - pip
   - f90nml
