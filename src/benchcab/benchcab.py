@@ -11,6 +11,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Optional
 
+import benchcab.utils.meorg as bm
 from benchcab import fluxsite, internal, spatial
 from benchcab.comparison import run_comparisons, run_comparisons_in_parallel
 from benchcab.config import read_config
@@ -22,7 +23,7 @@ from benchcab.coverage import (
 from benchcab.environment_modules import EnvironmentModules, EnvironmentModulesInterface
 from benchcab.internal import get_met_forcing_file_names
 from benchcab.model import Model
-from benchcab.utils import is_verbose
+from benchcab.utils import is_verbose, task_summary
 from benchcab.utils.fs import mkdir, next_path
 from benchcab.utils.pbs import render_job_script
 from benchcab.utils.repo import create_repo
@@ -234,13 +235,24 @@ class Benchcab:
             logger.error(exc.output)
             raise
 
-        logger.info(f"PBS job submitted: {proc.stdout.strip()}")
+        # Get the job ID
+        job_id = proc.stdout.strip()
+
+        logger.info(f"PBS job submitted: {job_id}")
         logger.info("CABLE log file for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['LOG']}/<task_name>_log.txt")
         logger.info("The CABLE standard output for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['TASKS']}/<task_name>/out.txt")
         logger.info("The NetCDF output for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['OUTPUT']}/<task_name>_out.nc")
+
+        # Upload to meorg by default
+        bm.do_meorg(
+            config,
+            upload_dir=internal.FLUXSITE_DIRS["OUTPUT"],
+            benchcab_bin=str(self.benchcab_exe_path),
+            benchcab_job_id=job_id,
+        )
 
     def gen_codecov(self, config_path: str):
         """Endpoint for `benchcab codecov`."""
@@ -347,8 +359,7 @@ class Benchcab:
         else:
             fluxsite.run_tasks(tasks)
 
-        tasks_failed = [task for task in tasks if not task.is_done()]
-        n_failed, n_success = len(tasks_failed), len(tasks) - len(tasks_failed)
+        _, n_success, n_failed, _ = task_summary(tasks)
         logger.info(f"{n_failed} failed, {n_success} passed")
 
     def fluxsite_bitwise_cmp(self, config_path: str):
@@ -376,8 +387,7 @@ class Benchcab:
         else:
             run_comparisons(comparisons)
 
-        tasks_failed = [task for task in comparisons if not task.is_done()]
-        n_failed, n_success = len(tasks_failed), len(comparisons) - len(tasks_failed)
+        _, n_success, n_failed, _ = task_summary(comparisons)
         logger.info(f"{n_failed} failed, {n_success} passed")
 
     def fluxsite(self, config_path: str, no_submit: bool, skip: list[str]):

@@ -10,6 +10,7 @@ import math
 import f90nml
 import netCDF4
 import pytest
+
 from benchcab import __version__, internal
 from benchcab.fluxsite import (
     CableError,

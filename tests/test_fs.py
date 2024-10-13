@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 
 import pytest
+
 from benchcab.utils.fs import chdir, mkdir, next_path, prepend_path
 
 

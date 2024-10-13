@@ -3,6 +3,7 @@
 import pytest
 
 import benchcab.utils as bu
+from benchcab.comparison import ComparisonTask
 
 
 def test_get_installed_root():
@@ -60,3 +61,23 @@ def test_get_logger_singleton_fail():
     logger2 = bu.get_logger(name="benchcab2")
 
     assert logger1 is not logger2
+
+
+def test_task_summary():
+
+    # Create some mocked tasks
+    t1 = ComparisonTask(files=(), task_name="t1")
+    t2 = ComparisonTask(files=(), task_name="t2")
+
+    # Inject success/fail cases
+    t1.is_done = lambda: True
+    t2.is_done = lambda: False
+
+    # Run the function
+    n_tasks, n_success, n_failed, all_complete = bu.task_summary([t1, t2])
+
+    # Check correct results
+    assert n_tasks == 2
+    assert n_success == 1
+    assert n_failed == 1
+    assert all_complete == False

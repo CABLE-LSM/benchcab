@@ -107,6 +107,12 @@ fluxsite:
           schema:
             type: "string"
             required: false
+    meorg_model_output_id:
+      type: 
+       - "boolean"
+       - "string"
+      required: false
+      default: false
 
 spatial:
   type: "dict"
@@ -135,3 +141,10 @@ spatial:
 codecov:
   type: "boolean"
   required: false
+
+meorg_bin:
+  type:
+   - "boolean"
+   - "string"
+  required: False
+  default: False
