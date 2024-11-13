@@ -86,7 +86,7 @@ class Model:
         """Get absolute path for code coverage analysis."""
         return (internal.CODECOV_DIR / f"R{self.model_id}").absolute()
 
-    def _get_build_flags(self, mpi: bool, coverage: bool, compiler_id: str) -> dict:
+    def _get_build_flags(self, coverage: bool, compiler_id: str) -> dict:
         """Get flags for CMake build."""
         # Supported compilers for code coverage
         codecov_compilers = ["ifort", "ifx"]
@@ -94,7 +94,6 @@ class Model:
         build_flags = {}
 
         build_flags["build_type"] = "Debug" if coverage else "Release"
-        build_flags["mpi"] = "ON" if mpi else "OFF"
 
         build_flags["flags_init"] = ""
 
@@ -164,14 +163,13 @@ class Model:
             self.logger.debug(
                 f"Getting environment variable for compiler $FC = {env_fc}"
             )
-            build_flags = self._get_build_flags(mpi, coverage, env_fc)
+            build_flags = self._get_build_flags(coverage, env_fc)
             env_fc = None
 
             with chdir(path_to_repo):
                 env = os.environ.copy()
 
                 cmake_args = [
-                    f"-DCABLE_MPI={build_flags['mpi']}",
                     f"-DCMAKE_BUILD_TYPE={build_flags['build_type']}",
                     f"-DCMAKE_Fortran_FLAGS_INIT={build_flags['flags_init']}",
                     "-DCMAKE_VERBOSE_MAKEFILE=ON",
@@ -207,12 +205,20 @@ class Model:
                 )
 
                 self.subprocess_handler.run_cmd(
-                    "cmake -S . -B build " + " ".join(cmake_args), env=env
+                    "cmake -S . -B build/serial -DCABLE_MPI=OFF " + " ".join(cmake_args), env=env
                 )
-                self.subprocess_handler.run_cmd("cmake --build build ", env=env)
+                self.subprocess_handler.run_cmd("cmake --build build/serial", env=env)
                 self.subprocess_handler.run_cmd(
-                    "cmake --install build --prefix .", env=env
+                    "cmake --install build/serial --prefix .", env=env
                 )
+                if mpi:
+                    self.subprocess_handler.run_cmd(
+                        "cmake -S . -B build/mpi -DCABLE_MPI=ON " + " ".join(cmake_args), env=env
+                    )
+                    self.subprocess_handler.run_cmd("cmake --build build/mpi", env=env)
+                    self.subprocess_handler.run_cmd(
+                        "cmake --install build/mpi --prefix .", env=env
+                    )
 
 
 def remove_module_lines(file_path: Path) -> None:
