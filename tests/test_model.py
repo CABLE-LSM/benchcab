@@ -121,7 +121,6 @@ class TestGetBuildFlags:
 
         return {
             "build_type": codecov_build_type[codecov],
-            "mpi": mpi_args[mpi],
             "flags_init": codecov_init_args[codecov],
         }
 
@@ -136,11 +135,11 @@ class TestGetBuildFlags:
                 User has {compiler_id} in their environment"""
                 ),
             ):
-                model._get_build_flags(mpi, codecov, compiler_id)
+                model._get_build_flags(codecov, compiler_id)
             return
 
         # Success case: get expected build flags to pass to CMake.
-        assert model._get_build_flags(mpi, codecov, compiler_id) == cmake_flags
+        assert model._get_build_flags(codecov, compiler_id) == cmake_flags
 
 
 # TODO(Sean) remove for issue https://github.com/CABLE-LSM/benchcab/issues/211
