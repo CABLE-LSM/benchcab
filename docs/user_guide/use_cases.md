@@ -21,20 +21,20 @@ realisations:
       git:
         branch: main
   - repo:
-      name: my-feature-off (1)
+      name: my-feature-off # (1)
       git:
         branch: XXXXX
   - repo:
       name: my-feature-on
       git:
         branch: XXXXX
-    patch: (2)
+    patch: # (2)
         cable:
             cable_user:
                 new_feature: YYYY
 
 fluxsite:
-    meorg_model_output_id: ZZZZ (3)
+    meorg_model_output_id: ZZZZ # (3)
   
 modules: [
   intel-compiler/2021.1.1,
@@ -42,6 +42,7 @@ modules: [
   openmpi/4.1.0
 ]
 ```
+
 1. We are using the same branch twice so we need to name each occurrence differently.
 2. One should use the same option names and values as implemented in the cable namelist file.
 3. You need to setup your environment for meorg_client before using this feature. If splitting in two occurrences for benchcab, this option should only appear with the "my-feature-on" `repo` option.
@@ -54,11 +55,11 @@ The analysis of R0 and R2 in modelevaluation.org gives the effect of the new fea
 In that case, you may want to show the comparison between your branch with the feature on and main *with the feature on as well*.
 
 ```yaml
-realisations: (1)
+realisations: # (1)
   - repo:
       git:
         branch: main
-    patch: (2)
+    patch: # (2)
         cable:
             cable_user:
                 existing_feature: YYYY
@@ -66,13 +67,13 @@ realisations: (1)
   - repo:
       git:
         branch: XXXXX
-    patch: (2)
+    patch: # (2)
         cable:
             cable_user:
                 existing_feature: YYYY
 
 fluxsite:
-    meorg_model_output_id: ZZZZ (3)
+    meorg_model_output_id: ZZZZ # (3)
   
 modules: [
   intel-compiler/2021.1.1,
@@ -80,6 +81,7 @@ modules: [
   openmpi/4.1.0
 ]
 ```
+
 1. We only show the configuration for the feature on case since the configuration for the feature off is the same as previously.
 2. One should use the same option names and values as implemented in the cable namelist file.
 3. You need to setup your environment for meorg_client before using this feature. 
@@ -99,21 +101,21 @@ realisations:
       git:
         branch: main
   - repo:
-      name: my-feature-off (1)
+      name: my-feature-off # (1)
       local:
-        path: XXXXX (2)
+        path: XXXXX # (2)
   - repo:
       name: my-feature-on
       local:
         path: XXXXX
-    patch: (3)
+    patch: # (3)
         cable:
             cable_user:
                 new_feature: YYYY
 
 fluxsite:
-    meorg_model_output_id: ZZZZ (4)
-    pbs: (5)
+    meorg_model_output_id: ZZZZ # (4)
+    pbs: # (5)
       ncpus: 8
       mem: 16GB
       walltime: "0:15:00"
@@ -124,6 +126,7 @@ modules: [
   openmpi/4.1.0
 ]
 ```
+
 1. We are using the same branch twice so we need to name each occurrence differently.
 2. Gives the full path to your local CABLE repository with your code changes.
 3. One should use the same option names and values as implemented in the cable namelist file.
