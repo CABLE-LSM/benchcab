@@ -2,18 +2,7 @@
 
 In all examples replace strings like XXXXX, YYYYY, etc. with the appropriate values for your case.
 
-## Required run when developing a new feature for CABLE
-
-!!! note Separate runs can be faster
-
-    We show an uniq configuration to get all the results needed but it isn't necessarily the fastest way. Splitting in 2 occurrences of benchcab running at the same time (one for each configuration of the feature branch) can be faster since the benchcab occurrences run in parallel of each other. It requires to setup 2 work directories for benchcab but that is a small amount of work.
-
-When developing a new feature for CABLE (or adapting an existing feature), you need to show 2 things in the pull request:
-
-- the results have not changed compared to the main branch when the feature is off
-- the modelevaluation.org analysis results when the feature is on compared to the main branch
-
-This can be done with one benchcab occurrence:
+## Check bitwise comparability
 
 ```yaml
 realisations:
@@ -21,20 +10,8 @@ realisations:
       git:
         branch: main
   - repo:
-      name: my-feature-off # (1)
       git:
         branch: XXXXX
-  - repo:
-      name: my-feature-on
-      git:
-        branch: XXXXX
-    patch: # (2)
-        cable:
-            cable_user:
-                new_feature: YYYY
-
-fluxsite:
-    meorg_model_output_id: ZZZZ # (3)
   
 modules: [
   intel-compiler/2021.1.1,
@@ -43,37 +20,101 @@ modules: [
 ]
 ```
 
-1. We are using the same branch twice so we need to name each occurrence differently.
-2. One should use the same option names and values as implemented in the cable namelist file.
-3. You need to setup your environment for meorg_client before using this feature. If splitting in two occurrences for benchcab, this option should only appear with the "my-feature-on" `repo` option.
+The results of the bitwise comparison will be in the log file from the flux site run.
 
-With this setup, the output of R0 and R1 should be bitwise comparable.
-The analysis of R0 and R2 in modelevaluation.org gives the effect of the new feature on the results.
 
-### Modification when changing an existing feature instead of developing a new one.
+## Evaluate the effect of a new feature
 
-In that case, you may want to show the comparison between your branch with the feature on and main *with the feature on as well*.
+If you are developing a new feature and want to check the effect compared to the main version, you need to run:
+
+- the main version as is
+- the development branch with the new feature turned on for all science configurations
+
+```yaml
+realisations:
+  - repo:
+      git:
+        branch: main
+  - repo:
+      git:
+        branch: XXXXX
+    patch: # (1)
+        cable:
+            cable_user:
+                existing_feature: YYYY
+
+fluxsite:
+    meorg_model_output_id: ZZZZ # (2)
+  
+modules: [
+  intel-compiler/2021.1.1,
+  netcdf/4.7.4,
+  openmpi/4.1.0
+]
+```
+
+1. Use the same option names and values as implemented in the cable namelist file.
+2. You need to setup your environment for meorg_client before using this feature. 
+
+The evaluation results will be in modelevaluation.org on the Model Output page you've specified
+
+## Evaluate the effect of a modified feature
+
+If you are modifying an *existing* feature of CABLE (bug fix or other development) and want to check the effect of your changes compared to the main version, with that feature turned on, you need to run:
+
+- the main branch with the new feature turned on for all science configurations
+- the development branch with the new feature turned on for all science configurations
+
+```yaml
+realisations:
+  - repo:
+      git:
+        branch: main
+    patch: # (1)
+        cable:
+            cable_user:
+                existing_feature: YYYY
+  - repo:
+      git:
+        branch: XXXXX
+    patch: # (1)
+        cable:
+            cable_user:
+                existing_feature: YYYY
+
+fluxsite:
+    meorg_model_output_id: ZZZZ # (2)
+  
+modules: [
+  intel-compiler/2021.1.1,
+  netcdf/4.7.4,
+  openmpi/4.1.0
+]
+```
+
+1. Use the same option names and values as implemented in the cable namelist file.
+2. You need to setup your environment for meorg_client before using this feature. 
+
+The evaluation results will be in modelevaluation.org on the Model Output page you've specified
+
+## Evaluation of a bug fix affecting all science options
+
+If you have a bug fix that affects all CABLE simulations, you need to run:
+
+- the main branch as is
+- the development branch as is
 
 ```yaml
 realisations: # (1)
   - repo:
       git:
         branch: main
-    patch: # (2)
-        cable:
-            cable_user:
-                existing_feature: YYYY
-
   - repo:
       git:
         branch: XXXXX
-    patch: # (2)
-        cable:
-            cable_user:
-                existing_feature: YYYY
 
 fluxsite:
-    meorg_model_output_id: ZZZZ # (3)
+    meorg_model_output_id: ZZZZ # (2)
   
 modules: [
   intel-compiler/2021.1.1,
@@ -82,40 +123,40 @@ modules: [
 ]
 ```
 
-1. We only show the configuration for the feature on case since the configuration for the feature off is the same as previously.
-2. One should use the same option names and values as implemented in the cable namelist file.
-3. You need to setup your environment for meorg_client before using this feature. 
+1. Use the same option names and values as implemented in the cable namelist file.
+2. You need to setup your environment for meorg_client before using this feature. 
 
-## Smaller tests during development
+The evaluation results will be in modelevaluation.org on the Model Output page you've specified
 
-### Comparison to one site for local development
+## Early test of development using a local repository 
 
-During development, one might want to check their results before committing and pushing to CABLE's GitHub repository. It is possible to run benchcab using a local directory. 
-The configuration here test both a new feature on and off but it is valid to only run one or the other case.
+Do a quick test at one site only to compare a new feature on and off together and with the main branch.
+
+To run only the fluxsite experiment, execute `benchcab fluxsite` with the following config.yaml file.
 
 ```yaml
-experiment: AU-Tum
+experiment: AU-Tum # (1)
 
 realisations:
   - repo:
       git:
         branch: main
   - repo:
-      name: my-feature-off # (1)
+      name: my-feature-off # (2)
       local:
-        path: XXXXX # (2)
+        path: XXXXX # (3)
   - repo:
       name: my-feature-on
       local:
         path: XXXXX
-    patch: # (3)
+    patch: # (4)
         cable:
             cable_user:
                 new_feature: YYYY
 
 fluxsite:
-    meorg_model_output_id: ZZZZ # (4)
-    pbs: # (5)
+    meorg_model_output_id: ZZZZ # (5)
+    pbs: # (6)
       ncpus: 8
       mem: 16GB
       walltime: "0:15:00"
@@ -127,8 +168,11 @@ modules: [
 ]
 ```
 
-1. We are using the same branch twice so we need to name each occurrence differently.
-2. Gives the full path to your local CABLE repository with your code changes.
-3. One should use the same option names and values as implemented in the cable namelist file.
-4. You need to setup your environment for meorg_client before using this feature. This option should only appear with the "my-feature-on" `repo` option.
-5. You can reduce the requested resources to reduce the cost of the test.
+1. Testing at one flux site only to save time and resources.
+2. We are using the same branch twice so we need to name each occurrence differently.
+3. Give the full path to your local CABLE repository with your code changes.
+4. Use the same option names and values as implemented in the cable namelist file.
+5. You need to setup your environment for meorg_client before using this feature. This option should only appear with the "my-feature-on" `repo` option.
+6. You can reduce the requested resources to reduce the cost of the test.
+
+Comparisons of R0 and R1 should show bitwise agreement. R2 and R0 comparison on modelevaluation.org shows the impact of the changes.
