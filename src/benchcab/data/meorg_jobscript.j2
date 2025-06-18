@@ -18,19 +18,39 @@ set -ev
 # Set some things
 DATA_DIR={{data_dir}}
 NUM_THREADS={{num_threads}}
-MODEL_OUTPUT_ID={{model_output_id}}
 CACHE_DELAY={{cache_delay}}
-MEORG_BIN={{meorg_bin}}
+MEORG_BIN={{me.meorg_bin}}
+MODEL_OUTPUT_NAME={{me.model_output_name}}
+MODEL_OUTPUT_ARGS=()
 
-{% if purge_outputs %}
-# Purge existing model outputs
-echo "Purging existing outputs from $MODEL_OUTPUT_ID"
-$MEORG_BIN file detach_all $MODEL_OUTPUT_ID
+
+# Create new model output entity
+MODEL_OUTPUT_ARGS+=(--state-selection {{ me.state_selection }})
+MODEL_OUTPUT_ARGS+=(--parameter-selection {{ me.parameter_selection }})
+{% if me.is_bundle %}
+MODEL_OUTPUT_ARGS+=(--is-bundle)
 {% endif %}
+
+MODEL_OUTPUT_ID=$($MEORG_BIN output query $MODEL_OUTPUT_NAME | head -n 1)
+{% if $MODEL_OUTPUT_ID %}
+echo "Deleting existing files from model output ID"
+$MEORG_BIN file detach_all $MODEL_OUTPUT_ID
+echo "Update model output ID"
+{% else %}
+echo "Create new model output ID"
+{% endif %}
+
+MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $MODEL_OUTPUT_NAME $MODEL_OUTPUT_ARGS)"
+
+echo "Add experiments to model output"
+$MEORG_BIN experiments update $MODEL_OUTPUT_ID {{ model_output_experiment_ids|join(',') }}
+
+echo "Add benchmarks to model output"
+$MEORG_BIN benchmark replace $MODEL_OUTPUT_ID {{ model_output_benchmark_ids|join(',') }}
 
 # Upload the data
 echo "Uploading data to $MODEL_OUTPUT_ID"
-$MEORG_BIN file upload $DATA_DIR/*.nc -n $NUM_THREADS --attach_to $MODEL_OUTPUT_ID
+$MEORG_BIN file upload $DATA_DIR/*.nc -n $NUM_THREADS $MODEL_OUTPUT_ID
 
 # Wait for the cache to transfer to the object store.
 echo "Waiting for object store transfer ($CACHE_DELAY sec)"
@@ -38,6 +58,8 @@ sleep $CACHE_DELAY
 
 # Trigger the analysis
 echo "Triggering analysis on $MODEL_OUTPUT_ID"
-$MEORG_BIN analysis start $MODEL_OUTPUT_ID
+{% for exp_id in model_output_experiment_ids %} 
+$MEORG_BIN analysis start $MODEL_OUTPUT_ID {{ exp_id }}
+{% endfor %} 
 
 echo "DONE"

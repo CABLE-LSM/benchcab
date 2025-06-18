@@ -249,9 +249,14 @@ MEORG_EXPERIMENTS = {
         "US-Whs",
         "US-Wkg",
     ],
+    "AU-Tum-P2": ["AU-Tum"]
 }
 
-FLUXSITE_DEFAULT_EXPERIMENT = "forty-two-site-test"
+MEORG_EXPERIMENT_MAP = {
+    "AU-Tum-P2": "aGKRjGTwckAytEjf5"
+}
+
+FLUXSITE_DEFAULT_EXPERIMENT = "AU-Tum-P2" # "forty-two-site-test"
 FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID = False
 
 OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
@@ -276,6 +281,12 @@ def get_met_forcing_file_names(experiment: str) -> list[str]:
 
     return file_names
 
+def get_model_output_name(config: dict):
+    # format
+    # R1 - R2  ... Rn
+    # Rx = model.name, if local then only the last part
+    # Prepend CABLE
+    pass
 
 # Configuration for the client upload
 MEORG_CLIENT = dict(
@@ -285,3 +296,6 @@ MEORG_CLIENT = dict(
     walltime="01:00:00",
     storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"],
 )
+
+# MEORG_PROFILE = ("CABLE", "nFcjg4qqHGPkB9sqE")
+MEORG_PROFILE = ("test-output", "QhrHMxeQcgbXboong")

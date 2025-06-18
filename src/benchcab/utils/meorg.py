@@ -10,7 +10,7 @@ from benchcab.internal import MEORG_CLIENT
 
 
 def do_meorg(config: dict, upload_dir: str, benchcab_bin: str, benchcab_job_id: str):
-    """Perform the upload of model outputs to modelevaluation.org
+    """Perform the upload of model outputs to modelevaluation.org.
 
     Parameters
     ----------
