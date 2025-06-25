@@ -1,5 +1,6 @@
 """Main entry point for `benchcab`."""
 
+import os
 import shutil
 import sys
 
@@ -40,7 +41,10 @@ def main():
 
     This is required for setup.py entry_points
     """
-    app = Benchcab(benchcab_exe_path=shutil.which(sys.argv[0]))
+    benchcab_path = shutil.which(sys.argv[0])
+    if "BENCHCAB_PATH" in os.environ:
+        benchcab_path = os.environ["BENCHCAB_PATH"]
+    app = Benchcab(benchcab_exe_path=benchcab_path)
     parser = generate_parser(app)
     parse_and_dispatch(parser, app)
 
