@@ -20,7 +20,6 @@ class PBSConfig(TypedDict):
 def render_job_script(
     project: str,
     config_path: str,
-    modules: list,
     benchcab_path: str,
     pbs_config: PBSConfig,
     verbose: Optional[bool] = False,
@@ -36,7 +35,6 @@ def render_job_script(
     storage_flags = ["gdata/ks32", "gdata/hh5", "gdata/wd9", *pbs_config["storage"]]
 
     context = dict(
-        modules=modules,
         verbose_flag=verbose_flag,
         ncpus=pbs_config["ncpus"],
         mem=pbs_config["mem"],
