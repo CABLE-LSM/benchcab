@@ -9,10 +9,6 @@
 #PBS -m e
 #PBS -l storage={{storage}}
 
-module purge
-{% for module in modules -%}
-module load {{module}}
-{% endfor %}
 set -ev
 
 {{benchcab_path}} fluxsite-run-tasks --config={{config_path}}{{verbose_flag}}

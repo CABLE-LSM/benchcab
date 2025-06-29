@@ -216,7 +216,6 @@ class Benchcab:
             contents = render_job_script(
                 project=config["project"],
                 config_path=config_path,
-                modules=config["modules"],
                 pbs_config=config["fluxsite"]["pbs"],
                 skip_bitwise_cmp="fluxsite-bitwise-cmp" in skip,
                 skip_codecov="gen_codecov" in skip or not config["codecov"],

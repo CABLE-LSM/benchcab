@@ -13,7 +13,6 @@ class TestRenderJobScript:
         assert render_job_script(
             project="tm70",
             config_path="/path/to/config.yaml",
-            modules=["foo", "bar", "baz"],
             pbs_config=internal.FLUXSITE_DEFAULT_PBS,
             benchcab_path="/absolute/path/to/benchcab",
         ) == load_package_data("test/pbs_jobscript_default.sh")
@@ -23,7 +22,6 @@ class TestRenderJobScript:
         assert render_job_script(
             project="tm70",
             config_path="/path/to/config.yaml",
-            modules=["foo", "bar", "baz"],
             pbs_config=internal.FLUXSITE_DEFAULT_PBS,
             verbose=True,
             benchcab_path="/absolute/path/to/benchcab",
@@ -34,7 +32,6 @@ class TestRenderJobScript:
         assert render_job_script(
             project="tm70",
             config_path="/path/to/config.yaml",
-            modules=["foo", "bar", "baz"],
             pbs_config=internal.FLUXSITE_DEFAULT_PBS,
             skip_bitwise_cmp=True,
             benchcab_path="/absolute/path/to/benchcab",
@@ -45,7 +42,6 @@ class TestRenderJobScript:
         assert render_job_script(
             project="tm70",
             config_path="/path/to/config.yaml",
-            modules=["foo", "bar", "baz"],
             pbs_config=internal.FLUXSITE_DEFAULT_PBS,
             skip_codecov=False,
             benchcab_path="/absolute/path/to/benchcab",
