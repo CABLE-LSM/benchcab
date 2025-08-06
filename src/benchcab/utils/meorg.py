@@ -7,9 +7,12 @@ from meorg_client.client import Client as MeorgClient
 
 import benchcab.utils as bu
 from benchcab.internal import MEORG_CLIENT
+from benchcab.utils import interpolate_file_template
 
 
-def do_meorg(config: dict, upload_dir: str, benchcab_bin: str, benchcab_job_id: str):
+def do_meorg(
+    config: dict, upload_dir: str, benchcab_bin: str, benchcab_job_id: str = None
+):
     """Perform the upload of model outputs to modelevaluation.org.
 
     Parameters
@@ -80,15 +83,28 @@ def do_meorg(config: dict, upload_dir: str, benchcab_bin: str, benchcab_job_id: 
 
         logger.info("Uploading outputs to modelevaluation.org")
 
+        mo = {
+            "state_selection": "default",
+            "parameter_selection": "automated",
+            "is_bundle": True,
+            "name": "benchcab_test_workflow",
+        }
+        model_prof_id = "QhrHMxeQcgbXboong"
+        model_exp_ids = ["N4cfSrR49NPCRvAmS"]
+        model_benchmark_ids = ["8yNz4bHKoqwznLuK2"]
+
         # Submit the outputs
         client = get_client()
         meorg_jobid = client.submit(
             bu.get_installed_root() / "data" / "meorg_jobscript.j2",
             render=True,
             dry_run=False,
-            depends_on=benchcab_job_id,
+            # depends_on=benchcab_job_id,
             # Interpolate into the job script
-            model_output_id=model_output_id,
+            mo=mo,
+            model_prof_id=model_prof_id,
+            model_exp_ids=model_exp_ids,
+            model_benchmark_ids=model_benchmark_ids,
             data_dir=upload_dir,
             cache_delay=MEORG_CLIENT["cache_delay"],
             mem=MEORG_CLIENT["mem"],

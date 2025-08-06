@@ -19,34 +19,30 @@ set -ev
 DATA_DIR={{data_dir}}
 NUM_THREADS={{num_threads}}
 CACHE_DELAY={{cache_delay}}
-MEORG_BIN={{me.meorg_bin}}
-MODEL_OUTPUT_NAME={{me.model_output_name}}
+MEORG_BIN={{meorg_bin}}
+MODEL_PROFILE_ID={{ model_prof_id }}
+MODEL_OUTPUT_NAME={{ mo.name }}
 MODEL_OUTPUT_ARGS=()
 
-
 # Create new model output entity
-MODEL_OUTPUT_ARGS+=(--state-selection {{ me.state_selection }})
-MODEL_OUTPUT_ARGS+=(--parameter-selection {{ me.parameter_selection }})
-{% if me.is_bundle %}
-MODEL_OUTPUT_ARGS+=(--is-bundle)
+MODEL_OUTPUT_ARGS+="--state-selection {{ mo.state_selection }}"
+MODEL_OUTPUT_ARGS+=" --parameter-selection {{ mo.parameter_selection }}"
+{% if mo.is_bundle %}
+MODEL_OUTPUT_ARGS+=" --is-bundle"
 {% endif %}
 
-MODEL_OUTPUT_ID=$($MEORG_BIN output query $MODEL_OUTPUT_NAME | head -n 1)
-{% if $MODEL_OUTPUT_ID %}
+MODEL_OUTPUT_ID=$($MEORG_BIN output query $MODEL_OUTPUT_NAME | head -n 1 )
+if [ ! -z "${MODEL_OUTPUT_ID}" ] ; then
 echo "Deleting existing files from model output ID"
-$MEORG_BIN file detach_all $MODEL_OUTPUT_ID
-echo "Update model output ID"
-{% else %}
+$MEORG_BIN file delete_all $MODEL_OUTPUT_ID
+echo "Updated model output ID"
+else
 echo "Create new model output ID"
-{% endif %}
+fi
 
-MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $MODEL_OUTPUT_NAME $MODEL_OUTPUT_ARGS)"
-
+MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $MODEL_OUTPUT_NAME $MODEL_OUTPUT_ARGS | head -n 1 | awk '{print $NF}')"
 echo "Add experiments to model output"
-$MEORG_BIN experiments update $MODEL_OUTPUT_ID {{ model_output_experiment_ids|join(',') }}
-
-echo "Add benchmarks to model output"
-$MEORG_BIN benchmark replace $MODEL_OUTPUT_ID {{ model_output_benchmark_ids|join(',') }}
+$MEORG_BIN experiment update $MODEL_OUTPUT_ID {{ model_exp_ids|join(',') }}
 
 # Upload the data
 echo "Uploading data to $MODEL_OUTPUT_ID"
@@ -56,10 +52,14 @@ $MEORG_BIN file upload $DATA_DIR/*.nc -n $NUM_THREADS $MODEL_OUTPUT_ID
 echo "Waiting for object store transfer ($CACHE_DELAY sec)"
 sleep $CACHE_DELAY
 
+{% for exp_id in model_exp_ids %} 
+echo "Replace benchmarks to model output"
+$MEORG_BIN benchmark update $MODEL_OUTPUT_ID {{ exp_id }} {{ model_benchmark_ids|join(',') }}
+
 # Trigger the analysis
 echo "Triggering analysis on $MODEL_OUTPUT_ID"
-{% for exp_id in model_output_experiment_ids %} 
 $MEORG_BIN analysis start $MODEL_OUTPUT_ID {{ exp_id }}
+
 {% endfor %} 
 
 echo "DONE"

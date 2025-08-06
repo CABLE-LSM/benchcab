@@ -249,14 +249,12 @@ MEORG_EXPERIMENTS = {
         "US-Whs",
         "US-Wkg",
     ],
-    "AU-Tum-P2": ["AU-Tum"]
+    "AU-Tum-P2": ["AU-Tum"],
 }
 
-MEORG_EXPERIMENT_MAP = {
-    "AU-Tum-P2": "aGKRjGTwckAytEjf5"
-}
+MEORG_EXPERIMENT_MAP = {"AU-Tum-P2": "aGKRjGTwckAytEjf5"}
 
-FLUXSITE_DEFAULT_EXPERIMENT = "AU-Tum-P2" # "forty-two-site-test"
+FLUXSITE_DEFAULT_EXPERIMENT = "AU-Tum-P2"  # "forty-two-site-test"
 FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID = False
 
 OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
@@ -281,12 +279,14 @@ def get_met_forcing_file_names(experiment: str) -> list[str]:
 
     return file_names
 
+
 def get_model_output_name(config: dict):
     # format
     # R1 - R2  ... Rn
     # Rx = model.name, if local then only the last part
     # Prepend CABLE
     pass
+
 
 # Configuration for the client upload
 MEORG_CLIENT = dict(
