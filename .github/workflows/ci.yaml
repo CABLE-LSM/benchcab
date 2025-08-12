@@ -42,3 +42,13 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
+      - name: Use black for formatting reports
+        uses: psf/black@stable
+        with:
+          options: "--check"
+          src: "./src ./tests"
+      - name: Use ruff for linting reports
+        uses: chartboost/ruff-action@v1
+        with:
+          args: check --output-format=github
+          src: "./src ./tests"
