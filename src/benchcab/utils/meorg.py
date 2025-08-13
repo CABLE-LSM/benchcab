@@ -87,11 +87,34 @@ def do_meorg(
             "state_selection": "default",
             "parameter_selection": "automated",
             "is_bundle": True,
-            "name": "benchcab_test_workflow",
+            "name": config["model_output_name"],
         }
-        model_prof_id = "QhrHMxeQcgbXboong"
-        model_exp_ids = ["N4cfSrR49NPCRvAmS"]
+        model_prof_id = "nFcjg4qqHGPkB9sqE"
+        model_exp_ids = ["jwN9jNMWLEzbT2i9D"]
         model_benchmark_ids = ["8yNz4bHKoqwznLuK2"]
+        print(
+            interpolate_file_template(
+                "meorg_jobscript.j2",
+                render=True,
+                dry_run=False,
+                # depends_on=benchcab_job_id,
+                # Interpolate into the job script
+                mo=mo,
+                model_prof_id=model_prof_id,
+                model_exp_ids=model_exp_ids,
+                model_benchmark_ids=model_benchmark_ids,
+                data_dir=upload_dir,
+                cache_delay=MEORG_CLIENT["cache_delay"],
+                mem=MEORG_CLIENT["mem"],
+                num_threads=MEORG_CLIENT["num_threads"],
+                walltime=MEORG_CLIENT["walltime"],
+                storage=MEORG_CLIENT["storage"],
+                project=config["project"],
+                modules=config["modules"],
+                purge_outputs=True,
+                meorg_bin=meorg_bin,
+            )
+        )
 
         # Submit the outputs
         client = get_client()

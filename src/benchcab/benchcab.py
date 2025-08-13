@@ -153,6 +153,7 @@ class Benchcab:
         return self._config
 
     def _get_models(self, config: dict) -> list[Model]:
+        model_output_name_idx = None
         if not self._models:
             for id, sub_config in enumerate(config["realisations"]):
                 repo = create_repo(
@@ -161,6 +162,20 @@ class Benchcab:
                     / (sub_config["name"] if sub_config["name"] else Path()),
                 )
                 self._models.append(Model(repo=repo, model_id=id, **sub_config))
+
+                if sub_config.get("model_output_name") is not None:
+                    if model_output_name_idx is not None:
+                        msg = "More than 1"
+                        raise Exception(msg)
+
+                    model_output_name_idx = id
+
+                if model_output_name_idx is None:
+                    msg = "None"
+                    raise Exception(msg)
+
+                config["model_output_name"] = self._models[model_output_name_idx].name
+
         return self._models
 
     def _fluxsite_show_task_composition(self, config: dict) -> str:
@@ -206,6 +221,9 @@ class Benchcab:
         if self.benchcab_exe_path is None:
             msg = "Path to benchcab executable is undefined."
             raise RuntimeError(msg)
+
+        # TODO: Better method
+        _ = self._get_models(config)
 
         job_script_path = Path(internal.QSUB_FNAME)
         logger.info("Creating PBS job script to run fluxsite tasks on compute nodes")

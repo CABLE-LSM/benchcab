@@ -51,6 +51,10 @@ realisations:
               path:
                 type: "string"
                 required: true
+      model_output_name:
+        nullable: true
+        type: "boolean"
+        required: false
       name:
         nullable: true
         type: "string"
