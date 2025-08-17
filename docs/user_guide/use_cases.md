@@ -35,17 +35,15 @@ realisations:
   - repo:
       git:
         branch: main
+    model_output_name: True # (1)
   - repo:
       git:
         branch: XXXXX
-    patch: # (1)
+    patch: # (2)
         cable:
             cable_user:
                 existing_feature: YYYY
 
-fluxsite:
-    meorg_model_output_id: ZZZZ # (2)
-  
 modules: [
   intel-compiler/2021.1.1,
   netcdf/4.7.4,
@@ -53,8 +51,8 @@ modules: [
 ]
 ```
 
-1. Use the option names and values as implemented in the cable namelist file.
-2. You need to setup your environment for meorg_client before using this feature. 
+1. You need to setup your environment for meorg_client before using this feature. 
+2. Use the option names and values as implemented in the cable namelist file.
 
 The evaluation results will be on modelevaluation.org accessible from the Model Output page you've specified
 
@@ -74,17 +72,15 @@ realisations:
         cable:
             cable_user:
                 existing_feature: YYYY
+    model_output_name: True # (2)
   - repo:
       git:
         branch: XXXXX
-    patch: # (2)
+    patch: # (3)
         cable:
             cable_user:
                 existing_feature: YYYY
 
-fluxsite:
-    meorg_model_output_id: ZZZZ # (3)
-  
 modules: [
   intel-compiler/2021.1.1,
   netcdf/4.7.4,
@@ -93,8 +89,8 @@ modules: [
 ```
 
 1. Use the option names and values as implemented in the cable namelist file.
-2. Use the option names and values as implemented in the cable namelist file.
-3. You need to setup your environment for meorg_client before using this feature. 
+2. You need to setup your environment for meorg_client before using this feature. 
+3. Use the option names and values as implemented in the cable namelist file.
 
 The evaluation results will be on modelevaluation.org accessible from the Model Output page you've specified
 
@@ -110,13 +106,11 @@ realisations:
   - repo:
       git:
         branch: main
+    model_output_name: True # (2)
   - repo:
       git:
         branch: XXXXX
 
-fluxsite:
-    meorg_model_output_id: ZZZZ # (1)
-  
 modules: [
   intel-compiler/2021.1.1,
   netcdf/4.7.4,
@@ -141,21 +135,21 @@ realisations:
   - repo:
       git:
         branch: main
+    model_output_name: True # (2)
   - repo:
-      name: my-feature-off # (2)
+      name: my-feature-off # (3)
       local:
-        path: XXXXX # (3)
+        path: XXXXX # (4)
   - repo:
       name: my-feature-on
       local:
         path: XXXXX
-    patch: # (4)
+    patch: # (5)
         cable:
             cable_user:
                 new_feature: YYYY
 
 fluxsite:
-    meorg_model_output_id: ZZZZ # (5)
     pbs: # (6)
       ncpus: 8
       mem: 16GB
@@ -169,10 +163,10 @@ modules: [
 ```
 
 1. Testing at one flux site only to save time and resources.
-2. We are using the same branch twice so we need to name each occurrence differently.
-3. Give the full path to your local CABLE repository with your code changes.
-4. Use the option names and values as implemented in the cable namelist file.
-5. You need to setup your environment for meorg_client before using this feature.
+2. You need to setup your environment for meorg_client before using this feature.
+3. We are using the same branch twice so we need to name each occurrence differently.
+4. Give the full path to your local CABLE repository with your code changes.
+5. Use the option names and values as implemented in the cable namelist file.
 6. You can reduce the requested resources to reduce the cost of the test.
 
 Comparisons of R0 and R1 should show bitwise agreement. R2 and R0 (and R1) comparison on modelevaluation.org shows the impact of the changes.

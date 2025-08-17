@@ -111,12 +111,6 @@ fluxsite:
           schema:
             type: "string"
             required: false
-    meorg_model_output_id:
-      type: 
-       - "boolean"
-       - "string"
-      required: false
-      default: false
 
 spatial:
   type: "dict"

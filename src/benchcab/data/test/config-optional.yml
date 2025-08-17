@@ -3,7 +3,6 @@ project: hh5
 
 fluxsite:
   experiment: AU-Tum
-  meorg_model_output_id: False
   multiprocess: False
   pbs:
     ncpus: 6
@@ -31,6 +30,7 @@ realisations:
       svn:
         branch_path: trunk
     name: svn_trunk
+    model_output_name: True
   - repo:
       svn:
         branch_path: branches/Users/ccc561/v3.0-YP-changes

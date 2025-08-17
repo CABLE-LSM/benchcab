@@ -10,6 +10,8 @@ from cerberus import Validator
 
 import benchcab.utils as bu
 from benchcab import internal
+from benchcab.utils.repo import create_repo
+from benchcab.model import Model
 
 
 class ConfigValidationError(Exception):
@@ -82,7 +84,7 @@ def read_optional_key(config: dict):
     Parameters
     ----------
     config : dict
-        The configuration file with with/without optional keys
+        The configuration file with without optional keys
 
     """
     if "project" not in config:
@@ -119,11 +121,34 @@ def read_optional_key(config: dict):
     config["fluxsite"]["pbs"] = internal.FLUXSITE_DEFAULT_PBS | config["fluxsite"].get(
         "pbs", {}
     )
-    config["fluxsite"]["meorg_model_output_id"] = config["fluxsite"].get(
-        "meorg_model_output_id", internal.FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID
-    )
 
     config["codecov"] = config.get("codecov", False)
+
+    return config
+
+
+def add_model_output_name(config: dict):
+    """Determine model output name from realisations.
+
+    Parameters
+    ----------
+    config : dict
+        The configuration file with with optional keys
+
+    """
+    is_model_output_name = False
+    for r in config["realisations"]:
+        assert not is_model_output_name
+        if r.get("model_output_name"):
+            is_model_output_name = True
+            repo = create_repo(
+                spec=r["repo"],
+                path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
+            )
+            config["model_output_name"] = Model(repo).name
+            break
+    assert is_model_output_name
+    return config
 
 
 def read_config_file(config_path: str) -> dict:
@@ -154,6 +179,8 @@ def read_config(config_path: str) -> dict:
     ----------
     config_path : str
         Path to the configuration file.
+    is_meorg: str
+        Whether workflow includes meorg job submission. If true, determine the model output name
 
     Returns
     -------
@@ -169,7 +196,8 @@ def read_config(config_path: str) -> dict:
     # Read configuration file
     config = read_config_file(config_path)
     # Populate configuration dict with optional keys
-    read_optional_key(config)
-    # Validate and return.
+    config = read_optional_key(config)
+    # Validate.
     validate_config(config)
+    config = add_model_output_name(config)
     return config

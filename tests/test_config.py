@@ -53,7 +53,7 @@ def no_optional_config() -> dict:
     return {
         "modules": ["intel-compiler/2021.1.1", "netcdf/4.7.4", "openmpi/4.1.0"],
         "realisations": [
-            {"repo": {"svn": {"branch_path": "trunk"}}},
+            {"repo": {"svn": {"branch_path": "trunk"}}, "model_output_name": True},
             {
                 "repo": {
                     "svn": {"branch_path": "branches/Users/ccc561/v3.0-YP-changes"}
@@ -75,7 +75,6 @@ def all_optional_default_config(no_optional_config) -> dict:
             "experiment": bi.FLUXSITE_DEFAULT_EXPERIMENT,
             "multiprocess": bi.FLUXSITE_DEFAULT_MULTIPROCESS,
             "pbs": bi.FLUXSITE_DEFAULT_PBS,
-            "meorg_model_output_id": bi.FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID
         },
         "science_configurations": bi.DEFAULT_SCIENCE_CONFIGURATIONS,
         "spatial": {
@@ -107,7 +106,6 @@ def all_optional_custom_config(no_optional_config) -> dict:
                 "walltime": "10:00:00",
                 "storage": ["scratch/$PROJECT"],
             },
-            "meorg_model_output_id": False
         },
         "science_configurations": [
             {
@@ -199,15 +197,24 @@ class TestReadOptionalKey:
         )
 
 
+def test_add_model_output_name(no_optional_config):
+    """Test addition of correct model output name."""
+    output_config = bc.add_model_output_name(no_optional_config)
+    assert output_config == no_optional_config | {"model_output_name": "trunk"}
+
+
 @pytest.mark.parametrize(
-    ("config_str", "output_config"),
+    ("config_str", "output_config_str"),
     [
         ("config-basic.yml", "all_optional_default_config"),
         ("config-optional.yml", "all_optional_custom_config"),
     ],
     indirect=["config_str"],
 )
-def test_read_config(config_path, output_config, request):
+def test_read_config(config_path, output_config_str, request):
     """Test overall behaviour of read_config."""
+    output_config = request.getfixturevalue(output_config_str) | {
+        "model_output_name": "trunk"
+    }
     config = bc.read_config(config_path)
-    assert pformat(config) == pformat(request.getfixturevalue(output_config))
+    assert pformat(config) == pformat(output_config)

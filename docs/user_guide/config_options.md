@@ -68,7 +68,6 @@ fluxsite:
     walltime: 06:00:00
     storage: [scratch/a00, gdata/xy11]
   multiprocess: True
-  meorg_model_output_id: XXXXXXXX
 ```
 
 ### [experiment](#experiment)
@@ -163,14 +162,6 @@ fluxsites:
   multiprocess: True
 
 ```
-
-### [meorg_model_output_id](#meorg_model_output_id)
-
-: **Default:** False, _optional key_. :octicons-dash-24: The unique Model Output ID from modelevaluation.org to which output files will be automatically uploaded for analysis.
-
-A separate upload job will be submitted at the successful completion of benchcab tasks if this key is present, however, the validity is not checked by benchcab at this stage.
-
-Note: It is the user's responsbility to ensure the model output is configured on modelevaluation.org.
 
 ## spatial
 
@@ -381,6 +372,13 @@ realisations:
 
 : **Default:** _required key, no default_. :octicons-dash-24: Specify the local checkout path of CABLE branch.
 
+### [meorg_model_output_name](#meorg_model_output_name)
+
+: **Default:** False :octicons-dash-24: The Model Output Name from modelevaluation.org to which output files will be automatically uploaded for analysis. Chosen as the model name from one of the realisations. The user must set only one of the realisations keys as True for the name to be chosen.
+
+Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org.
+
+
 ### [name](#name)
 
 : **Default:** base name of [branch_path](#+repo.svn.branch_path) if an SVN repository is given; the branch name if a git repository is given; the folder name if a local path is given, _optional key_. :octicons-dash-24: An alias name used internally by `benchcab` for the branch. The `name` key also specifies the directory name of the source code when retrieving from SVN, GitHub or local.
@@ -506,7 +504,7 @@ codecov:
 
 ## meorg_bin
 
-: **Default:** False, _optional key. :octicons-dash-24: Specifies the absolute system path to the ME.org client executable. In the absence of this key it will be inferred from the same directory as benchcab should `meorg_model_output_id` be set in `fluxsite` above.
+: **Default:** False, _optional key. :octicons-dash-24: Specifies the absolute system path to the ME.org client executable. In the absence of this key it will be inferred from the same directory as benchcab should `meorg_model_output_name` be set in `realisations` above.
 
 ``` yaml
 

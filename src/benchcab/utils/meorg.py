@@ -6,7 +6,7 @@ from hpcpy import get_client
 from meorg_client.client import Client as MeorgClient
 
 import benchcab.utils as bu
-from benchcab.internal import MEORG_CLIENT
+from benchcab.internal import MEORG_CLIENT, MEORG_PROFILE, MEORG_EXPERIMENT_ID_MAP
 from benchcab.utils import interpolate_file_template
 
 
@@ -32,12 +32,12 @@ def do_meorg(
     """
     logger = bu.get_logger()
 
-    model_output_id = config["fluxsite"]["meorg_model_output_id"]
+    model_output_name = config["model_output_name"]
     num_threads = MEORG_CLIENT["num_threads"]
 
     # Check if a model output id has been assigned
-    if model_output_id == False:
-        logger.info("No model_output_id found in fluxsite configuration.")
+    if config.get("model_output_name") is None:
+        logger.info("No model_output_name resolved in configuration.")
         logger.info("NOT uploading to modelevaluation.org")
         return False
 
@@ -63,7 +63,7 @@ def do_meorg(
     if MeorgClient().is_initialised() == False:
 
         logger.warn(
-            "A model_output_id has been supplied, but the meorg_client is not initialised."
+            "A model_output_name has been supplied, but the meorg_client is not initialised."
         )
         logger.warn(
             "To initialise, run `meorg initialise` in the installation environment."
@@ -72,15 +72,16 @@ def do_meorg(
             "Once initialised, the outputs from this run can be uploaded with the following command:"
         )
         logger.warn(
-            f"meorg file upload {upload_dir}/*.nc -n {num_threads} --attach_to {model_output_id}"
+            f"meorg file upload {upload_dir}/*.nc -n {num_threads} --attach_to {model_output_name}"
         )
         logger.warn("Then the analysis can be triggered with:")
-        logger.warn(f"meorg analysis start {model_output_id}")
+        logger.warn(f"meorg analysis start {model_output_name}")
         return False
 
     # Finally, attempt the upload!
     else:
 
+        experiment = config["fluxsite"]["experiment"]
         logger.info("Uploading outputs to modelevaluation.org")
 
         mo = {
@@ -89,9 +90,8 @@ def do_meorg(
             "is_bundle": True,
             "name": config["model_output_name"],
         }
-        model_prof_id = "nFcjg4qqHGPkB9sqE"
-        model_exp_ids = ["jwN9jNMWLEzbT2i9D"]
-        model_benchmark_ids = ["8yNz4bHKoqwznLuK2"]
+        model_exp_id = MEORG_EXPERIMENT_ID_MAP[experiment]["experiment"]
+        model_benchmark_ids = MEORG_EXPERIMENT_ID_MAP[experiment]["benchmarks"]
         print(
             interpolate_file_template(
                 "meorg_jobscript.j2",
@@ -100,8 +100,8 @@ def do_meorg(
                 # depends_on=benchcab_job_id,
                 # Interpolate into the job script
                 mo=mo,
-                model_prof_id=model_prof_id,
-                model_exp_ids=model_exp_ids,
+                model_prof_id=MEORG_PROFILE["id"],
+                model_exp_ids=[model_exp_id],
                 model_benchmark_ids=model_benchmark_ids,
                 data_dir=upload_dir,
                 cache_delay=MEORG_CLIENT["cache_delay"],
@@ -125,8 +125,8 @@ def do_meorg(
             # depends_on=benchcab_job_id,
             # Interpolate into the job script
             mo=mo,
-            model_prof_id=model_prof_id,
-            model_exp_ids=model_exp_ids,
+            model_prof_id=MEORG_PROFILE["id"],
+            model_exp_ids=[model_exp_id],
             model_benchmark_ids=model_benchmark_ids,
             data_dir=upload_dir,
             cache_delay=MEORG_CLIENT["cache_delay"],

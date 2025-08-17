@@ -249,13 +249,43 @@ MEORG_EXPERIMENTS = {
         "US-Whs",
         "US-Wkg",
     ],
-    "AU-Tum-P2": ["AU-Tum"],
 }
 
-MEORG_EXPERIMENT_MAP = {"AU-Tum-P2": "aGKRjGTwckAytEjf5"}
+# Map experiment with their IDs and benchmarks
+# For now, each experiment is associated with 3 benchmarks (1lin, 3km27, LSTM)
+MEORG_EXPERIMENT_ID_MAP = {
+    "AU-Tum": {
+        "experiment": "aGKRjGTwckAytEjf5",
+        "benchmarks": ["J9BBQCJdsuehsmMf2", "N5X2rjmp96baXrrJ3", "Q7Xu6yGGYdzvvAwbn"],
+    },
+    "AU-How": {
+        "experiment": "XfC6MTEMm23C4m4iL",
+        "benchmarks": ["tdrQrKmaihmWdZSZu", "qZWhR3g7JfGhKWPa7", "p2SFiZdQw6ChQK6pr"],
+    },
+    "FI-Hyy": {
+        "experiment": "nXpDC2Yt7RhhwSKor",
+        "benchmarks": ["Ym7gwY4k2J2pvDKDJ", "xYA3tSrL2bCeEmvai", "kXFt8mCMtHG4rsnJz"],
+    },
+    "US-Var": {
+        "experiment": "sD9N2dKx4Jca8B82T",
+        "benchmarks": ["NbMEBX4sPNHNYkTtq", "X3FoGtYvWmjCyRHGd", "uejBLuHnf4RxAqZXH"],
+    },
+    "US-Whs": {
+        "experiment": "aWDKqBoTe88ssinuc",
+        "benchmarks": ["QWsdgXGCWYx7HobXJ", "C42GurGaYDdSRrc2x", "zdnCDJXJzuSheP6T5"],
+    },
+    "five-site-test": {
+        "experiment": "Nb37QxkAz3FczWDd7",
+        "benchmarks": ["PP4rFWJGiixFZP8q4", "8kWgyuSkwAKyghsFp", "DYWQuYvxZDgEsp4iX"],
+    },
+    "forty-two-site-test": {
+        "experiment": "s6k22L3WajmiS9uGv",
+        "benchmarks": ["zKRrfM7bJpxWPcQ3L", "LMvzc2WL5Qa5jKTpv", "D3XqYwQgH88Tx6NCW"],
+    },
+}
 
-FLUXSITE_DEFAULT_EXPERIMENT = "AU-Tum-P2"  # "forty-two-site-test"
-FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID = False
+
+FLUXSITE_DEFAULT_EXPERIMENT = "AU-Tum"  # "forty-two-site-test"
 
 OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
 
@@ -280,14 +310,6 @@ def get_met_forcing_file_names(experiment: str) -> list[str]:
     return file_names
 
 
-def get_model_output_name(config: dict):
-    # format
-    # R1 - R2  ... Rn
-    # Rx = model.name, if local then only the last part
-    # Prepend CABLE
-    pass
-
-
 # Configuration for the client upload
 MEORG_CLIENT = dict(
     num_threads=1,  # Parallel uploads over 4 cores
@@ -297,5 +319,4 @@ MEORG_CLIENT = dict(
     storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"],
 )
 
-# MEORG_PROFILE = ("CABLE", "nFcjg4qqHGPkB9sqE")
-MEORG_PROFILE = ("test-output", "QhrHMxeQcgbXboong")
+MEORG_PROFILE = {"name": "CABLE", "id": "nFcjg4qqHGPkB9sqE"}
