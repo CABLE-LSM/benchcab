@@ -200,7 +200,10 @@ class TestReadOptionalKey:
 def test_add_model_output_name(no_optional_config):
     """Test addition of correct model output name."""
     output_config = bc.add_model_output_name(no_optional_config)
-    assert output_config == no_optional_config | {"model_output_name": "trunk"}
+
+    del no_optional_config["realisations"][0]["model_output_name"]
+    no_optional_config = no_optional_config | {"model_output_name": "trunk"}
+    assert output_config == no_optional_config
 
 
 @pytest.mark.parametrize(
@@ -216,5 +219,6 @@ def test_read_config(config_path, output_config_str, request):
     output_config = request.getfixturevalue(output_config_str) | {
         "model_output_name": "trunk"
     }
+    del output_config["realisations"][0]["model_output_name"]
     config = bc.read_config(config_path)
     assert pformat(config) == pformat(output_config)

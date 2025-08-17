@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import yaml
+import copy
 from cerberus import Validator
 
 import benchcab.utils as bu
@@ -136,10 +137,13 @@ def add_model_output_name(config: dict):
         The configuration file with with optional keys
 
     """
+    # pure function
+    config = copy.deepcopy(config)
+
     is_model_output_name = False
     for r in config["realisations"]:
         assert not is_model_output_name
-        if r.get("model_output_name"):
+        if r.pop("model_output_name", None):
             is_model_output_name = True
             repo = create_repo(
                 spec=r["repo"],

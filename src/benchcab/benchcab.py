@@ -161,7 +161,6 @@ class Benchcab:
                     / (sub_config["name"] if sub_config["name"] else Path()),
                 )
                 self._models.append(Model(repo=repo, model_id=id, **sub_config))
-
         return self._models
 
     def _fluxsite_show_task_composition(self, config: dict) -> str:

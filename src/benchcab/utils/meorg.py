@@ -92,29 +92,6 @@ def do_meorg(
         }
         model_exp_id = MEORG_EXPERIMENT_ID_MAP[experiment]["experiment"]
         model_benchmark_ids = MEORG_EXPERIMENT_ID_MAP[experiment]["benchmarks"]
-        print(
-            interpolate_file_template(
-                "meorg_jobscript.j2",
-                render=True,
-                dry_run=False,
-                # depends_on=benchcab_job_id,
-                # Interpolate into the job script
-                mo=mo,
-                model_prof_id=MEORG_PROFILE["id"],
-                model_exp_ids=[model_exp_id],
-                model_benchmark_ids=model_benchmark_ids,
-                data_dir=upload_dir,
-                cache_delay=MEORG_CLIENT["cache_delay"],
-                mem=MEORG_CLIENT["mem"],
-                num_threads=MEORG_CLIENT["num_threads"],
-                walltime=MEORG_CLIENT["walltime"],
-                storage=MEORG_CLIENT["storage"],
-                project=config["project"],
-                modules=config["modules"],
-                purge_outputs=True,
-                meorg_bin=meorg_bin,
-            )
-        )
 
         # Submit the outputs
         client = get_client()
@@ -122,7 +99,7 @@ def do_meorg(
             bu.get_installed_root() / "data" / "meorg_jobscript.j2",
             render=True,
             dry_run=False,
-            # depends_on=benchcab_job_id,
+            depends_on=benchcab_job_id,
             # Interpolate into the job script
             mo=mo,
             model_prof_id=MEORG_PROFILE["id"],
