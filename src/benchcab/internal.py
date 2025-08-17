@@ -285,7 +285,7 @@ MEORG_EXPERIMENT_ID_MAP = {
 }
 
 
-FLUXSITE_DEFAULT_EXPERIMENT = "AU-Tum"  # "forty-two-site-test"
+FLUXSITE_DEFAULT_EXPERIMENT = "forty-two-site-test"
 
 OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
 
