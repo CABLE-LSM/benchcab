@@ -255,7 +255,7 @@ MEORG_EXPERIMENTS = {
 # For now, each experiment is associated with 3 benchmarks (1lin, 3km27, LSTM)
 MEORG_EXPERIMENT_ID_MAP = {
     "AU-Tum": {
-        "experiment": "aGKRjGTwckAytEjf5",
+        "experiment": "jwN9jNMWLEzbT2i9D",
         "benchmarks": ["J9BBQCJdsuehsmMf2", "N5X2rjmp96baXrrJ3", "Q7Xu6yGGYdzvvAwbn"],
     },
     "AU-How": {
