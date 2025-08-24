@@ -20,7 +20,7 @@
 realisations:
   - repo:
       svn:
-        branch_path: trunk
+        branch_path: 123-sample
     model_output_name: True
   - repo:
       svn:

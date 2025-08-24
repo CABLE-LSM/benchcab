@@ -53,7 +53,7 @@ def no_optional_config() -> dict:
     return {
         "modules": ["intel-compiler/2021.1.1", "netcdf/4.7.4", "openmpi/4.1.0"],
         "realisations": [
-            {"repo": {"svn": {"branch_path": "trunk"}}, "model_output_name": True},
+            {"repo": {"svn": {"branch_path": "123-sample"}}, "model_output_name": True},
             {
                 "repo": {
                     "svn": {"branch_path": "branches/Users/ccc561/v3.0-YP-changes"}
@@ -122,7 +122,7 @@ def all_optional_custom_config(no_optional_config) -> dict:
         },
         "codecov": True,
     }
-    branch_names = ["svn_trunk", "git_branch"]
+    branch_names = ["123-sample-optional", "git_branch"]
 
     for c_r, b_n in zip(config["realisations"], branch_names):
         c_r["name"] = b_n
@@ -202,22 +202,48 @@ def test_add_model_output_name(no_optional_config):
     output_config = bc.add_model_output_name(no_optional_config)
 
     del no_optional_config["realisations"][0]["model_output_name"]
-    no_optional_config = no_optional_config | {"model_output_name": "trunk"}
+    no_optional_config = no_optional_config | {"model_output_name": "123-sample"}
     assert output_config == no_optional_config
 
 
+def test_valid_valid_output_name():
+    """Test reading config for a file that may/may not exist."""
+    model_output_name = "123-sample-issue"
+    msg = bc.is_valid_model_output_name(model_output_name)
+    assert msg is None
+
+
 @pytest.mark.parametrize(
-    ("config_str", "output_config_str"),
+    ("model_output_name", "output_msg"),
     [
-        ("config-basic.yml", "all_optional_default_config"),
-        ("config-optional.yml", "all_optional_custom_config"),
+        ("", "Model output name is empty"),
+        (
+            "l" * 256,
+            "Model output name has length more than allowed limit on me.org (255)",
+        ),
+        ("123-fsd f", "Model output name cannot have spaces"),
+        ("hello-123", "Model output name does not start with number"),
+        ("123", "Model output name does not contain keyword after number"),
+    ],
+)
+def test_invalid_valid_output_name(model_output_name, output_msg):
+    """Test reading config for a file that may/may not exist."""
+    msg = bc.is_valid_model_output_name(model_output_name)
+    assert msg == output_msg
+
+
+@pytest.mark.parametrize(
+    ("config_str", "model_output_name", "output_config"),
+    [
+        ("config-basic.yml", "123-sample", "all_optional_default_config"),
+        ("config-optional.yml", "123-sample-optional", "all_optional_custom_config"),
     ],
     indirect=["config_str"],
 )
-def test_read_config(config_path, output_config_str, request):
+def test_read_config(request, config_path, model_output_name, output_config):
     """Test overall behaviour of read_config."""
-    output_config = request.getfixturevalue(output_config_str) | {
-        "model_output_name": "trunk"
+    output_config = request.getfixturevalue(output_config) | {
+        "model_output_name": model_output_name
     }
     del output_config["realisations"][0]["model_output_name"]
     config = bc.read_config(config_path)

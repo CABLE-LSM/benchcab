@@ -13,6 +13,7 @@ import benchcab.utils as bu
 from benchcab import internal
 from benchcab.utils.repo import create_repo
 from benchcab.model import Model
+from typing import Optional
 
 
 class ConfigValidationError(Exception):
@@ -85,7 +86,7 @@ def read_optional_key(config: dict):
     Parameters
     ----------
     config : dict
-        The configuration file with without optional keys
+        The configuration file with, or without optional keys
 
     """
     if "project" not in config:
@@ -128,13 +129,47 @@ def read_optional_key(config: dict):
     return config
 
 
+def is_valid_model_output_name(name: str) -> Optional[str]:
+    """Validate model output name against github issue standards.
+
+    Standard: <digit>-<words-sep-by-dashes>
+
+    Parameters
+    ----------
+    name: str
+        The model output name
+
+    Returns
+    -------
+    Optional[str]
+        If model output name does not meet standard, then return error message
+
+    """
+    if len(name) == 0:
+        return "Model output name is empty"
+
+    if len(name) > 255:
+        return "Model output name has length more than allowed limit on me.org (255)"
+
+    if " " in name:
+        return "Model output name cannot have spaces"
+
+    name_keywords = name.split("-")
+
+    if not name_keywords[0].isdigit():
+        return "Model output name does not start with number"
+
+    if len(name_keywords) == 1:
+        return "Model output name does not contain keyword after number"
+
+
 def add_model_output_name(config: dict):
     """Determine model output name from realisations.
 
     Parameters
     ----------
     config : dict
-        The configuration file with with optional keys
+        The configuration file with optional keys
 
     """
     # pure function
@@ -145,11 +180,23 @@ def add_model_output_name(config: dict):
         assert not is_model_output_name
         if r.pop("model_output_name", None):
             is_model_output_name = True
-            repo = create_repo(
-                spec=r["repo"],
-                path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
-            )
-            config["model_output_name"] = Model(repo).name
+
+            mo_name = None
+            if r.get("name"):
+                mo_name = r["name"]
+            else:
+                repo = create_repo(
+                    spec=r["repo"],
+                    path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
+                )
+                mo_name = Model(repo).name
+
+            msg = is_valid_model_output_name(mo_name)
+
+            if msg is not None:
+                raise Exception(msg)
+
+            config["model_output_name"] = mo_name
             break
     assert is_model_output_name
     return config

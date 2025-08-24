@@ -31,14 +31,18 @@ MODEL_OUTPUT_ARGS+=" --parameter-selection {{ mo.parameter_selection }}"
 MODEL_OUTPUT_ARGS+=" --is-bundle"
 {% endif %}
 
+echo "Querying whether $MODEL_OUTPUT_NAME already exists on me.org"
 MODEL_OUTPUT_ID=$($MEORG_BIN output query $MODEL_OUTPUT_NAME | head -n 1 )
 if [ ! -z "${MODEL_OUTPUT_ID}" ] ; then
+# Re-run analysis on the same model output ID, cleaning up existing files
 echo "Deleting existing files from model output ID"
 $MEORG_BIN file delete_all $MODEL_OUTPUT_ID
-echo "Updated model output ID"
+echo -n "Updated"
 else
-echo "Create new model output ID"
+echo -n "Created"
 fi
+
+echo " $MODEL_OUTPUT_NAME on me.org and given this ID: $MODEL_OUTPUT_ID"
 
 MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $MODEL_OUTPUT_NAME $MODEL_OUTPUT_ARGS | head -n 1 | awk '{print $NF}')"
 echo "Add experiments to model output"
@@ -53,7 +57,7 @@ echo "Waiting for object store transfer ($CACHE_DELAY sec)"
 sleep $CACHE_DELAY
 
 {% for exp_id in model_exp_ids %} 
-echo "Replace benchmarks to model output"
+echo "Add benchmarks to model output"
 $MEORG_BIN benchmark update $MODEL_OUTPUT_ID {{ exp_id }} {{ model_benchmark_ids|join(',') }}
 
 # Trigger the analysis
@@ -62,4 +66,5 @@ $MEORG_BIN analysis start $MODEL_OUTPUT_ID {{ exp_id }}
 
 {% endfor %} 
 
-echo "DONE"
+MEORG_BASE_URL_DEV="${MEORG_BASE_URL_DEV:-https://modelevaluation.org/api/}"
+echo "Files transferred to me.org. Analysis in progress. Open ${MEORG_BASE_URL_DEV}/display/${MODEL_OUTPUT_ID} to see results"

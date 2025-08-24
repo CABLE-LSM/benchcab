@@ -284,6 +284,7 @@ MEORG_EXPERIMENT_ID_MAP = {
     },
 }
 
+MEORG_PROFILE = {"name": "CABLE", "id": "nFcjg4qqHGPkB9sqE"}
 
 FLUXSITE_DEFAULT_EXPERIMENT = "forty-two-site-test"
 
@@ -318,5 +319,3 @@ MEORG_CLIENT = dict(
     walltime="01:00:00",
     storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"],
 )
-
-MEORG_PROFILE = {"name": "CABLE", "id": "nFcjg4qqHGPkB9sqE"}
