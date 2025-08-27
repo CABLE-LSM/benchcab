@@ -32,12 +32,12 @@ def do_meorg(
     """
     logger = bu.get_logger()
 
-    model_output_name = config["model_output_name"]
+    meorg_output_name = config["meorg_output_name"]
     num_threads = MEORG_CLIENT["num_threads"]
 
     # Check if a model output id has been assigned
-    if config.get("model_output_name") is None:
-        logger.info("No model_output_name resolved in configuration.")
+    if config.get("meorg_output_name") is None:
+        logger.info("No meorg_output_name resolved in configuration.")
         logger.info("NOT uploading to modelevaluation.org")
         return False
 
@@ -63,7 +63,7 @@ def do_meorg(
     if MeorgClient().is_initialised() == False:
 
         logger.warn(
-            "A model_output_name has been supplied, but the meorg_client is not initialised."
+            "A meorg_output_name has been supplied, but the meorg_client is not initialised."
         )
         logger.warn(
             "To initialise, run `meorg initialise` in the installation environment."
@@ -72,10 +72,10 @@ def do_meorg(
             "Once initialised, the outputs from this run can be uploaded with the following command:"
         )
         logger.warn(
-            f"meorg file upload {upload_dir}/*.nc -n {num_threads} --attach_to {model_output_name}"
+            f"meorg file upload {upload_dir}/*.nc -n {num_threads} --attach_to {meorg_output_name}"
         )
         logger.warn("Then the analysis can be triggered with:")
-        logger.warn(f"meorg analysis start {model_output_name}")
+        logger.warn(f"meorg analysis start {meorg_output_name}")
         return False
 
     # Finally, attempt the upload!
@@ -88,7 +88,7 @@ def do_meorg(
             "state_selection": "default",
             "parameter_selection": "automated",
             "is_bundle": True,
-            "name": config["model_output_name"],
+            "name": config["meorg_output_name"],
         }
         model_exp_id = MEORG_EXPERIMENT_ID_MAP[experiment]["experiment"]
         model_benchmark_ids = MEORG_EXPERIMENT_ID_MAP[experiment]["benchmarks"]

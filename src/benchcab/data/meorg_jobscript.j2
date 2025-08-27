@@ -21,7 +21,7 @@ NUM_THREADS={{num_threads}}
 CACHE_DELAY={{cache_delay}}
 MEORG_BIN={{meorg_bin}}
 MODEL_PROFILE_ID={{ model_prof_id }}
-MODEL_OUTPUT_NAME={{ mo.name }}
+meorg_output_name={{ mo.name }}
 MODEL_OUTPUT_ARGS=()
 
 # Create new model output entity
@@ -31,8 +31,8 @@ MODEL_OUTPUT_ARGS+=" --parameter-selection {{ mo.parameter_selection }}"
 MODEL_OUTPUT_ARGS+=" --is-bundle"
 {% endif %}
 
-echo "Querying whether $MODEL_OUTPUT_NAME already exists on me.org"
-MODEL_OUTPUT_ID=$($MEORG_BIN output query $MODEL_OUTPUT_NAME | head -n 1 )
+echo "Querying whether $meorg_output_name already exists on me.org"
+MODEL_OUTPUT_ID=$($MEORG_BIN output query $meorg_output_name | head -n 1 )
 if [ ! -z "${MODEL_OUTPUT_ID}" ] ; then
 # Re-run analysis on the same model output ID, cleaning up existing files
 echo "Deleting existing files from model output ID"
@@ -42,9 +42,9 @@ else
 echo -n "Created"
 fi
 
-echo " $MODEL_OUTPUT_NAME on me.org and given this ID: $MODEL_OUTPUT_ID"
+echo " $meorg_output_name on me.org and given this ID: $MODEL_OUTPUT_ID"
 
-MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $MODEL_OUTPUT_NAME $MODEL_OUTPUT_ARGS | head -n 1 | awk '{print $NF}')"
+MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $meorg_output_name $MODEL_OUTPUT_ARGS | head -n 1 | awk '{print $NF}')"
 echo "Add experiments to model output"
 $MEORG_BIN experiment update $MODEL_OUTPUT_ID {{ model_exp_ids|join(',') }}
 

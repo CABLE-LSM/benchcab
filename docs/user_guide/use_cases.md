@@ -35,7 +35,7 @@ realisations:
   - repo:
       git:
         branch: main
-    model_output_name: True # (1)
+    meorg_output_name: True # (1)
   - repo:
       git:
         branch: XXXXX
@@ -72,7 +72,7 @@ realisations:
         cable:
             cable_user:
                 existing_feature: YYYY
-    model_output_name: True # (2)
+    meorg_output_name: True # (2)
   - repo:
       git:
         branch: XXXXX
@@ -106,7 +106,7 @@ realisations:
   - repo:
       git:
         branch: main
-    model_output_name: True # (2)
+    meorg_output_name: True # (2)
   - repo:
       git:
         branch: XXXXX
@@ -135,7 +135,7 @@ realisations:
   - repo:
       git:
         branch: main
-    model_output_name: True # (2)
+    meorg_output_name: True # (2)
   - repo:
       name: my-feature-off # (3)
       local:

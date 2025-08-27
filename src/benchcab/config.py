@@ -129,7 +129,7 @@ def read_optional_key(config: dict):
     return config
 
 
-def is_valid_model_output_name(name: str) -> Optional[str]:
+def is_valid_meorg_output_name(name: str) -> Optional[str]:
     """Validate model output name against github issue standards.
 
     Standard: <digit>-<words-sep-by-dashes>
@@ -146,24 +146,31 @@ def is_valid_model_output_name(name: str) -> Optional[str]:
 
     """
     if len(name) == 0:
-        return "Model output name is empty"
+        return "Model output name is empty\n"
+
+    msg = ""
 
     if len(name) > 255:
-        return "Model output name has length more than allowed limit on me.org (255)"
+        msg += "The length of model output name must be shorter than 255 characters. E.g.: 1-length-is-20-chars\n"
 
     if " " in name:
-        return "Model output name cannot have spaces"
+        msg += "Model output name cannot have spaces. It should use dashes (-) to separate words. E.g. 123-word1-word2\n"
 
     name_keywords = name.split("-")
 
     if not name_keywords[0].isdigit():
-        return "Model output name does not start with number"
+        msg += "Model output name does not start with number, E.g. 123-number-before-word\n"
 
     if len(name_keywords) == 1:
-        return "Model output name does not contain keyword after number"
+        msg += "Model output name does not contain keyword after number, E.g. 123-keyword\n"
+
+    if msg == "":
+        return None
+
+    return f"Errors present when validating model output name:\n{msg}"
 
 
-def add_model_output_name(config: dict):
+def add_meorg_output_name(config: dict):
     """Determine model output name from realisations.
 
     Parameters
@@ -175,30 +182,29 @@ def add_model_output_name(config: dict):
     # pure function
     config = copy.deepcopy(config)
 
-    is_model_output_name = False
+    mo_names = [True for r in config["realisations"] if r.get("meorg_output_name")]
+
+    if len(mo_names) > 1:
+        msg = "More than 1 value set as true"
+        raise AssertionError(msg)
+
     for r in config["realisations"]:
-        assert not is_model_output_name
-        if r.pop("model_output_name", None):
-            is_model_output_name = True
+        if r.pop("meorg_output_name", None):
+            # `meorg_output_name` decided either via `name` parameter in a realisation,
+            # otherwise via `Repo` branch name
+            repo = create_repo(
+                spec=r["repo"],
+                path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
+            )
+            mo_name = Model(repo, name=r.get("name")).name
 
-            mo_name = None
-            if r.get("name"):
-                mo_name = r["name"]
-            else:
-                repo = create_repo(
-                    spec=r["repo"],
-                    path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
-                )
-                mo_name = Model(repo).name
-
-            msg = is_valid_model_output_name(mo_name)
+            msg = is_valid_meorg_output_name(mo_name)
 
             if msg is not None:
                 raise Exception(msg)
 
-            config["model_output_name"] = mo_name
-            break
-    assert is_model_output_name
+            config["meorg_output_name"] = mo_name
+
     return config
 
 
@@ -250,5 +256,5 @@ def read_config(config_path: str) -> dict:
     config = read_optional_key(config)
     # Validate.
     validate_config(config)
-    config = add_model_output_name(config)
+    config = add_meorg_output_name(config)
     return config

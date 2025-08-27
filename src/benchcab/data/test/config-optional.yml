@@ -30,7 +30,7 @@ realisations:
       svn:
         branch_path: 123-sample
     name: 123-sample-optional
-    model_output_name: True
+    meorg_output_name: True
   - repo:
       svn:
         branch_path: branches/Users/ccc561/v3.0-YP-changes

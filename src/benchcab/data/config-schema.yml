@@ -51,7 +51,7 @@ realisations:
               path:
                 type: "string"
                 required: true
-      model_output_name:
+      meorg_output_name:
         nullable: true
         type: "boolean"
         required: false

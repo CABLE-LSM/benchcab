@@ -31,7 +31,7 @@ realisations:
   - repo:
       local:
         path: $CABLE_DIR
-  model_output_name: true
+  meorg_output_name: true
   - repo:
       git:
         branch: main

@@ -53,7 +53,7 @@ def no_optional_config() -> dict:
     return {
         "modules": ["intel-compiler/2021.1.1", "netcdf/4.7.4", "openmpi/4.1.0"],
         "realisations": [
-            {"repo": {"svn": {"branch_path": "123-sample"}}, "model_output_name": True},
+            {"repo": {"svn": {"branch_path": "123-sample"}}},
             {
                 "repo": {
                     "svn": {"branch_path": "branches/Users/ccc561/v3.0-YP-changes"}
@@ -127,6 +127,8 @@ def all_optional_custom_config(no_optional_config) -> dict:
     for c_r, b_n in zip(config["realisations"], branch_names):
         c_r["name"] = b_n
 
+    config["realisations"][0]["meorg_output_name"] = True
+
     return config
 
 
@@ -197,54 +199,87 @@ class TestReadOptionalKey:
         )
 
 
-def test_add_model_output_name(no_optional_config):
+def test_add_meorg_output_name(all_optional_custom_config):
     """Test addition of correct model output name."""
-    output_config = bc.add_model_output_name(no_optional_config)
+    output_config = bc.add_meorg_output_name(all_optional_custom_config)
 
-    del no_optional_config["realisations"][0]["model_output_name"]
-    no_optional_config = no_optional_config | {"model_output_name": "123-sample"}
-    assert output_config == no_optional_config
+    del all_optional_custom_config["realisations"][0]["meorg_output_name"]
+    all_optional_custom_config = all_optional_custom_config | {
+        "meorg_output_name": "123-sample-optional"
+    }
+    assert output_config == all_optional_custom_config
 
 
-def test_valid_valid_output_name():
-    """Test reading config for a file that may/may not exist."""
-    model_output_name = "123-sample-issue"
-    msg = bc.is_valid_model_output_name(model_output_name)
+def test_empty_model_output_name():
+    """Test validating empty model output name."""
+    msg = bc.is_valid_meorg_output_name("")
+    assert msg == "Model output name is empty\n"
+
+
+def test_valid_output_name():
+    """Test validating correct model output name."""
+    meorg_output_name = "123-sample-issue"
+    msg = bc.is_valid_meorg_output_name(meorg_output_name)
     assert msg is None
 
 
 @pytest.mark.parametrize(
-    ("model_output_name", "output_msg"),
+    ("meorg_output_name", "output_msg"),
     [
-        ("", "Model output name is empty"),
         (
-            "l" * 256,
-            "Model output name has length more than allowed limit on me.org (255)",
+            f"123-{'l'*256}",
+            "The length of model output name must be shorter than 255 characters. E.g.: 1-length-is-20-chars\n",
         ),
-        ("123-fsd f", "Model output name cannot have spaces"),
-        ("hello-123", "Model output name does not start with number"),
-        ("123", "Model output name does not contain keyword after number"),
+        (
+            "123-fsd f",
+            "Model output name cannot have spaces. It should use dashes (-) to separate words. E.g. 123-word1-word2\n",
+        ),
+        (
+            "hello-123",
+            "Model output name does not start with number, E.g. 123-number-before-word\n",
+        ),
+        (
+            "123",
+            "Model output name does not contain keyword after number, E.g. 123-keyword\n",
+        ),
     ],
 )
-def test_invalid_valid_output_name(model_output_name, output_msg):
-    """Test reading config for a file that may/may not exist."""
-    msg = bc.is_valid_model_output_name(model_output_name)
+def test_invalid_output_name(meorg_output_name, output_msg):
+    """Test validating incorrect model output name."""
+    output_msg = f"Errors present when validating model output name:\n{output_msg}"
+    msg = bc.is_valid_meorg_output_name(meorg_output_name)
     assert msg == output_msg
 
 
-@pytest.mark.parametrize(
-    ("config_str", "model_output_name", "output_config"),
-    [
-        ("config-basic.yml", "123-sample", "all_optional_default_config"),
-        ("config-optional.yml", "123-sample-optional", "all_optional_custom_config"),
-    ],
-    indirect=["config_str"],
-)
-def test_read_config(request, config_path, model_output_name, output_config):
-    """Test overall behaviour of read_config."""
-    output_config = request.getfixturevalue(output_config) | {
-        "model_output_name": model_output_name
+@pytest.mark.parametrize("config_str", ["config-basic.yml"], indirect=True)
+def test_read_basic_config(config_path, all_optional_default_config):
+    config = bc.read_config(config_path)
+    assert pformat(config) == pformat(all_optional_default_config)
+
+
+@pytest.mark.parametrize("config_str", ["config-optional.yml"], indirect=True)
+def test_read_optional_config(config_path, all_optional_custom_config):
+    output_config = all_optional_custom_config | {
+        "meorg_output_name": "123-sample-optional"
     }
-    del output_config["realisations"][0]["model_output_name"]
+    del output_config["realisations"][0]["meorg_output_name"]
     config = bc.read_config(config_path)
     assert pformat(config) == pformat(output_config)
+
+
+# @pytest.mark.parametrize(
+#     ("config_str", "meorg_output_name", "output_config"),
+#     [
+#         ("config-basic.yml", "123-sample", "all_optional_default_config"),
+#         ("config-optional.yml", "123-sample-optional", "all_optional_custom_config"),
+#     ],
+#     indirect=["config_str"],
+# )
+# def test_read_config(request, config_path, meorg_output_name, output_config):
+#     """Test overall behaviour of read_config."""
+#     output_config = request.getfixturevalue(output_config) | {
+#         "meorg_output_name": meorg_output_name
+#     }
+#     output_config["realisations"][0].pop("meorg_output_name", None)
+#     config = bc.read_config(config_path)
+#     assert pformat(config) == pformat(output_config)

@@ -372,9 +372,10 @@ realisations:
 
 : **Default:** _required key, no default_. :octicons-dash-24: Specify the local checkout path of CABLE branch.
 
-### [model_output_name](#model_output_name)
+### [meorg_output_name](#meorg_output_name)
 
-: **Default:** False :octicons-dash-24: Chosen as the model name for one of the realisations. This would be the Model Output to which output files will be automatically uploaded for analysis.  The user must set only one of the realisations keys as `true` for the name to be chosen.
+
+: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations. This would be the Model Output to which output files will be automatically uploaded for analysis.  The user must set only one of the realisations keys as `true` for the name to be chosen.
 
 Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org.
 
@@ -504,7 +505,7 @@ codecov:
 
 ## meorg_bin
 
-: **Default:** False, _optional key. :octicons-dash-24: Specifies the absolute system path to the ME.org client executable. In the absence of this key it will be inferred from the same directory as benchcab should `meorg_model_output_name` be set in `realisations` above.
+: **Default:** False, _optional key. :octicons-dash-24: Specifies the absolute system path to the ME.org client executable. In the absence of this key it will be inferred from the same directory as benchcab should `meorg_output_name` be set in `realisations` above.
 
 ``` yaml
 
