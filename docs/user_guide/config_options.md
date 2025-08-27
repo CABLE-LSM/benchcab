@@ -379,6 +379,17 @@ realisations:
 
 Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org.
 
+The model output name should also follow the Github issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
+
+This key is _optional_. No default.
+
+```yaml
+realisations:
+  - repo:
+      git:
+        branch: 123-my-branch
+    model_output_name: True
+```
 
 ### [name](#name)
 
