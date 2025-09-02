@@ -150,8 +150,8 @@ def is_valid_meorg_output_name(name: str) -> Optional[str]:
 
     msg = ""
 
-    if len(name) > 255:
-        msg += "The length of model output name must be shorter than 255 characters. E.g.: 1-length-is-20-chars\n"
+    if len(name) > 50:
+        msg += "The length of model output name must be shorter than 50 characters. E.g.: 1-length-is-20-chars\n"
 
     if " " in name:
         msg += "Model output name cannot have spaces. It should use dashes (-) to separate words. E.g. 123-word1-word2\n"

@@ -227,8 +227,8 @@ def test_valid_output_name():
     ("meorg_output_name", "output_msg"),
     [
         (
-            f"123-{'l'*256}",
-            "The length of model output name must be shorter than 255 characters. E.g.: 1-length-is-20-chars\n",
+            f"123-{'l'*48}",
+            "The length of model output name must be shorter than 50 characters. E.g.: 1-length-is-20-chars\n",
         ),
         (
             "123-fsd f",
