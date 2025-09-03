@@ -265,21 +265,3 @@ def test_read_optional_config(config_path, all_optional_custom_config):
     del output_config["realisations"][0]["meorg_output_name"]
     config = bc.read_config(config_path)
     assert pformat(config) == pformat(output_config)
-
-
-# @pytest.mark.parametrize(
-#     ("config_str", "meorg_output_name", "output_config"),
-#     [
-#         ("config-basic.yml", "123-sample", "all_optional_default_config"),
-#         ("config-optional.yml", "123-sample-optional", "all_optional_custom_config"),
-#     ],
-#     indirect=["config_str"],
-# )
-# def test_read_config(request, config_path, meorg_output_name, output_config):
-#     """Test overall behaviour of read_config."""
-#     output_config = request.getfixturevalue(output_config) | {
-#         "meorg_output_name": meorg_output_name
-#     }
-#     output_config["realisations"][0].pop("meorg_output_name", None)
-#     config = bc.read_config(config_path)
-#     assert pformat(config) == pformat(output_config)
