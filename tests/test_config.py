@@ -13,7 +13,7 @@ import benchcab.internal as bi
 import benchcab.utils as bu
 from benchcab import internal
 
-NO_OPTIONAL_CONFIG_PROJECT = "hh5"
+NO_OPTIONAL_CONFIG_PROJECT = "xp65"
 OPTIONAL_CONFIG_PROJECT = "ks32"
 
 
@@ -75,7 +75,7 @@ def all_optional_default_config(no_optional_config) -> dict:
             "experiment": bi.FLUXSITE_DEFAULT_EXPERIMENT,
             "multiprocess": bi.FLUXSITE_DEFAULT_MULTIPROCESS,
             "pbs": bi.FLUXSITE_DEFAULT_PBS,
-            "meorg_model_output_id": bi.FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID
+            "meorg_model_output_id": bi.FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID,
         },
         "science_configurations": bi.DEFAULT_SCIENCE_CONFIGURATIONS,
         "spatial": {
@@ -107,7 +107,7 @@ def all_optional_custom_config(no_optional_config) -> dict:
                 "walltime": "10:00:00",
                 "storage": ["scratch/$PROJECT"],
             },
-            "meorg_model_output_id": False
+            "meorg_model_output_id": False,
         },
         "science_configurations": [
             {

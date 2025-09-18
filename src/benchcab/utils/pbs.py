@@ -32,7 +32,7 @@ def render_job_script(
     between model output files.
     """
     verbose_flag = " -v" if verbose else ""
-    storage_flags = ["gdata/ks32", "gdata/hh5", "gdata/wd9", *pbs_config["storage"]]
+    storage_flags = ["gdata/ks32", "gdata/xp65", "gdata/wd9", *pbs_config["storage"]]
 
     context = dict(
         verbose_flag=verbose_flag,
