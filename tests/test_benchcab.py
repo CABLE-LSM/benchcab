@@ -15,13 +15,13 @@ def _set_user_projects():
         "os.getgroups"
     ) as mocked_groups:
         type(mocked_getgrid.return_value).gr_name = mock.PropertyMock(
-            return_value="hh5"
+            return_value="xp65"
         )
         mocked_groups.return_value = [1]
         yield
 
 
-@pytest.fixture(scope="module", params=["hh5", "invalid_project_name"])
+@pytest.fixture(scope="module", params=["xp65", "invalid_project_name"])
 def config_project(request):
     """Get config project name."""
     return request.param
@@ -42,7 +42,7 @@ no_project_name_msg = re.escape(
 @pytest.mark.parametrize(
     ("config_project", "pytest_error"),
     [
-        ("hh5", does_not_raise()),
+        ("xp65", does_not_raise()),
         (None, pytest.raises(AttributeError, match=no_project_name_msg)),
     ],
 )
@@ -57,7 +57,7 @@ def test_project_name(config_project, pytest_error):
 @pytest.mark.parametrize(
     ("config_project", "pytest_error"),
     [
-        ("hh5", does_not_raise()),
+        ("xp65", does_not_raise()),
         ("invalid_project_name", pytest.raises(PermissionError)),
     ],
 )
