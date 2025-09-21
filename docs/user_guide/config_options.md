@@ -375,9 +375,9 @@ realisations:
 ### [meorg_output_name](#meorg_output_name)
 
 
-: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations. This would be the Model Output to which output files will be automatically uploaded for analysis.  The user must set only one of the realisations keys as `true` for the name to be chosen.
+: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. A `base32` format hash derived from `model_profile_id` and `$USER` is appended to the model name.
 
-Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org.
+Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org. The realisation name is set via `name` if provided, otherwise the default realisation name of the `Repo`. 
 
 The model output name should also follow the Github issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
 
@@ -388,8 +388,17 @@ realisations:
   - repo:
       git:
         branch: 123-my-branch
-    model_output_name: True
+        meorg_output_name: True
+  - repo:
+      git:
+        branch: 456-my-branch
 ```
+f(mo_name, user, profile)
+123-my-branch-34akg9 # Add by default 
+
+<!-- Branch name different from mo_name -->
+
+
 
 ### [name](#name)
 

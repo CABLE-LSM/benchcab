@@ -317,5 +317,5 @@ MEORG_CLIENT = dict(
     cache_delay=60 * 5,  # 5mins between upload and analysis triggering
     mem="8G",
     walltime="01:00:00",
-    storage=["gdata/ks32", "gdata/hh5", "gdata/wd9", "gdata/rp23"],
+    storage=["gdata/ks32", "gdata/xp65", "gdata/wd9", "gdata/rp23"],
 )

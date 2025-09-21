@@ -8,8 +8,10 @@ from pathlib import Path
 import yaml
 import copy
 from cerberus import Validator
-
+import base64
+import hashlib
 import benchcab.utils as bu
+from benchcab.internal import MEORG_PROFILE
 from benchcab import internal
 from benchcab.utils.repo import create_repo
 from benchcab.model import Model
@@ -188,22 +190,32 @@ def add_meorg_output_name(config: dict):
         msg = "More than 1 value set as true"
         raise AssertionError(msg)
 
+    mo_names = ""
     for r in config["realisations"]:
+        # `meorg_output_name` decided either via `name` parameter in a realisation,
+        # otherwise via `Repo` branch name
+        repo = create_repo(
+            spec=r["repo"],
+            path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
+        )
+        mo_name = Model(repo, name=r.get("name")).name
+
+        mo_names += mo_name
         if r.pop("meorg_output_name", None):
-            # `meorg_output_name` decided either via `name` parameter in a realisation,
-            # otherwise via `Repo` branch name
-            repo = create_repo(
-                spec=r["repo"],
-                path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
-            )
-            mo_name = Model(repo, name=r.get("name")).name
-
             msg = is_valid_meorg_output_name(mo_name)
-
             if msg is not None:
                 raise Exception(msg)
 
             config["meorg_output_name"] = mo_name
+
+    if "meorg_output_name" in config:
+        user = os.getenv("USER")
+        mo_name_hash_input = f"{mo_names}{MEORG_PROFILE['id']}{user}"
+        # hash in bytes form
+        mo_name_hash_b = hashlib.sha1(mo_name_hash_input.encode())
+        # Convert to str and take first 6 characters
+        mo_name_hash = base64.b32encode(mo_name_hash_b.digest()).decode()[:6]
+        config["meorg_output_name"] += f"_{mo_name_hash}"
 
     return config
 

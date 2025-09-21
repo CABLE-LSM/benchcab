@@ -13,7 +13,7 @@ import benchcab.internal as bi
 import benchcab.utils as bu
 from benchcab import internal
 
-NO_OPTIONAL_CONFIG_PROJECT = "hh5"
+NO_OPTIONAL_CONFIG_PROJECT = "xp65"
 OPTIONAL_CONFIG_PROJECT = "ks32"
 
 
@@ -23,6 +23,7 @@ def _set_project_env_variable(monkeypatch):
     # Clear existing environment variables first
     with mock.patch.dict(os.environ, clear=True):
         monkeypatch.setenv("PROJECT", OPTIONAL_CONFIG_PROJECT)
+        monkeypatch.setenv("USER", "test")
         yield
 
 
@@ -205,12 +206,12 @@ def test_add_meorg_output_name(all_optional_custom_config):
 
     del all_optional_custom_config["realisations"][0]["meorg_output_name"]
     all_optional_custom_config = all_optional_custom_config | {
-        "meorg_output_name": "123-sample-optional"
+        "meorg_output_name": "123-sample-optional_7J3IEJ"
     }
     assert output_config == all_optional_custom_config
 
 
-def test_empty_model_output_name():
+def test_empty_meorg_output_name():
     """Test validating empty model output name."""
     msg = bc.is_valid_meorg_output_name("")
     assert msg == "Model output name is empty\n"
@@ -260,7 +261,7 @@ def test_read_basic_config(config_path, all_optional_default_config):
 @pytest.mark.parametrize("config_str", ["config-optional.yml"], indirect=True)
 def test_read_optional_config(config_path, all_optional_custom_config):
     output_config = all_optional_custom_config | {
-        "meorg_output_name": "123-sample-optional"
+        "meorg_output_name": "123-sample-optional_7J3IEJ"
     }
     del output_config["realisations"][0]["meorg_output_name"]
     config = bc.read_config(config_path)

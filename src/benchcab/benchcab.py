@@ -107,7 +107,7 @@ class Benchcab:
                 """
             raise AttributeError(msg)
 
-        required_groups = set([project, "ks32", "hh5"])
+        required_groups = set([project, "ks32", "xp65"])
         groups = [grp.getgrgid(gid).gr_name for gid in os.getgroups()]
         if not required_groups.issubset(groups):
             msg = (

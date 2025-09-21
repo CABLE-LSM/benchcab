@@ -13,7 +13,7 @@ In this guide, we will describe:
 To use `benchcab`, you need to join the following projects at NCI:
 
 - [ks32][ks32_mynci]
-- [hh5][hh5_mynci]
+- [xp65][xp65_mynci]
 - [wd9][wd9_mynci] if not part of the [cable][cable_mynci] project
 
 ## Quick-start
@@ -21,8 +21,8 @@ To use `benchcab`, you need to join the following projects at NCI:
 To launch a `benchcab` run, execute the following in the command line:
 
 ```sh
-module use /g/data/hh5/public/modules
-module load conda/analysis3-unstable
+module use /g/data/xp65/public/modules
+module load conda/benchcab
 cd /scratch/$PROJECT/$USER
 git clone https://github.com/CABLE-LSM/bench_example.git
 cd bench_example
@@ -33,18 +33,18 @@ benchcab run
 
 ## Installation
 
-The package is already installed for you in the Conda environments under the hh5 project. You simply need to load the module for the conda environment:
+The package is already installed for you in the Conda environments under the xp65 project. You simply need to load the module for the conda environment:
 
 ```bash
-   module use /g/data/hh5/public/modules
-   module load conda/analysis3-unstable
+   module use /g/data/xp65/public/modules
+   module load conda/benchcab
 ```
 
 You need to load the module on each new session at NCI on login or compute nodes.
 
 !!! Tip "Save the module location"
 
-    You should not put any `module load` or `module add` commands in your `$HOME/.bashrc` file. But you can safely store the `module use /g/data/hh5/public/modules` command in your `$HOME/.bashrc` file. This means you won't have to type this line again in other sessions you open on Gadi.
+    You should not put any `module load` or `module add` commands in your `$HOME/.bashrc` file. But you can safely store the `module use /g/data/xp65/public/modules` command in your `$HOME/.bashrc` file. This means you won't have to type this line again in other sessions you open on Gadi.
 
 ## Usage
 
@@ -306,7 +306,7 @@ Please enter your questions as issues on [the benchcab repository][issues-benchc
 
 Alternatively, you can also access the ACCESS-NRI User support via [the ACCESS-Hive forum][forum-support].
 
-[hh5_mynci]: https://my.nci.org.au/mancini/project/hh5
+[xp65_mynci]: https://my.nci.org.au/mancini/project/xp65
 [ks32_mynci]: https://my.nci.org.au/mancini/project/ks32
 [wd9_mynci]: https://my.nci.org.au/mancini/project/wd9
 [cable_mynci]: https://my.nci.org.au/mancini/project/cable

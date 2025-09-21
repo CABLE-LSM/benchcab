@@ -7,7 +7,7 @@
 #PBS -P tm70
 #PBS -j oe
 #PBS -m e
-#PBS -l storage=gdata/ks32+gdata/hh5+gdata/wd9
+#PBS -l storage=gdata/ks32+gdata/xp65+gdata/wd9
 
 set -ev
 
