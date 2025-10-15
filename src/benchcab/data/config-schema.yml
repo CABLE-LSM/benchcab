@@ -51,6 +51,10 @@ realisations:
               path:
                 type: "string"
                 required: true
+      meorg_output_name:
+        nullable: true
+        type: "boolean"
+        required: false
       name:
         nullable: true
         type: "string"
@@ -107,12 +111,6 @@ fluxsite:
           schema:
             type: "string"
             required: false
-    meorg_model_output_id:
-      type: 
-       - "boolean"
-       - "string"
-      required: false
-      default: false
 
 spatial:
   type: "dict"

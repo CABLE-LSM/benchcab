@@ -6,10 +6,16 @@ import os
 from pathlib import Path
 
 import yaml
+import copy
 from cerberus import Validator
-
+import base64
+import hashlib
 import benchcab.utils as bu
+from benchcab.internal import MEORG_PROFILE
 from benchcab import internal
+from benchcab.utils.repo import create_repo
+from benchcab.model import Model
+from typing import Optional
 
 
 class ConfigValidationError(Exception):
@@ -82,7 +88,7 @@ def read_optional_key(config: dict):
     Parameters
     ----------
     config : dict
-        The configuration file with with/without optional keys
+        The configuration file with, or without optional keys
 
     """
     if "project" not in config:
@@ -119,11 +125,99 @@ def read_optional_key(config: dict):
     config["fluxsite"]["pbs"] = internal.FLUXSITE_DEFAULT_PBS | config["fluxsite"].get(
         "pbs", {}
     )
-    config["fluxsite"]["meorg_model_output_id"] = config["fluxsite"].get(
-        "meorg_model_output_id", internal.FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID
-    )
 
     config["codecov"] = config.get("codecov", False)
+
+    return config
+
+
+def is_valid_meorg_output_name(name: str) -> Optional[str]:
+    """Validate model output name against github issue standards.
+
+    Standard: <digit>-<words-sep-by-dashes>
+
+    Parameters
+    ----------
+    name: str
+        The model output name
+
+    Returns
+    -------
+    Optional[str]
+        If model output name does not meet standard, then return error message
+
+    """
+    if len(name) == 0:
+        return "Model output name is empty\n"
+
+    msg = ""
+
+    if len(name) > 50:
+        msg += "The length of model output name must be shorter than 50 characters. E.g.: 1-length-is-20-chars\n"
+
+    if " " in name:
+        msg += "Model output name cannot have spaces. It should use dashes (-) to separate words. E.g. 123-word1-word2\n"
+
+    name_keywords = name.split("-")
+
+    if not name_keywords[0].isdigit():
+        msg += "Model output name does not start with number, E.g. 123-number-before-word\n"
+
+    if len(name_keywords) == 1:
+        msg += "Model output name does not contain keyword after number, E.g. 123-keyword\n"
+
+    if msg == "":
+        return None
+
+    return f"Errors present when validating model output name:\n{msg}"
+
+
+def add_meorg_output_name(config: dict):
+    """Determine model output name from realisations.
+
+    Parameters
+    ----------
+    config : dict
+        The configuration file with optional keys
+
+    """
+    # pure function
+    config = copy.deepcopy(config)
+
+    mo_names = [True for r in config["realisations"] if r.get("meorg_output_name")]
+
+    if len(mo_names) > 1:
+        msg = "More than 1 value set as true"
+        raise AssertionError(msg)
+
+    mo_names = ""
+    for r in config["realisations"]:
+        # `meorg_output_name` decided either via `name` parameter in a realisation,
+        # otherwise via `Repo` branch name
+        repo = create_repo(
+            spec=r["repo"],
+            path=internal.SRC_DIR / (r["name"] if r.get("name") else Path()),
+        )
+        mo_name = Model(repo, name=r.get("name")).name
+
+        mo_names += mo_name
+        if r.pop("meorg_output_name", None):
+            msg = is_valid_meorg_output_name(mo_name)
+            if msg is not None:
+                raise Exception(msg)
+
+            config["meorg_output_name"] = mo_name
+
+    if "meorg_output_name" in config:
+        user = os.getenv("USER")
+        mo_name_hash_input = f"{mo_names}{MEORG_PROFILE['id']}{user}"
+        # hash in bytes form
+        mo_name_hash_b = hashlib.sha1(mo_name_hash_input.encode())
+        # Convert to str and take first 6 characters
+        mo_name_hash = base64.b32encode(mo_name_hash_b.digest()).decode()[:6]
+        config["meorg_output_name"] += f"_{mo_name_hash}"
+
+    return config
 
 
 def read_config_file(config_path: str) -> dict:
@@ -154,6 +248,8 @@ def read_config(config_path: str) -> dict:
     ----------
     config_path : str
         Path to the configuration file.
+    is_meorg: str
+        Whether workflow includes meorg job submission. If true, determine the model output name
 
     Returns
     -------
@@ -169,7 +265,8 @@ def read_config(config_path: str) -> dict:
     # Read configuration file
     config = read_config_file(config_path)
     # Populate configuration dict with optional keys
-    read_optional_key(config)
-    # Validate and return.
+    config = read_optional_key(config)
+    # Validate.
     validate_config(config)
+    config = add_meorg_output_name(config)
     return config

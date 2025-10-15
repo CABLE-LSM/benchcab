@@ -245,13 +245,14 @@ class Benchcab:
         logger.info("The NetCDF output for each task is written to:")
         logger.info(f"{internal.FLUXSITE_DIRS['OUTPUT']}/<task_name>_out.nc")
 
-        # Upload to meorg by default
-        bm.do_meorg(
-            config,
-            upload_dir=internal.FLUXSITE_DIRS["OUTPUT"],
-            benchcab_bin=str(self.benchcab_exe_path),
-            benchcab_job_id=job_id,
-        )
+        # Upload to meorg if meorg_output_name optional key is passed
+        if config.get("meorg_output_name") is not None:
+            bm.do_meorg(
+                config,
+                upload_dir=internal.FLUXSITE_DIRS["OUTPUT"],
+                benchcab_bin=str(self.benchcab_exe_path),
+                benchcab_job_id=job_id,
+            )
 
     def gen_codecov(self, config_path: str):
         """Endpoint for `benchcab codecov`."""

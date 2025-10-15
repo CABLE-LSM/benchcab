@@ -251,8 +251,42 @@ MEORG_EXPERIMENTS = {
     ],
 }
 
+# Map experiment with their IDs and benchmarks
+# For now, each experiment is associated with 3 benchmarks (1lin, 3km27, LSTM)
+MEORG_EXPERIMENT_ID_MAP = {
+    "AU-Tum": {
+        "experiment": "jwN9jNMWLEzbT2i9D",
+        "benchmarks": ["J9BBQCJdsuehsmMf2", "N5X2rjmp96baXrrJ3", "Q7Xu6yGGYdzvvAwbn"],
+    },
+    "AU-How": {
+        "experiment": "XfC6MTEMm23C4m4iL",
+        "benchmarks": ["tdrQrKmaihmWdZSZu", "qZWhR3g7JfGhKWPa7", "p2SFiZdQw6ChQK6pr"],
+    },
+    "FI-Hyy": {
+        "experiment": "nXpDC2Yt7RhhwSKor",
+        "benchmarks": ["Ym7gwY4k2J2pvDKDJ", "xYA3tSrL2bCeEmvai", "kXFt8mCMtHG4rsnJz"],
+    },
+    "US-Var": {
+        "experiment": "sD9N2dKx4Jca8B82T",
+        "benchmarks": ["NbMEBX4sPNHNYkTtq", "X3FoGtYvWmjCyRHGd", "uejBLuHnf4RxAqZXH"],
+    },
+    "US-Whs": {
+        "experiment": "aWDKqBoTe88ssinuc",
+        "benchmarks": ["QWsdgXGCWYx7HobXJ", "C42GurGaYDdSRrc2x", "zdnCDJXJzuSheP6T5"],
+    },
+    "five-site-test": {
+        "experiment": "Nb37QxkAz3FczWDd7",
+        "benchmarks": ["PP4rFWJGiixFZP8q4", "8kWgyuSkwAKyghsFp", "DYWQuYvxZDgEsp4iX"],
+    },
+    "forty-two-site-test": {
+        "experiment": "s6k22L3WajmiS9uGv",
+        "benchmarks": ["zKRrfM7bJpxWPcQ3L", "LMvzc2WL5Qa5jKTpv", "D3XqYwQgH88Tx6NCW"],
+    },
+}
+
+MEORG_PROFILE = {"name": "CABLE", "id": "nFcjg4qqHGPkB9sqE"}
+
 FLUXSITE_DEFAULT_EXPERIMENT = "forty-two-site-test"
-FLUXSITE_DEFAULT_MEORG_MODEL_OUTPUT_ID = False
 
 OPTIONAL_COMMANDS = ["fluxsite-bitwise-cmp", "gen_codecov"]
 

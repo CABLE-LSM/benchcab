@@ -18,26 +18,53 @@ set -ev
 # Set some things
 DATA_DIR={{data_dir}}
 NUM_THREADS={{num_threads}}
-MODEL_OUTPUT_ID={{model_output_id}}
 CACHE_DELAY={{cache_delay}}
 MEORG_BIN={{meorg_bin}}
+MODEL_PROFILE_ID={{ model_prof_id }}
+meorg_output_name={{ mo.name }}
+MODEL_OUTPUT_ARGS=()
 
-{% if purge_outputs %}
-# Purge existing model outputs
-echo "Purging existing outputs from $MODEL_OUTPUT_ID"
-$MEORG_BIN file detach_all $MODEL_OUTPUT_ID
+# Create new model output entity
+MODEL_OUTPUT_ARGS+="--state-selection {{ mo.state_selection }}"
+MODEL_OUTPUT_ARGS+=" --parameter-selection {{ mo.parameter_selection }}"
+{% if mo.is_bundle %}
+MODEL_OUTPUT_ARGS+=" --is-bundle"
 {% endif %}
+
+echo "Querying whether $meorg_output_name already exists on me.org"
+MODEL_OUTPUT_ID=$($MEORG_BIN output query $meorg_output_name | head -n 1 )
+if [ ! -z "${MODEL_OUTPUT_ID}" ] ; then
+# Re-run analysis on the same model output ID, cleaning up existing files
+echo "Deleting existing files from model output ID"
+$MEORG_BIN file delete_all $MODEL_OUTPUT_ID
+echo -n "Updated"
+else
+echo -n "Created"
+fi
+
+echo " $meorg_output_name on me.org and given this ID: $MODEL_OUTPUT_ID"
+
+MODEL_OUTPUT_ID="$($MEORG_BIN output create $MODEL_PROFILE_ID $meorg_output_name $MODEL_OUTPUT_ARGS | head -n 1 | awk '{print $NF}')"
+echo "Add experiments to model output"
+$MEORG_BIN experiment update $MODEL_OUTPUT_ID {{ model_exp_ids|join(',') }}
 
 # Upload the data
 echo "Uploading data to $MODEL_OUTPUT_ID"
-$MEORG_BIN file upload $DATA_DIR/*.nc -n $NUM_THREADS --attach_to $MODEL_OUTPUT_ID
+$MEORG_BIN file upload $DATA_DIR/*.nc -n $NUM_THREADS $MODEL_OUTPUT_ID
 
 # Wait for the cache to transfer to the object store.
 echo "Waiting for object store transfer ($CACHE_DELAY sec)"
 sleep $CACHE_DELAY
 
+{% for exp_id in model_exp_ids %} 
+echo "Add benchmarks to model output"
+$MEORG_BIN benchmark update $MODEL_OUTPUT_ID {{ exp_id }} {{ model_benchmark_ids|join(',') }}
+
 # Trigger the analysis
 echo "Triggering analysis on $MODEL_OUTPUT_ID"
-$MEORG_BIN analysis start $MODEL_OUTPUT_ID
+$MEORG_BIN analysis start $MODEL_OUTPUT_ID {{ exp_id }}
 
-echo "DONE"
+{% endfor %} 
+
+MEORG_BASE_URL_DEV="${MEORG_BASE_URL_DEV:-https://modelevaluation.org/api/}"
+echo "Files transferred to me.org. Analysis in progress. Open ${MEORG_BASE_URL_DEV}/display/${MODEL_OUTPUT_ID} to see results"

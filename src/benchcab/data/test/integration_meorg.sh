@@ -31,6 +31,7 @@ realisations:
   - repo:
       local:
         path: $CABLE_DIR
+  meorg_output_name: true
   - repo:
       git:
         branch: main
@@ -47,7 +48,6 @@ fluxsite:
       - scratch/$PROJECT
       - gdata/$PROJECT
   # This ID is currently configured on the me.org server.
-  meorg_model_output_id: Sss7qupAHEZ8ovbCv
 EOL
 
 benchcab run -v
