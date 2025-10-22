@@ -378,18 +378,15 @@ realisations:
 : **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. The following workflow is executed:
 
 1. A new model output name is created based on the selected realisation. Note: The realisation name is set via `name` if provided, otherwise the default realisation name based on the repository name. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is also appended. The goal is to minimise conflicts in model output names for different users' needs. In case the `model_output_name` already exists, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis.
-
 2. The following settings are taken by default for the model output:
-  - Model Profile - `CABLE`
-  - State Selection - `default`
-  - Parameter Selection - `automated`
-  - Bundled experiments - `true`
-  - Comments - `none`
-
+   - Model Profile - `CABLE`
+   - State Selection - `default`
+   - Parameter Selection - `automated`
+   - Bundled experiments - `true`
+   - Comments - `none`
 3. Depending on the fluxsite [`experiment`](#`experiment`), `benchcab` will do the following:
   - Add the correponding experiment in model output.
   - Associate the experiment with base benchmark (already stored in `me.org`), and other listed realisations (since they share the same experiment). 
-
 4. Run the analysis, and provide a link to the user to check status.
 
 The model output name should also follow the Github issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
