@@ -375,7 +375,18 @@ realisations:
 ### [meorg_output_name](#meorg_output_name)
 
 
-: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. A `base32` format hash derived from `model_profile_id` and `$USER` is appended to the model name.
+: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. The following workflow is executed:
+1. A new model output name is created based on the selected realisation. A `base32` format hash derived from `realisations`, `model_profile_id` and `$USER` is also appended. This minimises collision between different use-cases for different users. In case the `model_output_name` already exists, the files within that model output are deleted, for fresh set of benchmarking results to be sent for analysis.
+2. The following settings are taken by default for the model output
+  - Model Profile - `CABLE`
+  - State Selection - `default`
+  - Parameter Selection - `automated`
+  - Bundled experiments - `true`
+  - Comments - `none`
+3. Depending on the fluxsite [`experiment`](#`experiment`), `benchcab` will do the following:
+  - Add them experiments in model output.
+  - Associate the experiment with base benchmark (already stored in `me.org`), and other listed realisations. 
+4. Run the analysis, and provide a link to the user to check status.
 
 Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org. The realisation name is set via `name` if provided, otherwise the default realisation name of the `Repo`. 
 
@@ -393,12 +404,6 @@ realisations:
       git:
         branch: 456-my-branch
 ```
-f(mo_name, user, profile)
-123-my-branch-34akg9 # Add by default 
-
-<!-- Branch name different from mo_name -->
-
-
 
 ### [name](#name)
 
