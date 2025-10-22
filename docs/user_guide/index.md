@@ -243,7 +243,7 @@ The following files and directories are created when `benchcab run` executes suc
 `benchcab` communicates with `meorg` using `meorg_client` package (available on `xp65` conda environment in Gadi). The benchmarking results are uploaded to `modelevaluation.org` for further analysis, which can be seen via the web interface. To enable support:
 
 1. Go to [modelevaluation.org][meorg] and login or create a new account.
-2. Make sure to enable the `benchcab-evaluation` workspace. To do this, click the **Current Workspace** button at the top of the page, and select `benchcab-evaluation` under "Workspaces Shared With Me".
+2. To view analysis in the web interface, one needs to enable `benchcab-evaluation` workspace. To do this, click the **Current Workspace** button at the top of the page, and select `benchcab-evaluation` under "Workspaces Shared With Me".
     <figure markdown>
       ![Workspace Button](../assets/model_evaluation/Current%20Workspace%20button.png){ width="500" }
       <figcaption>Button to choose workspace</figcaption>
