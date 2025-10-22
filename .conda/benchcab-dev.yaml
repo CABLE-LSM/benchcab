@@ -26,4 +26,7 @@ dependencies:
   - black
   - ruff
   - pip:
-    - -r mkdocs-requirements.txt
+    - mkdocs>1.1
+    - mkdocs-material>=7.2.6
+    - mkdocs-git-revision-date-localized-plugin
+    - mkdocs-macros-plugin
