@@ -375,9 +375,21 @@ realisations:
 ### [meorg_output_name](#meorg_output_name)
 
 
-: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. A `base32` format hash derived from `model_profile_id` and `$USER` is appended to the model name.
+: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. The following workflow is executed:
 
-Note: It is the user's responsbility to ensure the model output name does not clash with existing names belonging to other users on modelevaluation.org. The realisation name is set via `name` if provided, otherwise the default realisation name of the `Repo`. 
+1. A `model_output_name` is created using the format `<realisation_name>-<hash>`. Here, The `realisation_name` is determined where `meorg_output_name` is set as `true`.  
+**Note**: The `realisation_name` is set via [name](#name) if provided, otherwise the default repository name is used. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is appended at the end. The hash is used to minimise name conflicts for different users' needs.  
+**Note**: In case `model_output_name` already exists on `me.org`, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis, ensuring that the user can re-run `benchcab` without any issues. 
+2. The following settings are taken by default for the model output:
+    * Model Profile - `CABLE`
+    * State Selection - `default`
+    * Parameter Selection - `automated`
+    * Bundled experiments - `true`
+    * Comments - `none`
+3. Depending on the fluxsite [`experiment`](#`experiment`), `benchcab` will do the following:
+  - Add the correponding experiment to model output.
+  - Associate the experiment with base benchmark (already stored in `me.org`), and other listed realisations (since they share the same experiment). 
+4. Run the analysis, and provide a link to the user to check status.
 
 The model output name should also follow the Github issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
 
@@ -393,12 +405,6 @@ realisations:
       git:
         branch: 456-my-branch
 ```
-f(mo_name, user, profile)
-123-my-branch-34akg9 # Add by default 
-
-<!-- Branch name different from mo_name -->
-
-
 
 ### [name](#name)
 
