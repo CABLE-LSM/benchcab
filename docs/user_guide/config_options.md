@@ -377,15 +377,17 @@ realisations:
 
 : **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. The following workflow is executed:
 
-1. A new model output name is created based on the selected realisation. Note: The realisation name is set via `name` if provided, otherwise the default realisation name based on the repository name. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is also appended. The goal is to minimise conflicts in model output names for different users' needs. In case the `model_output_name` already exists, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis.
+1. A `model_output_name` is created using the format `<realisation_name>-<hash>`. Here, The `realisation_name` is determined where `meorg_output_name` is set as `true`.  
+**Note**: The `realisation_name` is set via [name](#name) if provided, otherwise the default repository name is used. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is appended at the end. The hash is used to minimise name conflicts for different users' needs.  
+**Note**: In case `model_output_name` already exists on `me.org`, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis, ensuring that the user can re-run `benchcab` without any issues. 
 2. The following settings are taken by default for the model output:
-   - Model Profile - `CABLE`
-   - State Selection - `default`
-   - Parameter Selection - `automated`
-   - Bundled experiments - `true`
-   - Comments - `none`
+    * Model Profile - `CABLE`
+    * State Selection - `default`
+    * Parameter Selection - `automated`
+    * Bundled experiments - `true`
+    * Comments - `none`
 3. Depending on the fluxsite [`experiment`](#`experiment`), `benchcab` will do the following:
-  - Add the correponding experiment in model output.
+  - Add the correponding experiment to model output.
   - Associate the experiment with base benchmark (already stored in `me.org`), and other listed realisations (since they share the same experiment). 
 4. Run the analysis, and provide a link to the user to check status.
 
