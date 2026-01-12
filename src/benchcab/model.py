@@ -175,6 +175,10 @@ class Model:
                     "-DCMAKE_VERBOSE_MAKEFILE=ON",
                 ]
 
+                # This is required to prevent CMake from finding openmpi
+                # libraries installed under xp65:
+                env.pop("OPAL_PREFIX", None)
+
                 # This is required to prevent CMake from finding the conda
                 # installation of netcdf-fortran (#279):
                 env.pop("LDFLAGS", None)
