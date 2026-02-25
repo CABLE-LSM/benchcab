@@ -257,4 +257,14 @@ def generate_parser(app: Benchcab) -> argparse.ArgumentParser:
         add_help=False,
     )
     parser_codecov.set_defaults(func=app.gen_codecov)
+
+    # subcommand: 'benchcab meorg-transfer'
+    parser_meorg_transfer = subparsers.add_parser(
+        "meorg-transfer",
+        parents=[args_help, args_subcommand],
+        help="Manually transfer model outputs to modelevaluation.org",
+        add_help=False
+    )
+    parser_meorg_transfer.set_defaults(func=app.meorg_transfer)
+
     return main_parser
