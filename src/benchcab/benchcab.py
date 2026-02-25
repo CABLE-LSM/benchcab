@@ -459,7 +459,6 @@ class Benchcab:
 
         # Get a logger, load the config
         logger = self._get_logger()
-        logger.setLevel(logging.DEBUG)
         config = self._get_config(config_path)
 
         # Check to ensure the tasks are complete
