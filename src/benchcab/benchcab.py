@@ -453,3 +453,35 @@ class Benchcab:
         self.spatial_setup_work_directory(config_path)
         self.fluxsite_submit_job(config_path, skip)
         self.spatial_run_tasks(config_path)
+
+    def meorg_transfer(self, config_path: str):
+        """Endpoint for `benchcab meorg-transfer`"""
+
+        # Get a logger, load the config
+        logger = self._get_logger()
+        config = self._get_config(config_path)
+
+        # Check to ensure the tasks are complete
+        logger.debug("Checking task completion")
+        tasks = self._get_fluxsite_tasks(config)
+        num_tasks, num_complete, num_failed, all_complete = task_summary(tasks)
+        logger.debug(f"{num_complete}/{num_tasks} completed.")
+
+        # Bail out if incomplete
+        if not all_complete:
+            logger.error(f"{num_failed} tasks have failed, unable to transfer. Exiting.")
+            sys.exit(1)
+
+        # Check if the output name is set
+        if config.get("meorg_output_name") is None:
+            logger.error("meorg_output_name is not defined in config, unable to transfer files.")
+            sys.exit(1)
+
+        # Upload to meorg if meorg_output_name optional key is passed
+        logger.info("Submitting job for meorg transfer")
+        bm.do_meorg(
+            config,
+            upload_dir=internal.FLUXSITE_DIRS["OUTPUT"],
+            benchcab_bin=str(self.benchcab_exe_path),
+            benchcab_job_id=None,
+        )
