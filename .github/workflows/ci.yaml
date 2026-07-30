@@ -25,7 +25,7 @@ jobs:
       - name: Build and install conda package
         run: |
           conda install conda-build
-          conda build -c conda-forge -c accessnri -c coecms .
+          conda-build -c conda-forge -c accessnri -c coecms .
           conda install --no-channel-priority -c $CONDA_PREFIX/conda-bld -c conda-forge -c accessnri -c coecms benchcab
           conda uninstall conda-build
       - name: Test with pytest
