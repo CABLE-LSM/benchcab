@@ -17,7 +17,7 @@ dependencies:
   - gitpython
   - jinja2
   - hpcpy>=0.5.0
-  - meorg_client>=0.5.0
+  - meorg_client>=0.6.2
   # CI
   - pytest-cov
   # Dev Dependencies
