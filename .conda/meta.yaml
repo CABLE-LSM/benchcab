@@ -17,11 +17,11 @@ build:
 
 requirements:
     host:
-        - python >=3.9,<3.13
+        - python >=3.10,<3.13
         - pip
     run:
-        - python >=3.9,<3.13
-        - payu >=1.0.30
+        - python >=3.10,<3.13
+        - payu >=1.3.3
         - netCDF4
         - PyYAML
         - f90nml

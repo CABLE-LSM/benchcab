@@ -166,13 +166,13 @@ class TestRun:
     def test_payu_run_command(self, task, mock_subprocess_handler):
         """Success case: test payu run command."""
         task.run()
-        assert "payu run" in mock_subprocess_handler.commands
+        assert "payu run --new-uuid" in mock_subprocess_handler.commands
 
     def test_payu_run_with_optional_arguments(self, task, mock_subprocess_handler):
         """Success case: test payu run command with optional arguments."""
         task.payu_args = "--some-flag"
         task.run()
-        assert "payu run --some-flag" in mock_subprocess_handler.commands
+        assert "payu run --new-uuid --some-flag" in mock_subprocess_handler.commands
 
 
 class TestGetSpatialTasks:

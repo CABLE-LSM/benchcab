@@ -68,7 +68,7 @@ class SpatialTask:
                 config = {}
 
         self.logger.debug(
-            f"  Updating experiment config parameters in {task_dir / 'config.yaml'}" ""
+            f"  Updating experiment config parameters in {task_dir / 'config.yaml'}"
         )
 
         if payu_config:
@@ -112,7 +112,9 @@ class SpatialTask:
         task_dir = internal.SPATIAL_TASKS_DIR / self.get_task_name()
         with chdir(task_dir):
             self.subprocess_handler.run_cmd(
-                f"payu run {self.payu_args}" if self.payu_args else "payu run",
+                f"payu run --new-uuid {self.payu_args}"
+                if self.payu_args
+                else "payu run --new-uuid",
             )
 
 
