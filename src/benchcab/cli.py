@@ -231,7 +231,7 @@ def generate_parser(app: Benchcab) -> argparse.ArgumentParser:
         help="Cleanup files created by running benchcab.",
         description="""Removes src/ and runs/ directories, along with log files in the 
         project root directory. The user has to specify which stage of files to remove 
-        via \{all, realisations, submissions\} subcommand.""",
+        via {all, realisations, submissions} subcommand.""",
         add_help=False,
     )
 
