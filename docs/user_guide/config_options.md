@@ -375,11 +375,18 @@ realisations:
 ### [meorg_output_name](#meorg_output_name)
 
 
-: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. The following workflow is executed:
+: **Default:** unset, _optional key_. :octicons-dash-24: Boolean flag used on one realisation to upload the Model Output to me.org for further analysis. Set this key at the same indentation level as `repo`, `name`, `patch` and the other realisation options.
 
-1. A `model_output_name` is created using the format `<realisation_name>-<hash>`. Here, The `realisation_name` is determined where `meorg_output_name` is set as `true`.  
-**Note**: The `realisation_name` is set via [name](#name) if provided, otherwise the default repository name is used. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is appended at the end. The hash is used to minimise name conflicts for different users' needs.  
-**Note**: In case `model_output_name` already exists on `me.org`, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis, ensuring that the user can re-run `benchcab` without any issues. 
+!!! warning "Only one realisation can enable me.org output"
+
+    Set `meorg_output_name: True` for exactly one realisation. If more than one realisation has this key set to `True`, `benchcab` raises an error.
+
+When `meorg_output_name` is enabled, the following workflow is executed:
+
+1. A model output name is created using the format `<realisation_name>-<hash>`. The `realisation_name` comes from [name](#name) if provided; otherwise it is inferred from the branch, SVN path or local path. Set [name](#name) explicitly when the inferred value does not follow the required model output name format. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is appended at the end. The hash is used to minimise name conflicts for different users' needs.
+
+**Note**: In case the generated model output name already exists on `me.org`, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis, ensuring that the user can re-run `benchcab` without any issues.
+
 2. The following settings are taken by default for the model output:
     * Model Profile - `CABLE`
     * State Selection - `default`
@@ -391,16 +398,16 @@ realisations:
   - Associate the experiment with base benchmark (already stored in `me.org`), and other listed realisations (since they share the same experiment). 
 4. Run the analysis, and provide a link to the user to check status.
 
-The model output name should also follow the Github issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
+The model output name should also follow the GitHub issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
 
-This key is _optional_. No default.
+This key is _optional_ and has no default. Omit it, or leave it unset, when you do not want the me.org transfer workflow.
 
 ```yaml
 realisations:
   - repo:
       git:
         branch: 123-my-branch
-        meorg_output_name: True
+    meorg_output_name: True
   - repo:
       git:
         branch: 456-my-branch
