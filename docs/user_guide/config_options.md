@@ -375,35 +375,32 @@ realisations:
 ### [meorg_output_name](#meorg_output_name)
 
 
-: **Default:** unset, _optional key_. :octicons-dash-24: Chosen as the model name for one of the realisations, if the user wants to upload the Model Output to me.org for further analysis. The following workflow is executed:
+: **Default:** False, _optional key_. :octicons-dash-24: If this flag is enabled for a given realisation, benchcab will create a model output on [modelevaluation.org][meorg] which is named using the selected realisation, and upload all simulation results to the created model output. Note that the CABLE branch name of the selected realisation should follow the GiHub issue branch format (i.e. it should start with a digit, with words separated by dashes), and must not exceed 50 characters in length. If the branch name does not satisfy these requirements by default, the branch name can be set to a custom branch name via the [`name` option](#name). More precisely, the following steps are executed when enabling this setting:
 
-1. A `model_output_name` is created using the format `<realisation_name>-<hash>`. Here, The `realisation_name` is determined where `meorg_output_name` is set as `true`.  
-**Note**: The `realisation_name` is set via [name](#name) if provided, otherwise the default repository name is used. A 6-character hash derived from `realisations`, `model_profile_id` and `$USER` is appended at the end. The hash is used to minimise name conflicts for different users' needs.  
-**Note**: In case `model_output_name` already exists on `me.org`, the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis, ensuring that the user can re-run `benchcab` without any issues. 
+1. A model output on [modelevaluation.org][meorg] is created with name `<realisation_name>-<hash>` where `realisation_name` is the branch name of the selected realisation, and `hash` is a 6-character hash unique to the `realisations_name`, `model_profile_id` and `$USER` (used to prevent name conflicts for different users' needs).
+
+    **Note**: In case the model output already exists on [modelevaluation.org][meorg], the files within that model output are deleted. This is done to send a fresh set of benchmarking results for analysis, ensuring that the user can re-run `benchcab` without any issues.
+
 2. The following settings are taken by default for the model output:
     * Model Profile - `CABLE`
     * State Selection - `default`
     * Parameter Selection - `automated`
     * Bundled experiments - `true`
     * Comments - `none`
-3. Depending on the fluxsite [`experiment`](#`experiment`), `benchcab` will do the following:
-  - Add the correponding experiment to model output.
-  - Associate the experiment with base benchmark (already stored in `me.org`), and other listed realisations (since they share the same experiment). 
-4. Run the analysis, and provide a link to the user to check status.
 
-The model output name should also follow the Github issue branch format (i.e. it should start with a digit, with words separated by dashes). Finally, the maximum number of characters allowed for `meorg_output_name` is 50.
+3. The appropriate experiment and empirical model benchmarks on [modelevaluation.org][meorg] are linked to the created model output.
 
-This key is _optional_. No default.
+5. The analysis is triggered remotely on [modelevaluation.org][meorg].
 
 ```yaml
 realisations:
   - repo:
       git:
-        branch: 123-my-branch
-        meorg_output_name: True
+        branch: main
   - repo:
       git:
-        branch: 456-my-branch
+        branch: 123-my-branch
+    meorg_output_name: True
 ```
 
 ### [name](#name)
