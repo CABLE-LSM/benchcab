@@ -119,7 +119,7 @@ You will then need to adapt the `config.yaml` file to your case. For more inform
 
 ### Run the simulations
 
-Currently, `benchcab` can only run CABLE for flux site and offline spatial configurations. **To run the whole workflow**, run
+Currently, `benchcab` can only run CABLE in offline mode for flux site and spatial configurations. **To run the whole workflow**, run
 
 ```bash
 benchcab run
@@ -179,6 +179,28 @@ One of the powerful features of `benchcab` is the ability to run an ensemble of 
 - *Ensemble run:* running any number of versions of CABLE with the same set of customised science configurations.
 
 The regression and new feature run modes should be used as necessary when evaluating new developments in CABLE. For more information on setting up these use cases, please see [config.yaml options](config_options.md#configyaml-options).
+
+## Example Configurations
+
+For the `main` branch and another branch named `123-benchcab-demo`, run the benchcab flux tower tests for:
+
+**1. The `five-site-test` experiment with the [modelevaluation.org][meorg] analysis**
+
+??? note "Solution"
+
+    ```yaml
+    --8<-- "https://raw.githubusercontent.com/CABLE-LSM/bench_example/refs/heads/examples-main-vs-demo-branch/config.yaml"
+    ```
+
+**2. The `five-site-test` experiment with the [modelevaluation.org][meorg] analysis, except now test the impact of a new option by setting `cable_user%new_option = .true.` in the CABLE namelist file for all simulations involving `123-benchcab-demo`**
+
+!!! tip "See the [`patch`](config_options.md#patch) option"
+
+??? note "Solution"
+
+    ```yaml
+    --8<-- "https://raw.githubusercontent.com/CABLE-LSM/bench_example/refs/heads/examples-main-vs-demo-branch-patch/config.yaml"
+    ```
 
 ## Contacts
 
