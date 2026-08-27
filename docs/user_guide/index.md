@@ -35,6 +35,10 @@ To use `benchcab`, you need:
 
 ## Usage
 
+### Connecting to Gadi
+
+To get started with using benchcab, we recommend users to connect to Gadi via the terminal which is the native environment for running the benchcab command line tool. For more information on how to do this, see [Connecting to Gadi via terminal][nci-opus-connecting-to-gadi].
+
 ### Loading the software
 
 The package is already installed for you in the Conda environments under the xp65 project. You simply need to load the module for the conda environment:
@@ -228,3 +232,4 @@ Alternatively, you can also access the ACCESS-NRI User support via [the ACCESS-H
 [run_CABLE_v2]: running_CABLE_v2.md
 [payu-github]: https://github.com/payu-org/payu
 [nci-signup]: https://my.nci.org.au/mancini/signup/0
+[nci-opus-connecting-to-gadi]: https://opus.nci.org.au/spaces/Help/pages/230491359/Connecting+to+Gadi...#ConnectingtoGadi...-ConnectingtoGadiviaterminal
