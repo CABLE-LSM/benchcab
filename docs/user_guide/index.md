@@ -28,6 +28,7 @@ To use `benchcab`, you need:
     - [ks32][ks32_mynci] (Required to access to flux tower driving data)
     - [xp65][xp65_mynci] (Required to access `benchcab` tool)
     - [wd9][wd9_mynci] if not part of the [cable][cable_mynci] project (Required to access CABLE ancillaries)
+    - [rp23][rp23_mynci] (Required to access ancillary and driving data for spatial CABLE configurations)
 
     Please reach out to the lead CI for the above projects stating your affiliation and purpose. This may take a few days for the request to be approved.
 
@@ -227,6 +228,7 @@ Alternatively, you can also access the ACCESS-NRI User support via [the ACCESS-H
 [xp65_mynci]: https://my.nci.org.au/mancini/project/xp65
 [ks32_mynci]: https://my.nci.org.au/mancini/project/ks32
 [wd9_mynci]: https://my.nci.org.au/mancini/project/wd9
+[rp23_mynci]: https://my.nci.org.au/mancini/project/rp23
 [cable_mynci]: https://my.nci.org.au/mancini/project/cable
 [bench_example]: https://github.com/CABLE-LSM/bench_example.git
 [forum-support]: https://forum.access-hive.org.au/t/access-help-and-support/908
