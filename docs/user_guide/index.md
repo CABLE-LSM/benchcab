@@ -29,6 +29,7 @@ To use `benchcab`, you need:
     - [xp65][xp65_mynci] (Required to access `benchcab` tool)
     - [wd9][wd9_mynci] if not part of the [cable][cable_mynci] project (Required to access CABLE ancillaries)
     - [rp23][rp23_mynci] (Required to access ancillary and driving data for spatial CABLE configurations)
+    - [nf33][nf33_mynci] (Required for compute jobs for running CABLE simulations)
 
     Please reach out to the lead CI for the above projects stating your affiliation and purpose. This may take a few days for the request to be approved.
 
