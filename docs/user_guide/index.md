@@ -88,7 +88,19 @@ Once the work directory is cloned, change directory into the cloned example work
 cd bench_example
 ```
 
-You will then need to adapt the `config.yaml` file to your case. For more information on the available options in this file, please refer to [config.yaml options](config_options.md#configyaml-options).
+You will then need to adapt the `config.yaml` file to your case. This file should look similar to the following:
+
+```yaml
+--8<-- "https://raw.githubusercontent.com/CABLE-LSM/bench_example/refs/heads/main/config.yaml"
+```
+
+Here the [`realisations`](config_options.md#realisations) section specifies to run CABLE executables built from the `main` branch of CABLE repository for the default ensemble of CABLE model configurations. The model configurations consist of various flux towers and gridded simulations (see [`fluxsite`](config_options.md#fluxsite) and [`spatial`](config_options.md#spatial)), with each driving data set simulated using one or more CABLE science configurations (see [`science_configurations`](config_options.md#science_configurations)).
+
+The `realisations` list can be expanded to compare behaviour across multiple branches (see [Example Configurations](#example-configurations)).
+
+We also specify the environment modules required for building the CABLE executable in the [`modules`](config_options.md#modules) section. These modules will be loaded before invoking the CABLE build system.
+
+For more information on the available options in the `config.yaml` file, please refer to [config.yaml options](config_options.md#configyaml-options).
 
 !!! info "Running with CABLE v2.x"
 
