@@ -219,6 +219,8 @@ For the `main` branch and another branch named `123-benchcab-demo`, run the benc
     --8<-- "https://raw.githubusercontent.com/CABLE-LSM/bench_example/refs/heads/examples-main-vs-demo-branch-patch/config.yaml"
     ```
 
+Please also see [Configuration examples for various use cases](use_cases.md#configuration-examples-for-various-use-cases).
+
 ## Contacts
 
 Please enter your questions as issues on [the benchcab repository][issues-benchcab].
