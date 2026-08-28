@@ -5,7 +5,7 @@
     ```sh
     module use /g/data/xp65/public/modules
     module load conda/benchcab
-    cd /scratch/$PROJECT/$USER
+    cd /scratch/nf33/$USER
     git clone -b land-training https://github.com/CABLE-LSM/bench_example.git
     cd bench_example
     vim config.yaml # Edit config.yaml
@@ -94,10 +94,10 @@ cd bench_example
 !! info
 We see that the `project` key has been set to `nf33` by default, using the configuration resources for that project. In case you need to use `benchcab` in the future, you can set the `project` key appropriately.
 
-You will then need to adapt the `config.yaml` file to your case. This file should look similar to the following:
+You will then need to adapt the `config.yaml` file to your case. This file should look similar to the following :
 
 ```yaml
---8<-- "https://raw.githubusercontent.com/CABLE-LSM/bench_example/refs/heads/main/config.yaml"
+--8<-- "https://raw.githubusercontent.com/CABLE-LSM/bench_example/refs/heads/land-training/config.yaml"
 ```
 
 Here the [`realisations`](config_options.md#realisations) section specifies to run CABLE executables built from the `main` branch of CABLE repository for the default ensemble of CABLE model configurations. The model configurations consist of various flux towers and gridded simulations (see [`fluxsite`](config_options.md#fluxsite) and [`spatial`](config_options.md#spatial)), with each driving data set simulated using one or more CABLE science configurations (see [`science_configurations`](config_options.md#science_configurations)).
@@ -210,6 +210,10 @@ One of the powerful features of `benchcab` is the ability to run an ensemble of 
 The regression and new feature run modes should be used as necessary when evaluating new developments in CABLE. For more information on setting up these use cases, please see [config.yaml options](config_options.md#configyaml-options).
 
 ## Example Configurations
+
+!! info
+The provided solutions are `project` independent.
+
 
 For the `main` branch and another branch named `123-benchcab-demo`, run the benchcab flux tower tests for:
 
