@@ -6,10 +6,11 @@
     module use /g/data/xp65/public/modules
     module load conda/benchcab
     cd /scratch/$PROJECT/$USER
-    git clone https://github.com/CABLE-LSM/bench_example.git
+    git clone -b land-training https://github.com/CABLE-LSM/bench_example.git
     cd bench_example
     vim config.yaml # Edit config.yaml
-    benchcab run
+    # Note: Optional step if connecting with modelevaluation.org, add keyword `meorg_output_name` and set as true
+    benchcab run -v
     ```
 
 In this guide, we will describe:
@@ -64,10 +65,10 @@ You need to load the module on each new session at NCI on login or compute nodes
 
 #### Choose a location
 
-Benchcab will automatically setup and run the requested CABLE simulations for you under a common directory of your choice. This directory can belong under `/scratch` or `/g/data`, however, `/scratch` is preferred as the data in the run directory does not need to be preserved for a long time. The code will create sub-directories as needed. Please ensure you have enough space to store the CABLE outputs in your directory. The full test suite will require about 22GB of storage space.
+Benchcab will automatically setup and run the requested CABLE simulations for you under a common directory of your choice. This directory can belong under `/scratch` or `/g/data`, however, `/scratch` is preferred as the data in the run directory does not need to be preserved for a long time. The code will create sub-directories as needed. Please ensure you have enough space to store the CABLE outputs in your directory. The full test suite will require about 22GB of storage space. We will be using the `nf33` subproject for today.
 
 ```bash
-cd /scratch/$PROJECT/$USER  # or cd /g/data/$PROJECT/$USER
+cd /scratch/nf33/$USER  # or cd /g/data/$PROJECT/$USER
 ```
 
 !!! Warning "The `$HOME` directory is unsuitable"
@@ -79,16 +80,19 @@ cd /scratch/$PROJECT/$USER  # or cd /g/data/$PROJECT/$USER
 Once you have identified a common directory to run the benchcab simulations, you can now download [the example work directory][bench_example] with git and then adapt it to your case.
 
 ```bash
-git clone https://github.com/CABLE-LSM/bench_example.git
+git clone -b land-training https://github.com/CABLE-LSM/bench_example.git
 ```
 
 ### Modify the configuration file
 
-Once the work directory is cloned, change directory into the cloned example work directory
+Once the work directory is cloned, change directory into the cloned example work directory. 
 
 ```bash
 cd bench_example
 ```
+
+!! info
+We see that the `project` key has been set to `nf33` by default, using the configuration resources for that project. In case you need to use `benchcab` in the future, you can set the `project` key appropriately.
 
 You will then need to adapt the `config.yaml` file to your case. This file should look similar to the following:
 
@@ -134,14 +138,21 @@ For more information on the available options in the `config.yaml` file, please 
       <figcaption>Initialising `meorg_client`</figcaption>
     </figure>
 4. Set the [`meorg_output_name`](config_options.md#meorg_output_name) as `true` for one of the realisations to enable the analysis workflow (run as a PBS jobscript). Please note that the CABLE branch name must satisfy the appropriate naming convention. The CABLE branch name will then be used as the model output name which is uploaded to [modelevaluation.org][meorg].
+    <figure markdown>
+      ![Model Output Page](../assets/model_evaluation/model_output.png){ width="500" }
+      <figcaption>Model Output Page</figcaption>
+    </figure>
 
 ### Run the simulations
 
 Currently, `benchcab` can only run CABLE in offline mode for flux site and spatial configurations. **To run the whole workflow**, run
 
 ```bash
-benchcab run
+benchcab run -v
 ```
+
+!!! info
+We use the `-v` flag to have debug logs, which are particularly useful during the developing stage of a new feature, or debugging issues in workflow.
 
 The tool will follow the steps:
 
@@ -232,6 +243,7 @@ Alternatively, you can also access the ACCESS-NRI User support via [the ACCESS-H
 [ks32_mynci]: https://my.nci.org.au/mancini/project/ks32
 [wd9_mynci]: https://my.nci.org.au/mancini/project/wd9
 [rp23_mynci]: https://my.nci.org.au/mancini/project/rp23
+[nf33_mynci]: https://my.nci.org.au/mancini/project/nf33
 [cable_mynci]: https://my.nci.org.au/mancini/project/cable
 [bench_example]: https://github.com/CABLE-LSM/bench_example.git
 [forum-support]: https://forum.access-hive.org.au/t/access-help-and-support/908
