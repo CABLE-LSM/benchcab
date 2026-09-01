@@ -91,8 +91,9 @@ Once the work directory is cloned, change directory into the cloned example work
 cd bench_example
 ```
 
-!! info
-We see that the `project` key has been set to `nf33` by default, using the configuration resources for that project. In case you need to use `benchcab` in the future, you can set the `project` key appropriately.
+!!! info
+
+     We see that the `project` key has been set to `nf33` by default, using the configuration resources for that project. In case you need to use `benchcab` in the future, you can set the `project` key appropriately.
 
 You will then need to adapt the `config.yaml` file to your case. This file should look similar to the following :
 
