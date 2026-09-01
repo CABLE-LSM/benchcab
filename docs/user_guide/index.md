@@ -152,7 +152,8 @@ benchcab run -v
 ```
 
 !!! info
-We use the `-v` flag to have debug logs, which are particularly useful during the developing stage of a new feature, or debugging issues in workflow.
+
+     We use the `-v` flag to have debug logs, which are particularly useful during the developing stage of a new feature, or debugging issues in workflow.
 
 The tool will follow the steps:
 
