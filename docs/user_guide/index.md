@@ -211,8 +211,8 @@ The regression and new feature run modes should be used as necessary when evalua
 
 ## Example Configurations
 
-!! info
-The provided solutions are `project` independent.
+!!! info
+    The provided solutions are `project` independent.
 
 
 For the `main` branch and another branch named `123-benchcab-demo`, run the benchcab flux tower tests for:
