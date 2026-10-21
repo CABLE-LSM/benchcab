@@ -10,6 +10,9 @@ fluxsite:
     walltime: "10:00:00"
     storage:
       - scratch/$PROJECT
+  meorg_analysis:
+    enabled: true
+    walltime: "01:00:00"
 
 spatial:
   met_forcings:

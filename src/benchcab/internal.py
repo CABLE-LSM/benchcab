@@ -319,3 +319,28 @@ MEORG_CLIENT = dict(
     walltime="01:00:00",
     storage=["gdata/ks32", "gdata/xp65", "gdata/wd9", "gdata/rp23"],
 )
+
+# Defaults for the analysis on Gadi (`fluxsite.meorg_analysis`).
+MEORG_ANALYSIS_DEFAULTS = dict(
+    enabled=False,
+    module="r-meorg/1.0.7_0",
+)
+
+# Resources of the analysis job, by experiment type. The multi-site numbers are
+# from 42-site runs with 3 benchmarks: 62-72 GB peak memory and 360-533 s. Gadi
+# charges max(ncpus, mem / 4GB), so 96GB costs the same as 24 CPUs.
+MEORG_ANALYSIS_RESOURCES = {
+    "single-site": dict(ncpus=4, mem="16GB", walltime="00:30:00"),
+    "multi-site": dict(ncpus=24, mem="96GB", walltime="01:00:00"),
+}
+
+# Fixed settings for the analysis on Gadi
+MEORG_ANALYSIS = dict(
+    module_use="/g/data/vk83/modules",  # Released r-meorg modules
+    # Downloaded analysis inputs. The dm8 cache is shared by its members, so an
+    # input is downloaded once for all users. It is used when it is writable.
+    shared_cache="/g/data/dm8/meorg-cache",
+    shared_cache_storage=["gdata/dm8"],
+    cache="/scratch/{project}/{user}/meorg-cache",  # Otherwise, one per user
+    storage=["gdata/vk83"],  # Analysis job, before `fluxsite.pbs.storage`
+)

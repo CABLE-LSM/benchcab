@@ -76,6 +76,8 @@ def all_optional_default_config(no_optional_config) -> dict:
             "experiment": bi.FLUXSITE_DEFAULT_EXPERIMENT,
             "multiprocess": bi.FLUXSITE_DEFAULT_MULTIPROCESS,
             "pbs": bi.FLUXSITE_DEFAULT_PBS,
+            "meorg_analysis": bi.MEORG_ANALYSIS_DEFAULTS
+            | bi.MEORG_ANALYSIS_RESOURCES["multi-site"],
         },
         "science_configurations": bi.DEFAULT_SCIENCE_CONFIGURATIONS,
         "spatial": {
@@ -107,6 +109,7 @@ def all_optional_custom_config(no_optional_config) -> dict:
                 "walltime": "10:00:00",
                 "storage": ["scratch/$PROJECT"],
             },
+            "meorg_analysis": {"enabled": True, "walltime": "01:00:00"},
         },
         "science_configurations": [
             {
@@ -199,6 +202,29 @@ class TestReadOptionalKey:
             all_optional_default_config_no_project
         )
 
+    @pytest.mark.parametrize(
+        ("fluxsite", "profile", "user"),
+        [
+            # No experiment given: the default is a multi-site experiment
+            ({}, "multi-site", {}),
+            ({"experiment": "AU-Tum"}, "single-site", {}),
+            # A key set by the user wins, the others come from the experiment
+            ({"experiment": "AU-Tum"}, "single-site", {"mem": "32GB"}),
+        ],
+    )
+    def test_meorg_analysis_resources(
+        self, no_optional_config, fluxsite, profile, user
+    ):
+        """The analysis job resources come from the experiment, user keys win per key."""
+        config = no_optional_config | {
+            "fluxsite": fluxsite | ({"meorg_analysis": user} if user else {})
+        }
+        bc.read_optional_key(config)
+        expected = (
+            bi.MEORG_ANALYSIS_DEFAULTS | bi.MEORG_ANALYSIS_RESOURCES[profile] | user
+        )
+        assert config["fluxsite"]["meorg_analysis"] == expected
+
 
 def test_add_meorg_output_name(all_optional_custom_config):
     """Test addition of correct model output name."""
@@ -263,6 +289,11 @@ def test_read_optional_config(config_path, all_optional_custom_config):
     output_config = all_optional_custom_config | {
         "meorg_output_name": "123-sample-optional_7J3IEJ"
     }
+    output_config["fluxsite"]["meorg_analysis"] = (
+        bi.MEORG_ANALYSIS_DEFAULTS
+        | bi.MEORG_ANALYSIS_RESOURCES["single-site"]
+        | output_config["fluxsite"]["meorg_analysis"]
+    )
     del output_config["realisations"][0]["meorg_output_name"]
     config = bc.read_config(config_path)
     assert pformat(config) == pformat(output_config)

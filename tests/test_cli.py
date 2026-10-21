@@ -121,6 +121,15 @@ def test_cli_parser():
         "func": app.gen_codecov,
     }
 
+    # Success case: meorg-analysis command with --dry-run
+    res = vars(parser.parse_args(["meorg-analysis", "--dry-run"]))
+    assert res == {
+        "config_path": "config.yaml",
+        "verbose": False,
+        "dry_run": True,
+        "func": app.meorg_analysis,
+    }
+
     # Failure case: pass --no-submit to a non 'run' command
     with pytest.raises(SystemExit):
         parser.parse_args(["fluxsite-setup-work-dir", "--no-submit"])

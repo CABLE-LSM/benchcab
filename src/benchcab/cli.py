@@ -267,4 +267,21 @@ def generate_parser(app: Benchcab) -> argparse.ArgumentParser:
     )
     parser_meorg_transfer.set_defaults(func=app.meorg_transfer)
 
+    # subcommand: 'benchcab meorg-analysis'
+    parser_meorg_analysis = subparsers.add_parser(
+        "meorg-analysis",
+        parents=[args_help, args_subcommand],
+        help="Run the me.org analysis on Gadi for existing fluxsite outputs.",
+        description="""Submits three chained jobs with hpcpy: create the model output
+        on me.org and fetch the analysis inputs, run the analysis with meorg-run,
+        then submit the result and upload the model output files.""",
+        add_help=False,
+    )
+    parser_meorg_analysis.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Render the three job scripts without submitting them.",
+    )
+    parser_meorg_analysis.set_defaults(func=app.meorg_analysis)
+
     return main_parser

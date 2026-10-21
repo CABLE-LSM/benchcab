@@ -485,3 +485,29 @@ class Benchcab:
             benchcab_bin=str(self.benchcab_exe_path),
             benchcab_job_id=None,
         )
+
+    def meorg_analysis(self, config_path: str, dry_run: bool = False):
+        """Endpoint for `benchcab meorg-analysis`."""
+        logger = self._get_logger()
+        config = self._get_config(config_path)
+
+        # A dry run only renders the job scripts, so it needs no outputs
+        if not dry_run:
+            tasks = self._get_fluxsite_tasks(config)
+            num_tasks, num_complete, num_failed, all_complete = task_summary(tasks)
+            logger.debug(f"{num_complete}/{num_tasks} completed.")
+            if not all_complete:
+                logger.error(f"{num_failed} tasks have failed, unable to analyse.")
+                sys.exit(1)
+
+        logger.info("Submitting the analysis jobs on Gadi")
+        submitted = bm.do_meorg(
+            config,
+            upload_dir=internal.FLUXSITE_DIRS["OUTPUT"],
+            benchcab_bin=str(self.benchcab_exe_path),
+            benchcab_job_id=None,
+            gadi=True,
+            dry_run=dry_run,
+        )
+        if not submitted:
+            sys.exit(1)
